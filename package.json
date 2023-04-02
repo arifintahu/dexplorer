@@ -6,9 +6,12 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "format": "prettier --check .",
+    "format:fix": "prettier --write ."
   },
   "dependencies": {
+    "@chakra-ui/icons": "^2.0.18",
     "@chakra-ui/react": "^2.5.5",
     "@emotion/react": "^11.10.6",
     "@emotion/styled": "^11.10.6",
@@ -23,5 +26,8 @@
     "react-dom": "18.2.0",
     "react-icons": "^4.8.0",
     "typescript": "5.0.3"
+  },
+  "devDependencies": {
+    "prettier": "^2.8.7"
   }
 }

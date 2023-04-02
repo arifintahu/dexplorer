@@ -1,4 +1,4 @@
-import React, { ReactNode } from 'react';
+import React, { ReactNode } from 'react'
 import {
   IconButton,
   Box,
@@ -13,7 +13,7 @@ import {
   useDisclosure,
   BoxProps,
   FlexProps,
-} from '@chakra-ui/react';
+} from '@chakra-ui/react'
 import {
   FiHome,
   FiTrendingUp,
@@ -21,12 +21,12 @@ import {
   FiStar,
   FiSettings,
   FiMenu,
-} from 'react-icons/fi';
-import { IconType } from 'react-icons';
+} from 'react-icons/fi'
+import { IconType } from 'react-icons'
 
 interface LinkItemProps {
-  name: string;
-  icon: IconType;
+  name: string
+  icon: IconType
 }
 const LinkItems: Array<LinkItemProps> = [
   { name: 'Home', icon: FiHome },
@@ -34,10 +34,10 @@ const LinkItems: Array<LinkItemProps> = [
   { name: 'Explore', icon: FiCompass },
   { name: 'Favourites', icon: FiStar },
   { name: 'Settings', icon: FiSettings },
-];
+]
 
 export default function Sidebar({ children }: { children: ReactNode }) {
-  const { isOpen, onOpen, onClose } = useDisclosure();
+  const { isOpen, onOpen, onClose } = useDisclosure()
   return (
     <Box minH="100vh" bg={useColorModeValue('gray.100', 'gray.900')}>
       <SidebarContent
@@ -51,7 +51,8 @@ export default function Sidebar({ children }: { children: ReactNode }) {
         onClose={onClose}
         returnFocusOnClose={false}
         onOverlayClick={onClose}
-        size="full">
+        size="full"
+      >
         <DrawerContent>
           <SidebarContent onClose={onClose} />
         </DrawerContent>
@@ -62,11 +63,11 @@ export default function Sidebar({ children }: { children: ReactNode }) {
         {children}
       </Box>
     </Box>
-  );
+  )
 }
 
 interface SidebarProps extends BoxProps {
-  onClose: () => void;
+  onClose: () => void
 }
 
 const SidebarContent = ({ onClose, ...rest }: SidebarProps) => {
@@ -78,7 +79,8 @@ const SidebarContent = ({ onClose, ...rest }: SidebarProps) => {
       w={{ base: 'full', md: 60 }}
       pos="fixed"
       h="full"
-      {...rest}>
+      {...rest}
+    >
       <Flex h="20" alignItems="center" mx="8" justifyContent="space-between">
         <Text fontSize="2xl" fontFamily="monospace" fontWeight="bold">
           Logo
@@ -91,16 +93,20 @@ const SidebarContent = ({ onClose, ...rest }: SidebarProps) => {
         </NavItem>
       ))}
     </Box>
-  );
-};
+  )
+}
 
 interface NavItemProps extends FlexProps {
-  icon: IconType;
-  children: string | number;
+  icon: IconType
+  children: string | number
 }
 const NavItem = ({ icon, children, ...rest }: NavItemProps) => {
   return (
-    <Link href="#" style={{ textDecoration: 'none' }} _focus={{ boxShadow: 'none' }}>
+    <Link
+      href="#"
+      style={{ textDecoration: 'none' }}
+      _focus={{ boxShadow: 'none' }}
+    >
       <Flex
         align="center"
         p="4"
@@ -112,7 +118,8 @@ const NavItem = ({ icon, children, ...rest }: NavItemProps) => {
           bg: 'cyan.400',
           color: 'white',
         }}
-        {...rest}>
+        {...rest}
+      >
         {icon && (
           <Icon
             mr="4"
@@ -126,11 +133,11 @@ const NavItem = ({ icon, children, ...rest }: NavItemProps) => {
         {children}
       </Flex>
     </Link>
-  );
-};
+  )
+}
 
 interface MobileProps extends FlexProps {
-  onOpen: () => void;
+  onOpen: () => void
 }
 const MobileNav = ({ onOpen, ...rest }: MobileProps) => {
   return (
@@ -143,7 +150,8 @@ const MobileNav = ({ onOpen, ...rest }: MobileProps) => {
       borderBottomWidth="1px"
       borderBottomColor={useColorModeValue('gray.200', 'gray.700')}
       justifyContent="flex-start"
-      {...rest}>
+      {...rest}
+    >
       <IconButton
         variant="outline"
         onClick={onOpen}
@@ -155,5 +163,5 @@ const MobileNav = ({ onOpen, ...rest }: MobileProps) => {
         Logo
       </Text>
     </Flex>
-  );
-};
+  )
+}
