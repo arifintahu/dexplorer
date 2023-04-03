@@ -1,13 +1,15 @@
-import { useState, ReactNode } from 'react'
+import { ReactNode } from 'react'
+import { useSelector } from 'react-redux'
 import Sidebar from '../Sidebar'
 import Connect from '../Connect'
+import { selecConnectState } from '@/store/connectSlice'
 
 export default function Layout({ children }: { children: ReactNode }) {
-  const [isConnected, setIsConnected] = useState(false)
+  const connectState = useSelector(selecConnectState)
 
   return (
     <>
-      {isConnected ? (
+      {connectState ? (
         <Sidebar>{children}</Sidebar>
       ) : (
         <div>

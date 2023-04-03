@@ -3,8 +3,9 @@ import type { AppProps } from 'next/app'
 import { ChakraProvider } from '@chakra-ui/react'
 import Layout from '@/components/Layout'
 import theme from './theme'
+import { wrapper } from '../store'
 
-export default function App({ Component, pageProps }: AppProps) {
+function App({ Component, pageProps }: AppProps) {
   return (
     <ChakraProvider theme={theme}>
       <Layout>
@@ -13,3 +14,5 @@ export default function App({ Component, pageProps }: AppProps) {
     </ChakraProvider>
   )
 }
+
+export default wrapper.withRedux(App)

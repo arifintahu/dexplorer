@@ -11,6 +11,8 @@ import {
   Flex,
 } from '@chakra-ui/react'
 import { CheckIcon } from '@chakra-ui/icons'
+import { useDispatch } from 'react-redux'
+import { setConnectState } from '@/store/connectSlice'
 import Head from 'next/head'
 
 export default function Connect() {
@@ -19,6 +21,7 @@ export default function Connect() {
     'initial'
   )
   const [error, setError] = useState(false)
+  const dispatch = useDispatch()
 
   return (
     <>
@@ -67,6 +70,7 @@ export default function Connect() {
                 }
 
                 setState('success')
+                dispatch(setConnectState(true))
               }, 1000)
             }}
           >
