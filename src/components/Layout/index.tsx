@@ -2,10 +2,10 @@ import { ReactNode } from 'react'
 import { useSelector } from 'react-redux'
 import Sidebar from '../Sidebar'
 import Connect from '../Connect'
-import { selecConnectState } from '@/store/connectSlice'
+import { selectConnectState } from '@/store/connectSlice'
 
 export default function Layout({ children }: { children: ReactNode }) {
-  const connectState = useSelector(selecConnectState)
+  const connectState = useSelector(selectConnectState)
 
   return (
     <>

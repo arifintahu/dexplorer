@@ -12,8 +12,9 @@ import {
 } from '@chakra-ui/react'
 import { CheckIcon } from '@chakra-ui/icons'
 import { useDispatch } from 'react-redux'
-import { setConnectState } from '@/store/connectSlice'
+import { setConnectState, setClient } from '@/store/connectSlice'
 import Head from 'next/head'
+import { Tendermint34Client } from '@cosmjs/tendermint-rpc'
 
 export default function Connect() {
   const [address, setAddress] = useState('')
@@ -22,6 +23,32 @@ export default function Connect() {
   )
   const [error, setError] = useState(false)
   const dispatch = useDispatch()
+
+  const connectClient = async (e: FormEvent) => {
+    e.preventDefault()
+    setError(false)
+    setState('submitting')
+
+    if (!address) {
+      setError(true)
+      setState('initial')
+      return
+    }
+
+    const tmClient = await Tendermint34Client.connect(address).catch((err) => {
+      console.error(err)
+    })
+
+    if (!tmClient) {
+      setError(true)
+      setState('initial')
+      return
+    }
+
+    dispatch(setConnectState(true))
+    dispatch(setClient(tmClient))
+    setState('success')
+  }
 
   return (
     <>
@@ -56,23 +83,7 @@ export default function Connect() {
             direction={{ base: 'column', md: 'row' }}
             as={'form'}
             spacing={'12px'}
-            onSubmit={(e: FormEvent) => {
-              e.preventDefault()
-              setError(false)
-              setState('submitting')
-
-              // remove this code and implement your submit logic right here
-              setTimeout(() => {
-                if (address == 'https://www.google.com') {
-                  setError(true)
-                  setState('initial')
-                  return
-                }
-
-                setState('success')
-                dispatch(setConnectState(true))
-              }, 1000)
-            }}
+            onSubmit={connectClient}
           >
             <FormControl>
               <Input
