@@ -16,24 +16,26 @@ import {
 } from '@chakra-ui/react'
 import {
   FiHome,
-  FiTrendingUp,
+  FiBox,
   FiCompass,
   FiStar,
-  FiSettings,
+  FiSliders,
   FiMenu,
 } from 'react-icons/fi'
 import { IconType } from 'react-icons'
+import NextLink from 'next/link'
 
 interface LinkItemProps {
   name: string
   icon: IconType
+  route: string
 }
 const LinkItems: Array<LinkItemProps> = [
-  { name: 'Home', icon: FiHome },
-  { name: 'Trending', icon: FiTrendingUp },
-  { name: 'Explore', icon: FiCompass },
-  { name: 'Favourites', icon: FiStar },
-  { name: 'Settings', icon: FiSettings },
+  { name: 'Home', icon: FiHome, route: '/' },
+  { name: 'Blocks', icon: FiBox, route: '/blocks' },
+  { name: 'Staking', icon: FiCompass, route: '/staking' },
+  { name: 'Governance', icon: FiStar, route: '/' },
+  { name: 'Parameters', icon: FiSliders, route: '/' },
 ]
 
 export default function Sidebar({ children }: { children: ReactNode }) {
@@ -83,12 +85,12 @@ const SidebarContent = ({ onClose, ...rest }: SidebarProps) => {
     >
       <Flex h="20" alignItems="center" mx="8" justifyContent="space-between">
         <Text fontSize="2xl" fontFamily="monospace" fontWeight="bold">
-          Logo
+          Dexplorer
         </Text>
         <CloseButton display={{ base: 'flex', md: 'none' }} onClick={onClose} />
       </Flex>
       {LinkItems.map((link) => (
-        <NavItem key={link.name} icon={link.icon}>
+        <NavItem key={link.name} icon={link.icon} route={link.route}>
           {link.name}
         </NavItem>
       ))}
@@ -99,11 +101,13 @@ const SidebarContent = ({ onClose, ...rest }: SidebarProps) => {
 interface NavItemProps extends FlexProps {
   icon: IconType
   children: string | number
+  route: string
 }
-const NavItem = ({ icon, children, ...rest }: NavItemProps) => {
+const NavItem = ({ icon, children, route, ...rest }: NavItemProps) => {
   return (
     <Link
-      href="#"
+      as={NextLink}
+      href={route}
       style={{ textDecoration: 'none' }}
       _focus={{ boxShadow: 'none' }}
     >
