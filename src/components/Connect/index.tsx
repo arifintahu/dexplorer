@@ -12,9 +12,12 @@ import {
 } from '@chakra-ui/react'
 import { CheckIcon } from '@chakra-ui/icons'
 import { useDispatch } from 'react-redux'
-import { setConnectState, setClient, setTmClient } from '@/store/connectSlice'
+import {
+  setConnectState,
+  setTmClient,
+  setRPCAddress,
+} from '@/store/connectSlice'
 import Head from 'next/head'
-import { StargateClient } from '@cosmjs/stargate'
 import { Tendermint34Client } from '@cosmjs/tendermint-rpc'
 
 export default function Connect() {
@@ -46,19 +49,9 @@ export default function Connect() {
       return
     }
 
-    const client = await StargateClient.connect(address).catch((err) => {
-      console.error(err)
-    })
-
-    if (!tmClient) {
-      setError(true)
-      setState('initial')
-      return
-    }
-
     dispatch(setConnectState(true))
-    dispatch(setClient(client))
     dispatch(setTmClient(tmClient))
+    dispatch(setRPCAddress(address))
     setState('success')
   }
 

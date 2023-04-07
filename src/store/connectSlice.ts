@@ -1,20 +1,19 @@
 import { createSlice } from '@reduxjs/toolkit'
 import { AppState } from './index'
 import { HYDRATE } from 'next-redux-wrapper'
-import { StargateClient } from '@cosmjs/stargate'
 import { Tendermint34Client } from '@cosmjs/tendermint-rpc'
 
 // Type for our state
 export interface ConnectState {
+  rpcAddress: string
   connectState: boolean
-  client: StargateClient | null
   tmClient: Tendermint34Client | null
 }
 
 // Initial state
 const initialState: ConnectState = {
+  rpcAddress: '',
   connectState: false,
-  client: null,
   tmClient: null,
 }
 
@@ -23,13 +22,13 @@ export const connectSlice = createSlice({
   name: 'connect',
   initialState,
   reducers: {
+    // Action to set the address
+    setRPCAddress(state, action) {
+      state.rpcAddress = action.payload
+    },
     // Action to set the connection status
     setConnectState(state, action) {
       state.connectState = action.payload
-    },
-    // Action to set the client
-    setClient(state, action) {
-      state.client = action.payload
     },
     // Action to set the client
     setTmClient(state, action) {
@@ -48,11 +47,12 @@ export const connectSlice = createSlice({
   },
 })
 
-export const { setConnectState, setClient, setTmClient } = connectSlice.actions
+export const { setRPCAddress, setConnectState, setTmClient } =
+  connectSlice.actions
 
+export const selectRPCAddress = (state: AppState) => state.connect.rpcAddress
 export const selectConnectState = (state: AppState) =>
   state.connect.connectState
-export const selectClient = (state: AppState) => state.connect.client
 export const selectTmClient = (state: AppState) => state.connect.tmClient
 
 export default connectSlice.reducer
