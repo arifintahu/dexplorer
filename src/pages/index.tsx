@@ -12,7 +12,14 @@ import {
   Box,
   VStack,
 } from '@chakra-ui/react'
-import { FiHome, FiChevronRight, FiBox } from 'react-icons/fi'
+import {
+  FiHome,
+  FiChevronRight,
+  FiBox,
+  FiClock,
+  FiCpu,
+  FiUsers,
+} from 'react-icons/fi'
 import { IconType } from 'react-icons'
 import NextLink from 'next/link'
 import { useEffect, useState } from 'react'
@@ -60,35 +67,28 @@ export default function Home() {
               color="cyan.600"
               icon={FiBox}
               name="Height"
-              value={dashboard?.height}
+              value={dashboard?.latestBlockHeight}
             />
             <BoxInfo
-              bgColor="cyan.200"
-              color="cyan.600"
-              icon={FiBox}
-              name="Height"
-              value={dashboard?.height}
+              bgColor="green.200"
+              color="green.600"
+              icon={FiClock}
+              name="Update"
+              value={dashboard?.latestBlockTime.toLocaleString()}
             />
             <BoxInfo
-              bgColor="cyan.200"
-              color="cyan.600"
-              icon={FiBox}
-              name="Height"
-              value={dashboard?.height}
+              bgColor="orange.200"
+              color="orange.600"
+              icon={FiCpu}
+              name="Network"
+              value={dashboard?.network}
             />
             <BoxInfo
-              bgColor="cyan.200"
-              color="cyan.600"
-              icon={FiBox}
-              name="Height"
-              value={dashboard?.height}
-            />
-            <BoxInfo
-              bgColor="cyan.200"
-              color="cyan.600"
-              icon={FiBox}
-              name="Height"
-              value={dashboard?.height}
+              bgColor="purple.200"
+              color="purple.600"
+              icon={FiUsers}
+              name="Validators"
+              value={dashboard?.totalValidators}
             />
           </SimpleGrid>
         </Box>

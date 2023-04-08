@@ -1,5 +1,6 @@
 import { QueryClient, StargateClient } from '@cosmjs/stargate'
 import { Tendermint34Client } from '@cosmjs/tendermint-rpc'
+import { ReadonlyDate } from 'readonly-date'
 
 export async function getChainId(
   tmClient: Tendermint34Client
@@ -9,15 +10,21 @@ export async function getChainId(
 }
 
 export interface ResponseDashboard {
-  height: number
+  latestBlockHeight: number
+  latestBlockTime: ReadonlyDate
+  totalValidators: number
+  network: string
 }
 export async function getDashboard(
   tmClient: Tendermint34Client
 ): Promise<ResponseDashboard> {
-  const client = await StargateClient.create(tmClient)
-  const height = await client.getHeight()
+  const status = await tmClient.status()
+  const validators = await tmClient.validatorsAll()
 
   return {
-    height,
+    latestBlockHeight: status.syncInfo.latestBlockHeight,
+    latestBlockTime: status.syncInfo.latestBlockTime,
+    totalValidators: validators.count,
+    network: status.nodeInfo.network,
   }
 }
