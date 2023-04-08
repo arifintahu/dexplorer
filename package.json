@@ -23,6 +23,7 @@
     "@types/react": "18.0.31",
     "@types/react-dom": "18.0.11",
     "cosmjs-types": "^0.7.2",
+    "dayjs": "^1.11.7",
     "eslint": "8.37.0",
     "eslint-config-next": "13.2.4",
     "framer-motion": "^10.10.0",

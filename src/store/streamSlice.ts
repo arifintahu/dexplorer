@@ -5,11 +5,13 @@ import { NewBlockEvent } from '@cosmjs/tendermint-rpc'
 
 // Type for our state
 export interface StreamState {
+  newBlockState: Boolean
   newBlock: NewBlockEvent | null
 }
 
 // Initial state
 const initialState: StreamState = {
+  newBlockState: false,
   newBlock: null,
 }
 
@@ -18,6 +20,11 @@ export const streamSlice = createSlice({
   name: 'stream',
   initialState,
   reducers: {
+    // Action to set the new block
+    setNewBlockState(state, action) {
+      state.newBlockState = action.payload
+    },
+
     // Action to set the new block
     setNewBlock(state, action) {
       state.newBlock = action.payload
@@ -35,8 +42,10 @@ export const streamSlice = createSlice({
   },
 })
 
-export const { setNewBlock } = streamSlice.actions
+export const { setNewBlockState, setNewBlock } = streamSlice.actions
 
+export const selectNewBlockState = (state: AppState) =>
+  state.stream.newBlockState
 export const selectNewBlock = (state: AppState) => state.stream.newBlock
 
 export default streamSlice.reducer

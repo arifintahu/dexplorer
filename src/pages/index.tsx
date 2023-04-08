@@ -39,6 +39,15 @@ export default function Home() {
     }
   }, [tmClient])
 
+  const convertDate = (date: string | undefined): string => {
+    if (!date) {
+      return ''
+    }
+
+    const newDate = new Date(date)
+    return newDate.toLocaleString()
+  }
+
   return (
     <>
       <Head>
@@ -76,7 +85,7 @@ export default function Home() {
               color="green.600"
               icon={FiClock}
               name="Update"
-              value={newBlock?.header.time.toLocaleString()}
+              value={convertDate(newBlock?.header.time?.toISOString())}
             />
             <BoxInfo
               bgColor="orange.200"
