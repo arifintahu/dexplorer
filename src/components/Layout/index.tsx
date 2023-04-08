@@ -1,5 +1,5 @@
-import { ReactNode, useEffect, useState } from 'react'
-import { useSelector } from 'react-redux'
+import { ReactNode, useEffect } from 'react'
+import { useDispatch, useSelector } from 'react-redux'
 import Sidebar from '../Sidebar'
 import Connect from '../Connect'
 import {
@@ -16,19 +16,26 @@ import {
   Icon,
 } from '@chakra-ui/react'
 import { FiRadio } from 'react-icons/fi'
-import { getChainId } from '@/rpc/query'
+import { subscribeNewBlock } from '@/rpc/query'
+import { setNewBlock, selectNewBlock } from '@/store/streamSlice'
+import { NewBlockEvent } from '@cosmjs/tendermint-rpc'
 
 export default function Layout({ children }: { children: ReactNode }) {
   const connectState = useSelector(selectConnectState)
   const tmClient = useSelector(selectTmClient)
   const address = useSelector(selectRPCAddress)
-  const [chainId, setChainId] = useState('')
+  const newBlock = useSelector(selectNewBlock)
+  const dispatch = useDispatch()
 
   useEffect(() => {
     if (tmClient) {
-      getChainId(tmClient).then(setChainId)
+      subscribeNewBlock(tmClient, updateNewBlock)
     }
   }, [tmClient])
+
+  const updateNewBlock = (event: NewBlockEvent): void => {
+    dispatch(setNewBlock(event))
+  }
 
   return (
     <>
@@ -45,7 +52,7 @@ export default function Layout({ children }: { children: ReactNode }) {
             <HStack>
               <Icon mr="4" fontSize="32" color={'green.600'} as={FiRadio} />
               <Box>
-                <Heading size="xs">{chainId}</Heading>
+                <Heading size="xs">{newBlock?.header.chainId}</Heading>
                 <Text pt="2" fontSize="sm">
                   {address}
                 </Text>

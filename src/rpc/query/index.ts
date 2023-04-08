@@ -1,5 +1,9 @@
 import { QueryClient, StargateClient } from '@cosmjs/stargate'
-import { Tendermint34Client } from '@cosmjs/tendermint-rpc'
+import {
+  NewBlockEvent,
+  Tendermint34Client,
+  ValidatorsResponse,
+} from '@cosmjs/tendermint-rpc'
 import { ReadonlyDate } from 'readonly-date'
 
 export async function getChainId(
@@ -9,22 +13,24 @@ export async function getChainId(
   return client.getChainId()
 }
 
-export interface ResponseDashboard {
-  latestBlockHeight: number
-  latestBlockTime: ReadonlyDate
-  totalValidators: number
-  network: string
-}
-export async function getDashboard(
+export async function getValidators(
   tmClient: Tendermint34Client
-): Promise<ResponseDashboard> {
-  const status = await tmClient.status()
-  const validators = await tmClient.validatorsAll()
+): Promise<ValidatorsResponse> {
+  return tmClient.validatorsAll()
+}
 
-  return {
-    latestBlockHeight: status.syncInfo.latestBlockHeight,
-    latestBlockTime: status.syncInfo.latestBlockTime,
-    totalValidators: validators.count,
-    network: status.nodeInfo.network,
-  }
+export function subscribeNewBlock(
+  tmClient: Tendermint34Client,
+  callback: (event: NewBlockEvent) => any
+): void {
+  const stream = tmClient.subscribeNewBlock()
+  const subscription = stream.subscribe({
+    next: (event) => {
+      callback(event)
+    },
+    error: (err) => {
+      console.error(err)
+      subscription.unsubscribe()
+    },
+  })
 }

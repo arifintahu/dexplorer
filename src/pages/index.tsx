@@ -24,16 +24,18 @@ import { IconType } from 'react-icons'
 import NextLink from 'next/link'
 import { useEffect, useState } from 'react'
 import { useSelector } from 'react-redux'
-import { getDashboard, ResponseDashboard } from '@/rpc/query'
+import { getValidators } from '@/rpc/query'
 import { selectTmClient } from '@/store/connectSlice'
+import { selectNewBlock } from '@/store/streamSlice'
 
 export default function Home() {
   const tmClient = useSelector(selectTmClient)
-  const [dashboard, setDashboard] = useState<ResponseDashboard | null>(null)
+  const newBlock = useSelector(selectNewBlock)
+  const [validators, setValidators] = useState<number>()
 
   useEffect(() => {
     if (tmClient) {
-      getDashboard(tmClient).then(setDashboard)
+      getValidators(tmClient).then((response) => setValidators(response.total))
     }
   }, [tmClient])
 
@@ -67,28 +69,28 @@ export default function Home() {
               color="cyan.600"
               icon={FiBox}
               name="Height"
-              value={dashboard?.latestBlockHeight}
+              value={newBlock?.header.height}
             />
             <BoxInfo
               bgColor="green.200"
               color="green.600"
               icon={FiClock}
               name="Update"
-              value={dashboard?.latestBlockTime.toLocaleString()}
+              value={newBlock?.header.time.toLocaleString()}
             />
             <BoxInfo
               bgColor="orange.200"
               color="orange.600"
               icon={FiCpu}
               name="Network"
-              value={dashboard?.network}
+              value={newBlock?.header.chainId}
             />
             <BoxInfo
               bgColor="purple.200"
               color="purple.600"
               icon={FiUsers}
               name="Validators"
-              value={dashboard?.totalValidators}
+              value={validators}
             />
           </SimpleGrid>
         </Box>

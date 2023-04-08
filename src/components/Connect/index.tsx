@@ -18,7 +18,7 @@ import {
   setRPCAddress,
 } from '@/store/connectSlice'
 import Head from 'next/head'
-import { Tendermint34Client } from '@cosmjs/tendermint-rpc'
+import { Tendermint34Client, WebsocketClient } from '@cosmjs/tendermint-rpc'
 
 export default function Connect() {
   const [address, setAddress] = useState('')
@@ -39,7 +39,8 @@ export default function Connect() {
       return
     }
 
-    const tmClient = await Tendermint34Client.connect(address).catch((err) => {
+    const wsClient = new WebsocketClient(replaceHTTPtoWebsocket(address))
+    const tmClient = await Tendermint34Client.create(wsClient).catch((err) => {
       console.error(err)
     })
 
@@ -53,6 +54,10 @@ export default function Connect() {
     dispatch(setTmClient(tmClient))
     dispatch(setRPCAddress(address))
     setState('success')
+  }
+
+  const replaceHTTPtoWebsocket = (url: string): string => {
+    return url.replace('http', 'ws')
   }
 
   return (
