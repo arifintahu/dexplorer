@@ -56,12 +56,8 @@ export const streamSlice = createSlice({
   },
 })
 
-export const {
-  setNewBlockState,
-  setNewBlock,
-  setTxEventState,
-  setTxEvent,
-} = streamSlice.actions
+export const { setNewBlockState, setNewBlock, setTxEventState, setTxEvent } =
+  streamSlice.actions
 
 export const selectNewBlockState = (state: AppState) =>
   state.stream.newBlockState

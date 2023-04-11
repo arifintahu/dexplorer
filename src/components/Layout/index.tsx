@@ -16,10 +16,7 @@ import {
   Icon,
 } from '@chakra-ui/react'
 import { FiRadio } from 'react-icons/fi'
-import {
-  subscribeNewBlock,
-  subscribeTx,
-} from '@/rpc/query'
+import { subscribeNewBlock, subscribeTx } from '@/rpc/query'
 import {
   setNewBlock,
   selectNewBlock,

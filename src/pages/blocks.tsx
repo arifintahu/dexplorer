@@ -24,16 +24,17 @@ import {
   TabPanels,
   TabPanel,
   Badge,
+  Tag,
+  TagLeftIcon,
+  TagLabel,
 } from '@chakra-ui/react'
 import NextLink from 'next/link'
-import { FiChevronRight, FiHome } from 'react-icons/fi'
-import {
-  selectNewBlock,
-  selectTxEvent,
-} from '@/store/streamSlice'
+import { FiChevronRight, FiHome, FiCheck, FiX } from 'react-icons/fi'
+import { selectNewBlock, selectTxEvent } from '@/store/streamSlice'
 import dayjs from 'dayjs'
 import relativeTime from 'dayjs/plugin/relativeTime'
 import { toHex, toBase64 } from '@cosmjs/encoding'
+import { TxBody } from 'cosmjs-types/cosmos/tx/v1beta1/tx'
 
 const MAX_ROWS = 20
 
@@ -58,10 +59,7 @@ export default function Blocks() {
   const updateBlocks = (block: NewBlockEvent) => {
     if (blocks.length) {
       if (block.header.height > blocks[0].header.height) {
-        setBlocks((prevBlocks) => [
-          block,
-          ...prevBlocks.slice(0, MAX_ROWS - 1),
-        ])
+        setBlocks((prevBlocks) => [block, ...prevBlocks.slice(0, MAX_ROWS - 1)])
       }
     } else {
       setBlocks([block])
@@ -69,17 +67,9 @@ export default function Blocks() {
   }
 
   const updateTxs = (tx: TxEvent) => {
-    // const data = tx.result.data
-    // if (data) {
-    //   console.log(toBase64(data))
-    // }
-    
     if (txs.length) {
-      if ((tx.height >= txs[0].height) && (tx.hash != txs[0].hash)) {
-        setTxs((prevTx) => [
-          tx,
-          ...prevTx.slice(0, MAX_ROWS - 1),
-        ])
+      if (tx.height >= txs[0].height && tx.hash != txs[0].hash) {
+        setTxs((prevTx) => [tx, ...prevTx.slice(0, MAX_ROWS - 1)])
       }
     } else {
       setTxs([tx])
@@ -96,6 +86,38 @@ export default function Blocks() {
     const first = hash.slice(0, 5)
     const last = hash.slice(hash.length - 5, hash.length)
     return first + '...' + last
+  }
+
+  const renderMessages = (data: Uint8Array | undefined) => {
+    if (data) {
+      const txBody = TxBody.decode(data)
+      const messages = txBody.messages
+
+      if (messages.length == 1) {
+        return (
+          <HStack>
+            <Tag colorScheme="cyan">{getTypeMsg(messages[0].typeUrl)}</Tag>
+          </HStack>
+        )
+      } else if (messages.length > 1) {
+        return (
+          <HStack>
+            <Tag colorScheme="cyan">{getTypeMsg(messages[0].typeUrl)}</Tag>
+            <Text textColor="cyan.800">+{messages.length - 1}</Text>
+          </HStack>
+        )
+      }
+    }
+
+    return ''
+  }
+
+  const getTypeMsg = (typeUrl: string): string => {
+    const arr = typeUrl.split('.')
+    if (arr.length) {
+      return arr[arr.length - 1]
+    }
+    return ''
   }
 
   return (
@@ -177,19 +199,29 @@ export default function Blocks() {
                       <Tr>
                         <Th>Hash</Th>
                         <Th>Result</Th>
-                        <Th>Fee</Th>
+                        <Th>Messages</Th>
                         <Th>Height</Th>
-                        <Th>Time</Th>
                       </Tr>
                     </Thead>
                     <Tbody>
                       {txs.map((tx) => (
                         <Tr key={toHex(tx.hash)}>
                           <Td>{trimHash(tx.hash)}</Td>
-                          <Td>{tx.result.code == 0 ? <Badge colorScheme='green'>Success</Badge> : <Badge colorScheme='red'>Error</Badge>}</Td>
-                          <Td>{tx.result.gasUsed}</Td>
+                          <Td>
+                            {tx.result.code == 0 ? (
+                              <Tag variant="subtle" colorScheme="green">
+                                <TagLeftIcon as={FiCheck} />
+                                <TagLabel>Success</TagLabel>
+                              </Tag>
+                            ) : (
+                              <Tag variant="subtle" colorScheme="red">
+                                <TagLeftIcon as={FiX} />
+                                <TagLabel>Error</TagLabel>
+                              </Tag>
+                            )}
+                          </Td>
+                          <Td>{renderMessages(tx.result.data)}</Td>
                           <Td>{tx.height}</Td>
-                          <Td>{tx.result.code}</Td>
                         </Tr>
                       ))}
                     </Tbody>
