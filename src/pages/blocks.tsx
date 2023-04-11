@@ -1,7 +1,7 @@
 import Head from 'next/head'
 import { useEffect, useState } from 'react'
 import { useSelector } from 'react-redux'
-import { NewBlockEvent } from '@cosmjs/tendermint-rpc'
+import { NewBlockEvent, TxEvent } from '@cosmjs/tendermint-rpc'
 import {
   Box,
   Divider,
@@ -23,42 +23,79 @@ import {
   Tab,
   TabPanels,
   TabPanel,
+  Badge,
 } from '@chakra-ui/react'
 import NextLink from 'next/link'
 import { FiChevronRight, FiHome } from 'react-icons/fi'
-import { selectNewBlock } from '@/store/streamSlice'
+import {
+  selectNewBlock,
+  selectTxEvent,
+} from '@/store/streamSlice'
 import dayjs from 'dayjs'
 import relativeTime from 'dayjs/plugin/relativeTime'
 import { toHex, toBase64 } from '@cosmjs/encoding'
 
-const MAX_BLOCKS = 20
+const MAX_ROWS = 20
 
 export default function Blocks() {
   const newBlock = useSelector(selectNewBlock)
+  const txEvent = useSelector(selectTxEvent)
   const [blocks, setBlocks] = useState<NewBlockEvent[]>([])
+  const [txs, setTxs] = useState<TxEvent[]>([])
 
   useEffect(() => {
     if (newBlock) {
-      updateEvent(newBlock)
+      updateBlocks(newBlock)
     }
   }, [newBlock])
 
-  const updateEvent = (event: NewBlockEvent) => {
+  useEffect(() => {
+    if (txEvent) {
+      updateTxs(txEvent)
+    }
+  }, [txEvent])
+
+  const updateBlocks = (block: NewBlockEvent) => {
     if (blocks.length) {
-      if (event.header.height > blocks[0].header.height) {
+      if (block.header.height > blocks[0].header.height) {
         setBlocks((prevBlocks) => [
-          event,
-          ...prevBlocks.slice(0, MAX_BLOCKS - 1),
+          block,
+          ...prevBlocks.slice(0, MAX_ROWS - 1),
         ])
       }
     } else {
-      setBlocks([event])
+      setBlocks([block])
+    }
+  }
+
+  const updateTxs = (tx: TxEvent) => {
+    // const data = tx.result.data
+    // if (data) {
+    //   console.log(toBase64(data))
+    // }
+    
+    if (txs.length) {
+      if ((tx.height >= txs[0].height) && (tx.hash != txs[0].hash)) {
+        setTxs((prevTx) => [
+          tx,
+          ...prevTx.slice(0, MAX_ROWS - 1),
+        ])
+      }
+    } else {
+      setTxs([tx])
     }
   }
 
   const timeFromNow = (date: string): string => {
     dayjs.extend(relativeTime)
     return dayjs(date).fromNow()
+  }
+
+  const trimHash = (txHash: Uint8Array): string => {
+    const hash = toHex(txHash).toUpperCase()
+    const first = hash.slice(0, 5)
+    const last = hash.slice(hash.length - 5, hash.length)
+    return first + '...' + last
   }
 
   return (
@@ -141,12 +178,21 @@ export default function Blocks() {
                         <Th>Hash</Th>
                         <Th>Result</Th>
                         <Th>Fee</Th>
-                        <Th>Messages</Th>
                         <Th>Height</Th>
                         <Th>Time</Th>
                       </Tr>
                     </Thead>
-                    <Tbody></Tbody>
+                    <Tbody>
+                      {txs.map((tx) => (
+                        <Tr key={toHex(tx.hash)}>
+                          <Td>{trimHash(tx.hash)}</Td>
+                          <Td>{tx.result.code == 0 ? <Badge colorScheme='green'>Success</Badge> : <Badge colorScheme='red'>Error</Badge>}</Td>
+                          <Td>{tx.result.gasUsed}</Td>
+                          <Td>{tx.height}</Td>
+                          <Td>{tx.result.code}</Td>
+                        </Tr>
+                      ))}
+                    </Tbody>
                   </Table>
                 </TableContainer>
               </TabPanel>

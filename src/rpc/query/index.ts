@@ -2,6 +2,7 @@ import { QueryClient, StargateClient } from '@cosmjs/stargate'
 import {
   NewBlockEvent,
   Tendermint34Client,
+  TxEvent,
   ValidatorsResponse,
 } from '@cosmjs/tendermint-rpc'
 import { ReadonlyDate } from 'readonly-date'
@@ -24,6 +25,22 @@ export function subscribeNewBlock(
   callback: (event: NewBlockEvent) => any
 ): void {
   const stream = tmClient.subscribeNewBlock()
+  const subscription = stream.subscribe({
+    next: (event) => {
+      callback(event)
+    },
+    error: (err) => {
+      console.error(err)
+      subscription.unsubscribe()
+    },
+  })
+}
+
+export function subscribeTx(
+  tmClient: Tendermint34Client,
+  callback: (event: TxEvent) => any
+): void {
+  const stream = tmClient.subscribeTx()
   const subscription = stream.subscribe({
     next: (event) => {
       callback(event)

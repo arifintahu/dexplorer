@@ -16,32 +16,43 @@ import {
   Icon,
 } from '@chakra-ui/react'
 import { FiRadio } from 'react-icons/fi'
-import { subscribeNewBlock } from '@/rpc/query'
+import {
+  subscribeNewBlock,
+  subscribeTx,
+} from '@/rpc/query'
 import {
   setNewBlock,
   selectNewBlock,
-  selectNewBlockState,
-  setNewBlockState,
+  setTxEvent,
+  selectTxEvent,
 } from '@/store/streamSlice'
 import { NewBlockEvent } from '@cosmjs/tendermint-rpc'
+import { TxEvent } from '@cosmjs/tendermint-rpc'
 
 export default function Layout({ children }: { children: ReactNode }) {
   const connectState = useSelector(selectConnectState)
   const tmClient = useSelector(selectTmClient)
   const address = useSelector(selectRPCAddress)
   const newBlock = useSelector(selectNewBlock)
-  const newBlockState = useSelector(selectNewBlockState)
+  const txEvent = useSelector(selectTxEvent)
   const dispatch = useDispatch()
 
   useEffect(() => {
-    if (tmClient && !newBlockState) {
+    if (tmClient && !newBlock) {
       subscribeNewBlock(tmClient, updateNewBlock)
+    }
+
+    if (tmClient && !txEvent) {
+      subscribeTx(tmClient, updateTxEvent)
     }
   }, [tmClient])
 
   const updateNewBlock = (event: NewBlockEvent): void => {
     dispatch(setNewBlock(event))
-    dispatch(setNewBlockState(true))
+  }
+
+  const updateTxEvent = (event: TxEvent): void => {
+    dispatch(setTxEvent(event))
   }
 
   return (
