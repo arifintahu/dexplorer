@@ -23,7 +23,6 @@ import {
   Tab,
   TabPanels,
   TabPanel,
-  Badge,
   Tag,
   TagLeftIcon,
   TagLabel,
@@ -31,18 +30,23 @@ import {
 import NextLink from 'next/link'
 import { FiChevronRight, FiHome, FiCheck, FiX } from 'react-icons/fi'
 import { selectNewBlock, selectTxEvent } from '@/store/streamSlice'
-import dayjs from 'dayjs'
-import relativeTime from 'dayjs/plugin/relativeTime'
-import { toHex, toBase64 } from '@cosmjs/encoding'
+import { toHex } from '@cosmjs/encoding'
 import { TxBody } from 'cosmjs-types/cosmos/tx/v1beta1/tx'
+import { timeFromNow, trimHash } from '@/utils/helper'
 
 const MAX_ROWS = 20
+
+interface Tx {
+  TxEvent: TxEvent
+  Timestamp: Date
+}
 
 export default function Blocks() {
   const newBlock = useSelector(selectNewBlock)
   const txEvent = useSelector(selectTxEvent)
   const [blocks, setBlocks] = useState<NewBlockEvent[]>([])
-  const [txs, setTxs] = useState<TxEvent[]>([])
+
+  const [txs, setTxs] = useState<Tx[]>([])
 
   useEffect(() => {
     if (newBlock) {
@@ -66,26 +70,21 @@ export default function Blocks() {
     }
   }
 
-  const updateTxs = (tx: TxEvent) => {
+  const updateTxs = (txEvent: TxEvent) => {
+    const tx = {
+      TxEvent: txEvent,
+      Timestamp: new Date(),
+    }
     if (txs.length) {
-      if (tx.height >= txs[0].height && tx.hash != txs[0].hash) {
+      if (
+        txEvent.height >= txs[0].TxEvent.height &&
+        txEvent.hash != txs[0].TxEvent.hash
+      ) {
         setTxs((prevTx) => [tx, ...prevTx.slice(0, MAX_ROWS - 1)])
       }
     } else {
       setTxs([tx])
     }
-  }
-
-  const timeFromNow = (date: string): string => {
-    dayjs.extend(relativeTime)
-    return dayjs(date).fromNow()
-  }
-
-  const trimHash = (txHash: Uint8Array): string => {
-    const hash = toHex(txHash).toUpperCase()
-    const first = hash.slice(0, 5)
-    const last = hash.slice(hash.length - 5, hash.length)
-    return first + '...' + last
   }
 
   const renderMessages = (data: Uint8Array | undefined) => {
@@ -115,7 +114,7 @@ export default function Blocks() {
   const getTypeMsg = (typeUrl: string): string => {
     const arr = typeUrl.split('.')
     if (arr.length) {
-      return arr[arr.length - 1]
+      return arr[arr.length - 1].replace('Msg', '')
     }
     return ''
   }
@@ -201,14 +200,15 @@ export default function Blocks() {
                         <Th>Result</Th>
                         <Th>Messages</Th>
                         <Th>Height</Th>
+                        <Th>Time</Th>
                       </Tr>
                     </Thead>
                     <Tbody>
                       {txs.map((tx) => (
-                        <Tr key={toHex(tx.hash)}>
-                          <Td>{trimHash(tx.hash)}</Td>
+                        <Tr key={toHex(tx.TxEvent.hash)}>
+                          <Td>{trimHash(tx.TxEvent.hash)}</Td>
                           <Td>
-                            {tx.result.code == 0 ? (
+                            {tx.TxEvent.result.code == 0 ? (
                               <Tag variant="subtle" colorScheme="green">
                                 <TagLeftIcon as={FiCheck} />
                                 <TagLabel>Success</TagLabel>
@@ -220,8 +220,9 @@ export default function Blocks() {
                               </Tag>
                             )}
                           </Td>
-                          <Td>{renderMessages(tx.result.data)}</Td>
-                          <Td>{tx.height}</Td>
+                          <Td>{renderMessages(tx.TxEvent.result.data)}</Td>
+                          <Td>{tx.TxEvent.height}</Td>
+                          <Td>{timeFromNow(tx.Timestamp.toISOString())}</Td>
                         </Tr>
                       ))}
                     </Tbody>
