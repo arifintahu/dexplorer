@@ -179,7 +179,18 @@ export default function Blocks() {
                     <Tbody>
                       {blocks.map((block) => (
                         <Tr key={block.header.height}>
-                          <Td>{block.header.height}</Td>
+                          <Td>
+                            <Link
+                              as={NextLink}
+                              href={'/blocks/' + block.header.height}
+                              style={{ textDecoration: 'none' }}
+                              _focus={{ boxShadow: 'none' }}
+                            >
+                              <Text color={'cyan.400'}>
+                                {block.header.height}
+                              </Text>
+                            </Link>
+                          </Td>
                           <Td noOfLines={1}>{toHex(block.header.appHash)}</Td>
                           <Td>{block.txs.length}</Td>
                           <Td>
@@ -196,7 +207,7 @@ export default function Blocks() {
                   <Table variant="simple">
                     <Thead>
                       <Tr>
-                        <Th>Hash</Th>
+                        <Th>Tx Hash</Th>
                         <Th>Result</Th>
                         <Th>Messages</Th>
                         <Th>Height</Th>
