@@ -7,6 +7,7 @@ import {
   Link,
   Table,
   TableContainer,
+  Tag,
   Tbody,
   Td,
   Text,
@@ -19,10 +20,90 @@ import { FiChevronRight, FiHome } from 'react-icons/fi'
 import NextLink from 'next/link'
 import Head from 'next/head'
 import { useRouter } from 'next/router'
+import { useEffect, useState } from 'react'
+import { useSelector } from 'react-redux'
+import { getBlock } from '@/rpc/query'
+import { selectTmClient } from '@/store/connectSlice'
+import { Block, Coin } from '@cosmjs/stargate'
+import { Tx as TxData } from 'cosmjs-types/cosmos/tx/v1beta1/tx'
+import { sha256 } from '@cosmjs/crypto'
+import { toHex } from '@cosmjs/encoding'
+import { timeFromNow, trimHash } from '@/utils/helper'
 
 export default function DetailBlock() {
   const router = useRouter()
   const { height } = router.query
+  const tmClient = useSelector(selectTmClient)
+  const [block, setBlock] = useState<Block | null>(null)
+
+  interface Tx {
+    data: TxData
+    hash: Uint8Array
+  }
+  const [txs, setTxs] = useState<Tx[]>([])
+
+  useEffect(() => {
+    if (tmClient && height) {
+      getBlock(tmClient, parseInt(height as string, 10)).then((response) =>
+        setBlock(response)
+      )
+    }
+  }, [tmClient, height])
+
+  useEffect(() => {
+    if (block?.txs.length && !txs.length) {
+      for (const rawTx of block.txs) {
+        const data = TxData.decode(rawTx)
+        const hash = sha256(rawTx)
+        setTxs((prevTxs) => [
+          ...prevTxs,
+          {
+            data,
+            hash,
+          },
+        ])
+      }
+    }
+  }, [block])
+
+  const renderMessages = (messages: any) => {
+    if (messages.length == 1) {
+      return (
+        <HStack>
+          <Tag colorScheme="cyan">{getTypeMsg(messages[0].typeUrl)}</Tag>
+        </HStack>
+      )
+    } else if (messages.length > 1) {
+      return (
+        <HStack>
+          <Tag colorScheme="cyan">{getTypeMsg(messages[0].typeUrl)}</Tag>
+          <Text textColor="cyan.800">+{messages.length - 1}</Text>
+        </HStack>
+      )
+    }
+
+    return ''
+  }
+
+  const getTypeMsg = (typeUrl: string): string => {
+    const arr = typeUrl.split('.')
+    if (arr.length) {
+      return arr[arr.length - 1].replace('Msg', '')
+    }
+    return ''
+  }
+
+  const getFee = (fees: Coin[] | undefined) => {
+    if (fees && fees.length) {
+      return (
+        <HStack>
+          <Text>{fees[0].amount}</Text>
+          <Text textColor="cyan.800">{fees[0].denom}</Text>
+        </HStack>
+      )
+    }
+    return ''
+  }
 
   return (
     <>
@@ -71,52 +152,34 @@ export default function DetailBlock() {
             <Table variant="unstyled" size={'sm'}>
               <Tbody>
                 <Tr>
-                  <Td pl={0} width={200}>
+                  <Td pl={0} width={150}>
                     <b>Chain Id</b>
                   </Td>
-                  <Td>1234</Td>
+                  <Td>{block?.header.chainId}</Td>
                 </Tr>
                 <Tr>
-                  <Td pl={0} width={200}>
+                  <Td pl={0} width={150}>
                     <b>Height</b>
                   </Td>
-                  <Td>1234</Td>
+                  <Td>{block?.header.height}</Td>
                 </Tr>
                 <Tr>
-                  <Td pl={0} width={200}>
+                  <Td pl={0} width={150}>
                     <b>Block Time</b>
                   </Td>
-                  <Td>1234</Td>
+                  <Td>{block?.header.time}</Td>
                 </Tr>
                 <Tr>
-                  <Td pl={0} width={200}>
+                  <Td pl={0} width={150}>
                     <b>Block Hash</b>
                   </Td>
-                  <Td>1234</Td>
+                  <Td>{block?.id}</Td>
                 </Tr>
                 <Tr>
-                  <Td pl={0} width={200}>
+                  <Td pl={0} width={150}>
                     <b>Number of Tx</b>
                   </Td>
-                  <Td>1234</Td>
-                </Tr>
-                <Tr>
-                  <Td pl={0} width={200}>
-                    <b>Gas (used / wanted)</b>
-                  </Td>
-                  <Td>1234</Td>
-                </Tr>
-                <Tr>
-                  <Td pl={0} width={200}>
-                    <b>Block Round</b>
-                  </Td>
-                  <Td>1234</Td>
-                </Tr>
-                <Tr>
-                  <Td pl={0} width={200}>
-                    <b>Proposer</b>
-                  </Td>
-                  <Td>1234</Td>
+                  <Td>{block?.txs.length}</Td>
                 </Tr>
               </Tbody>
             </Table>
@@ -139,13 +202,27 @@ export default function DetailBlock() {
               <Thead>
                 <Tr>
                   <Th>Tx Hash</Th>
-                  <Th>Result</Th>
                   <Th>Messages</Th>
+                  <Th>Fee</Th>
                   <Th>Height</Th>
                   <Th>Time</Th>
                 </Tr>
               </Thead>
-              <Tbody></Tbody>
+              <Tbody>
+                {txs.map((tx) => (
+                  <Tr key={toHex(tx.hash)}>
+                    <Td>{trimHash(tx.hash)}</Td>
+                    <Td>{renderMessages(tx.data.body?.messages)}</Td>
+                    <Td>{getFee(tx.data.authInfo?.fee?.amount)}</Td>
+                    <Td>{height}</Td>
+                    <Td>
+                      {block?.header.time
+                        ? timeFromNow(block?.header.time)
+                        : ''}
+                    </Td>
+                  </Tr>
+                ))}
+              </Tbody>
             </Table>
           </TableContainer>
         </Box>
