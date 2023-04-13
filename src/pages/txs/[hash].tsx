@@ -1,5 +1,8 @@
 import {
   Box,
+  Card,
+  CardBody,
+  CardHeader,
   Divider,
   HStack,
   Heading,
@@ -27,6 +30,7 @@ import { getTx, getBlock } from '@/rpc/query'
 import { IndexedTx, Block, Coin } from '@cosmjs/stargate'
 import { Tx } from 'cosmjs-types/cosmos/tx/v1beta1/tx'
 import { timeFromNow, displayDate } from '@/utils/helper'
+import { decodeMsg, DecodeMsg } from '@/encoding'
 
 export default function DetailBlock() {
   const router = useRouter()
@@ -35,6 +39,7 @@ export default function DetailBlock() {
   const [tx, setTx] = useState<IndexedTx | null>(null)
   const [txData, setTxData] = useState<Tx | null>(null)
   const [block, setBlock] = useState<Block | null>(null)
+  const [msgs, setMsgs] = useState<DecodeMsg[]>([])
 
   useEffect(() => {
     if (tmClient && hash) {
@@ -51,10 +56,18 @@ export default function DetailBlock() {
   useEffect(() => {
     if (tx?.tx) {
       const data = Tx.decode(tx?.tx)
-      console.log(data)
       setTxData(data)
     }
   }, [tx])
+
+  useEffect(() => {
+    if (txData?.body?.messages.length && !msgs.length) {
+      for (const message of txData?.body?.messages) {
+        const msg = decodeMsg(message.typeUrl, message.value)
+        setMsgs((prevMsgs) => [...prevMsgs, msg])
+      }
+    }
+  }, [txData])
 
   const getFee = (fees: Coin[] | undefined) => {
     if (fees && fees.length) {
@@ -64,6 +77,26 @@ export default function DetailBlock() {
           <Text textColor="cyan.800">{fees[0].denom}</Text>
         </HStack>
       )
+    }
+    return ''
+  }
+
+  const showMsgData = (msgData: any): string => {
+    if (Array.isArray(msgData)) {
+      return JSON.stringify(msgData)
+    }
+
+    if (!Array.isArray(msgData) && msgData.length) {
+      return String(msgData)
+    }
+
+    return ''
+  }
+
+  const getTypeMsg = (typeUrl: string): string => {
+    const arr = typeUrl.split('.')
+    if (arr.length) {
+      return arr[arr.length - 1].replace('Msg', '')
     }
     return ''
   }
@@ -194,6 +227,53 @@ export default function DetailBlock() {
               </Tbody>
             </Table>
           </TableContainer>
+        </Box>
+
+        <Box
+          mt={8}
+          bg={useColorModeValue('white', 'gray.900')}
+          shadow={'base'}
+          borderRadius={4}
+          p={4}
+        >
+          <Heading size={'md'} mb={4}>
+            Messages
+          </Heading>
+
+          {msgs.map((msg, index) => (
+            <Card variant={'outline'} key={index} mb={8}>
+              <CardHeader>
+                <Heading size="sm">{getTypeMsg(msg.typeUrl)}</Heading>
+              </CardHeader>
+              <Divider />
+              <CardBody>
+                <TableContainer>
+                  <Table variant="unstyled" size={'sm'}>
+                    <Tbody>
+                      <Tr>
+                        <Td pl={0} width={150}>
+                          <b>typeUrl</b>
+                        </Td>
+                        <Td>{msg.typeUrl}</Td>
+                      </Tr>
+                      {Object.keys(msg.data ?? {}).map((key) => (
+                        <Tr key={key}>
+                          <Td pl={0} width={150}>
+                            <b>{key}</b>
+                          </Td>
+                          <Td>
+                            {showMsgData(
+                              msg.data ? msg.data[key as keyof {}] : ''
+                            )}
+                          </Td>
+                        </Tr>
+                      ))}
+                    </Tbody>
+                  </Table>
+                </TableContainer>
+              </CardBody>
+            </Card>
+          ))}
         </Box>
       </main>
     </>
