@@ -217,7 +217,20 @@ export default function Blocks() {
                     <Tbody>
                       {txs.map((tx) => (
                         <Tr key={toHex(tx.TxEvent.hash)}>
-                          <Td>{trimHash(tx.TxEvent.hash)}</Td>
+                          <Td>
+                            <Link
+                              as={NextLink}
+                              href={
+                                '/txs/' + toHex(tx.TxEvent.hash).toUpperCase()
+                              }
+                              style={{ textDecoration: 'none' }}
+                              _focus={{ boxShadow: 'none' }}
+                            >
+                              <Text color={'cyan.400'}>
+                                {trimHash(tx.TxEvent.hash)}
+                              </Text>
+                            </Link>
+                          </Td>
                           <Td>
                             {tx.TxEvent.result.code == 0 ? (
                               <Tag variant="subtle" colorScheme="green">

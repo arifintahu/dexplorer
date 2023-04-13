@@ -13,3 +13,7 @@ export const trimHash = (txHash: Uint8Array): string => {
   const last = hash.slice(hash.length - 5, hash.length)
   return first + '...' + last
 }
+
+export const displayDate = (date: string): string => {
+  return dayjs(date).format('YYYY-MM-DD HH:mm:ss')
+}

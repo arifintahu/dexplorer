@@ -28,7 +28,7 @@ import { Block, Coin } from '@cosmjs/stargate'
 import { Tx as TxData } from 'cosmjs-types/cosmos/tx/v1beta1/tx'
 import { sha256 } from '@cosmjs/crypto'
 import { toHex } from '@cosmjs/encoding'
-import { timeFromNow, trimHash } from '@/utils/helper'
+import { timeFromNow, trimHash, displayDate } from '@/utils/helper'
 
 export default function DetailBlock() {
   const router = useRouter()
@@ -167,7 +167,13 @@ export default function DetailBlock() {
                   <Td pl={0} width={150}>
                     <b>Block Time</b>
                   </Td>
-                  <Td>{block?.header.time}</Td>
+                  <Td>
+                    {block?.header.time
+                      ? `${timeFromNow(block?.header.time)} ( ${displayDate(
+                          block?.header.time
+                        )} )`
+                      : ''}
+                  </Td>
                 </Tr>
                 <Tr>
                   <Td pl={0} width={150}>
@@ -211,7 +217,16 @@ export default function DetailBlock() {
               <Tbody>
                 {txs.map((tx) => (
                   <Tr key={toHex(tx.hash)}>
-                    <Td>{trimHash(tx.hash)}</Td>
+                    <Td>
+                      <Link
+                        as={NextLink}
+                        href={'/txs/' + toHex(tx.hash).toUpperCase()}
+                        style={{ textDecoration: 'none' }}
+                        _focus={{ boxShadow: 'none' }}
+                      >
+                        <Text color={'cyan.400'}>{trimHash(tx.hash)}</Text>
+                      </Link>
+                    </Td>
                     <Td>{renderMessages(tx.data.body?.messages)}</Td>
                     <Td>{getFee(tx.data.authInfo?.fee?.amount)}</Td>
                     <Td>{height}</Td>
