@@ -12,7 +12,6 @@ import {
   setRPCAddress,
 } from '@/store/connectSlice'
 import {
-  useColorModeValue,
   Box,
   Heading,
   Text,
@@ -62,7 +61,7 @@ export default function Layout({ children }: { children: ReactNode }) {
       const subscription = subscribeTx(tmClient, updateTxEvent)
       dispatch(setSubsTxEvent(subscription))
     }
-  }, [tmClient])
+  }, [tmClient, newBlock, txEvent, dispatch])
 
   useEffect(() => {
     if (isLoading) {
@@ -112,7 +111,7 @@ export default function Layout({ children }: { children: ReactNode }) {
       {connectState && !isLoading ? (
         <Sidebar>
           <Box
-            bg={useColorModeValue('white', 'gray.900')}
+            bg="white"
             w="100%"
             p={4}
             shadow={'base'}
