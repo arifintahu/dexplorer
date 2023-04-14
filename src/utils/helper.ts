@@ -17,3 +17,7 @@ export const trimHash = (txHash: Uint8Array): string => {
 export const displayDate = (date: string): string => {
   return dayjs(date).format('YYYY-MM-DD HH:mm:ss')
 }
+
+export const replaceHTTPtoWebsocket = (url: string): string => {
+  return url.replace('http', 'ws')
+}

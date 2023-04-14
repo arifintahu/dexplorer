@@ -13,6 +13,7 @@ import {
   useDisclosure,
   BoxProps,
   FlexProps,
+  Button,
 } from '@chakra-ui/react'
 import {
   FiHome,
@@ -21,9 +22,12 @@ import {
   FiStar,
   FiSliders,
   FiMenu,
+  FiLogOut,
 } from 'react-icons/fi'
 import { IconType } from 'react-icons'
 import NextLink from 'next/link'
+import { selectSubsNewBlock, selectSubsTxEvent } from '@/store/streamSlice'
+import { useSelector } from 'react-redux'
 
 interface LinkItemProps {
   name: string
@@ -73,6 +77,16 @@ interface SidebarProps extends BoxProps {
 }
 
 const SidebarContent = ({ onClose, ...rest }: SidebarProps) => {
+  const subsNewBlock = useSelector(selectSubsNewBlock)
+  const subsTxEvent = useSelector(selectSubsTxEvent)
+
+  const handleDisconnect = () => {
+    subsNewBlock?.unsubscribe()
+    subsTxEvent?.unsubscribe()
+    window.localStorage.removeItem('RPC_ADDRESS')
+    window.location.replace('/')
+  }
+
   return (
     <Box
       bg={useColorModeValue('white', 'gray.900')}
@@ -83,17 +97,39 @@ const SidebarContent = ({ onClose, ...rest }: SidebarProps) => {
       h="full"
       {...rest}
     >
-      <Flex h="20" alignItems="center" mx="8" justifyContent="space-between">
-        <Text fontSize="2xl" fontFamily="monospace" fontWeight="bold">
-          Dexplorer
-        </Text>
-        <CloseButton display={{ base: 'flex', md: 'none' }} onClick={onClose} />
+      <Flex flexDirection="column" h="full" justifyContent="space-between">
+        <Box>
+          <Flex
+            h="20"
+            alignItems="center"
+            mx="8"
+            justifyContent="space-between"
+          >
+            <Text fontSize="2xl" fontFamily="monospace" fontWeight="bold">
+              Dexplorer
+            </Text>
+            <CloseButton
+              display={{ base: 'flex', md: 'none' }}
+              onClick={onClose}
+            />
+          </Flex>
+          {LinkItems.map((link) => (
+            <NavItem key={link.name} icon={link.icon} route={link.route}>
+              {link.name}
+            </NavItem>
+          ))}
+        </Box>
+        <Flex justifyContent="center" mb="4">
+          <Button
+            leftIcon={<FiLogOut />}
+            colorScheme="red"
+            variant="outline"
+            onClick={handleDisconnect}
+          >
+            Disconnect
+          </Button>
+        </Flex>
       </Flex>
-      {LinkItems.map((link) => (
-        <NavItem key={link.name} icon={link.icon} route={link.route}>
-          {link.name}
-        </NavItem>
-      ))}
     </Box>
   )
 }

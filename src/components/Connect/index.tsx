@@ -19,6 +19,7 @@ import {
 } from '@/store/connectSlice'
 import Head from 'next/head'
 import { Tendermint34Client, WebsocketClient } from '@cosmjs/tendermint-rpc'
+import { replaceHTTPtoWebsocket } from '@/utils/helper'
 
 export default function Connect() {
   const [address, setAddress] = useState('')
@@ -54,10 +55,8 @@ export default function Connect() {
     dispatch(setTmClient(tmClient))
     dispatch(setRPCAddress(address))
     setState('success')
-  }
 
-  const replaceHTTPtoWebsocket = (url: string): string => {
-    return url.replace('http', 'ws')
+    window.localStorage.setItem('RPC_ADDRESS', address)
   }
 
   return (
@@ -134,7 +133,7 @@ export default function Connect() {
           >
             {error
               ? 'Oh no an error occured! 😢 Please try again later.'
-              : "You won't receive any spam! ✌️"}
+              : 'For any Cosmos SDK chain! ✌️'}
           </Text>
         </Container>
       </Flex>
