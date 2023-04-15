@@ -15,6 +15,7 @@ import {
   Thead,
   Tr,
   useColorModeValue,
+  useToast,
 } from '@chakra-ui/react'
 import { FiChevronRight, FiHome } from 'react-icons/fi'
 import NextLink from 'next/link'
@@ -32,6 +33,7 @@ import { timeFromNow, trimHash, displayDate } from '@/utils/helper'
 
 export default function DetailBlock() {
   const router = useRouter()
+  const toast = useToast()
   const { height } = router.query
   const tmClient = useSelector(selectTmClient)
   const [block, setBlock] = useState<Block | null>(null)
@@ -44,9 +46,9 @@ export default function DetailBlock() {
 
   useEffect(() => {
     if (tmClient && height) {
-      getBlock(tmClient, parseInt(height as string, 10)).then((response) =>
-        setBlock(response)
-      )
+      getBlock(tmClient, parseInt(height as string, 10))
+        .then(setBlock)
+        .catch(showError)
     }
   }, [tmClient, height])
 
@@ -103,6 +105,27 @@ export default function DetailBlock() {
       )
     }
     return ''
+  }
+
+  const showError = (err: Error) => {
+    const errMsg = err.message
+    let error = null
+    try {
+      error = JSON.parse(errMsg)
+    } catch (e) {
+      error = {
+        message: 'Invalid',
+        data: errMsg,
+      }
+    }
+
+    toast({
+      title: error.message,
+      description: error.data,
+      status: 'error',
+      duration: 5000,
+      isClosable: true,
+    })
   }
 
   return (

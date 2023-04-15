@@ -27,6 +27,7 @@ import { useSelector } from 'react-redux'
 import { getValidators } from '@/rpc/query'
 import { selectTmClient } from '@/store/connectSlice'
 import { selectNewBlock } from '@/store/streamSlice'
+import { displayDate } from '@/utils/helper'
 
 export default function Home() {
   const tmClient = useSelector(selectTmClient)
@@ -85,7 +86,11 @@ export default function Home() {
               color="green.600"
               icon={FiClock}
               name="Update"
-              value={convertDate(newBlock?.header.time?.toISOString())}
+              value={
+                newBlock?.header.time
+                  ? displayDate(newBlock?.header.time?.toISOString())
+                  : ''
+              }
             />
             <BoxInfo
               bgColor="orange.200"

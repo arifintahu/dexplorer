@@ -18,6 +18,7 @@ import {
   Text,
   Tr,
   useColorModeValue,
+  useToast,
 } from '@chakra-ui/react'
 import { FiChevronRight, FiHome, FiCheck, FiX } from 'react-icons/fi'
 import NextLink from 'next/link'
@@ -34,6 +35,7 @@ import { decodeMsg, DecodeMsg } from '@/encoding'
 
 export default function DetailBlock() {
   const router = useRouter()
+  const toast = useToast()
   const { hash } = router.query
   const tmClient = useSelector(selectTmClient)
   const [tx, setTx] = useState<IndexedTx | null>(null)
@@ -43,13 +45,15 @@ export default function DetailBlock() {
 
   useEffect(() => {
     if (tmClient && hash) {
-      getTx(tmClient, hash as string).then(setTx)
+      getTx(tmClient, hash as string)
+        .then(setTx)
+        .catch(showError)
     }
   }, [tmClient, hash])
 
   useEffect(() => {
     if (tmClient && tx?.height) {
-      getBlock(tmClient, tx?.height).then((response) => setBlock(response))
+      getBlock(tmClient, tx?.height).then(setBlock).catch(showError)
     }
   }, [tmClient, tx])
 
@@ -99,6 +103,28 @@ export default function DetailBlock() {
       return arr[arr.length - 1].replace('Msg', '')
     }
     return ''
+  }
+
+  const showError = (err: Error) => {
+    console.log(err)
+    const errMsg = err.message
+    let error = null
+    try {
+      error = JSON.parse(errMsg)
+    } catch (e) {
+      error = {
+        message: 'Invalid',
+        data: errMsg,
+      }
+    }
+
+    toast({
+      title: error.message,
+      description: error.data,
+      status: 'error',
+      duration: 5000,
+      isClosable: true,
+    })
   }
 
   return (

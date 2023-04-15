@@ -1,4 +1,5 @@
 import { ReactNode, useEffect, useState } from 'react'
+import { useRouter } from 'next/router'
 import { useDispatch, useSelector } from 'react-redux'
 import Sidebar from '../Sidebar'
 import Connect from '../Connect'
@@ -41,6 +42,7 @@ import { TxEvent } from '@cosmjs/tendermint-rpc'
 import { replaceHTTPtoWebsocket } from '@/utils/helper'
 
 export default function Layout({ children }: { children: ReactNode }) {
+  const router = useRouter()
   const connectState = useSelector(selectConnectState)
   const tmClient = useSelector(selectTmClient)
   const address = useSelector(selectRPCAddress)
@@ -49,6 +51,7 @@ export default function Layout({ children }: { children: ReactNode }) {
   const dispatch = useDispatch()
 
   const [searchBy, setSearchBy] = useState('block')
+  const [inputSearch, setInputSearch] = useState('')
   const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
@@ -85,6 +88,31 @@ export default function Layout({ children }: { children: ReactNode }) {
 
   const handleSelect = (event: any) => {
     setSearchBy(event.target.value as string)
+  }
+
+  const handleInputSearch = (event: any) => {
+    setInputSearch(event.target.value as string)
+  }
+
+  const handleSearch = () => {
+    let path = '/blocks'
+    if (inputSearch) {
+      switch (searchBy) {
+        case 'block':
+          path = '/blocks/'
+          break
+
+        case 'tx hash':
+          path = '/txs/'
+          break
+
+        default:
+          break
+      }
+    }
+
+    router.push(path + inputSearch)
+    return
   }
 
   const connect = async (address: string) => {
@@ -148,6 +176,7 @@ export default function Layout({ children }: { children: ReactNode }) {
                   type={'text'}
                   borderColor={'gray.900'}
                   placeholder={`Search by ${searchBy}`}
+                  onChange={handleInputSearch}
                 />
               </InputGroup>
               <IconButton
@@ -156,6 +185,7 @@ export default function Layout({ children }: { children: ReactNode }) {
                 size="md"
                 fontSize="20"
                 icon={<FiSearch />}
+                onClick={handleSearch}
               />
             </HStack>
           </Box>
