@@ -112,6 +112,10 @@ export default function Layout({ children }: { children: ReactNode }) {
           path = '/txs/'
           break
 
+        case 'account':
+          path = '/accounts/'
+          break
+
         default:
           break
       }

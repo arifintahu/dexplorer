@@ -123,7 +123,7 @@ export default function Blocks() {
     <>
       <Head>
         <title>Blocks | Dexplorer</title>
-        <meta name="description" content="Home | Dexplorer" />
+        <meta name="description" content="Blocks | Dexplorer" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
