@@ -22,6 +22,7 @@ import {
   InputGroup,
   Input,
   Select,
+  Skeleton,
 } from '@chakra-ui/react'
 import { FiRadio, FiSearch } from 'react-icons/fi'
 import { subscribeNewBlock, subscribeTx } from '@/rpc/subscribe'
@@ -53,6 +54,7 @@ export default function Layout({ children }: { children: ReactNode }) {
   const [searchBy, setSearchBy] = useState('block')
   const [inputSearch, setInputSearch] = useState('')
   const [isLoading, setIsLoading] = useState(true)
+  const [isLoadedSkeleton, setIsLoadedSkeleton] = useState(false)
 
   useEffect(() => {
     if (tmClient && !newBlock) {
@@ -63,6 +65,10 @@ export default function Layout({ children }: { children: ReactNode }) {
     if (tmClient && !txEvent) {
       const subscription = subscribeTx(tmClient, updateTxEvent)
       dispatch(setSubsTxEvent(subscription))
+    }
+
+    if (newBlock) {
+      setIsLoadedSkeleton(true)
     }
   }, [tmClient, newBlock, txEvent, dispatch])
 
@@ -151,10 +157,14 @@ export default function Layout({ children }: { children: ReactNode }) {
             <HStack>
               <Icon mr="4" fontSize="32" color={'green.600'} as={FiRadio} />
               <Box>
-                <Heading size="xs">{newBlock?.header.chainId}</Heading>
-                <Text pt="2" fontSize="sm">
-                  {address}
-                </Text>
+                <Skeleton isLoaded={isLoadedSkeleton}>
+                  <Heading size="xs">{newBlock?.header.chainId}</Heading>
+                </Skeleton>
+                <Skeleton isLoaded={isLoadedSkeleton}>
+                  <Text pt="2" fontSize="sm">
+                    {address}
+                  </Text>
+                </Skeleton>
               </Box>
             </HStack>
             <HStack>

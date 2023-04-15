@@ -11,6 +11,7 @@ import {
   SimpleGrid,
   Box,
   VStack,
+  Skeleton,
 } from '@chakra-ui/react'
 import {
   FiHome,
@@ -33,6 +34,7 @@ export default function Home() {
   const tmClient = useSelector(selectTmClient)
   const newBlock = useSelector(selectNewBlock)
   const [validators, setValidators] = useState<number>()
+  const [isLoaded, setIsLoaded] = useState(false)
 
   useEffect(() => {
     if (tmClient) {
@@ -40,14 +42,11 @@ export default function Home() {
     }
   }, [tmClient])
 
-  const convertDate = (date: string | undefined): string => {
-    if (!date) {
-      return ''
+  useEffect(() => {
+    if (!isLoaded && newBlock) {
+      setIsLoaded(true)
     }
-
-    const newDate = new Date(date)
-    return newDate.toLocaleString()
-  }
+  }, [isLoaded, newBlock])
 
   return (
     <>
@@ -74,38 +73,48 @@ export default function Home() {
         </HStack>
         <Box mt={8}>
           <SimpleGrid minChildWidth="200px" spacing="40px">
-            <BoxInfo
-              bgColor="cyan.200"
-              color="cyan.600"
-              icon={FiBox}
-              name="Height"
-              value={newBlock?.header.height}
-            />
-            <BoxInfo
-              bgColor="green.200"
-              color="green.600"
-              icon={FiClock}
-              name="Update"
-              value={
-                newBlock?.header.time
-                  ? displayDate(newBlock?.header.time?.toISOString())
-                  : ''
-              }
-            />
-            <BoxInfo
-              bgColor="orange.200"
-              color="orange.600"
-              icon={FiCpu}
-              name="Network"
-              value={newBlock?.header.chainId}
-            />
-            <BoxInfo
-              bgColor="purple.200"
-              color="purple.600"
-              icon={FiUsers}
-              name="Validators"
-              value={validators}
-            />
+            <Skeleton isLoaded={isLoaded}>
+              <BoxInfo
+                bgColor="cyan.200"
+                color="cyan.600"
+                icon={FiBox}
+                name="Height"
+                value={newBlock?.header.height}
+              />
+            </Skeleton>
+            <Skeleton isLoaded={isLoaded}>
+              <BoxInfo
+                bgColor="green.200"
+                color="green.600"
+                icon={FiClock}
+                name="Update"
+                value={
+                  newBlock?.header.time
+                    ? displayDate(newBlock?.header.time?.toISOString())
+                    : ''
+                }
+              />
+            </Skeleton>
+
+            <Skeleton isLoaded={isLoaded}>
+              <BoxInfo
+                bgColor="orange.200"
+                color="orange.600"
+                icon={FiCpu}
+                name="Network"
+                value={newBlock?.header.chainId}
+              />
+            </Skeleton>
+
+            <Skeleton isLoaded={isLoaded}>
+              <BoxInfo
+                bgColor="purple.200"
+                color="purple.600"
+                icon={FiUsers}
+                name="Validators"
+                value={validators}
+              />
+            </Skeleton>
           </SimpleGrid>
         </Box>
       </main>
