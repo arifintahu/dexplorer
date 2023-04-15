@@ -41,25 +41,25 @@ export default function DetailAccount() {
   const [balanceStaked, setBalanceStaked] = useState<Coin | null>(null)
 
   useEffect(() => {
-    if (tmClient && !account) {
-      getAccount(tmClient, address as string)
-        .then(setAccount)
-        .catch(showError)
-    }
+    if (tmClient && address) {
+      if (!account) {
+        getAccount(tmClient, address as string)
+          .then(setAccount)
+          .catch(showError)
+      }
 
-    if (tmClient && !allBalances.length) {
-      getAllBalances(tmClient, address as string)
-        .then(setAllBalances)
-        .catch(showError)
-    }
+      if (!allBalances.length) {
+        getAllBalances(tmClient, address as string)
+          .then(setAllBalances)
+          .catch(showError)
+      }
 
-    if (tmClient && balanceStaked) {
-      getBalanceStaked(tmClient, address as string)
-        .then(setBalanceStaked)
-        .catch(showError)
+      if (!balanceStaked) {
+        getBalanceStaked(tmClient, address as string)
+          .then(setBalanceStaked)
+          .catch(showError)
+      }
     }
-
-    console.log(account, allBalances, balanceStaked)
   }, [tmClient, account, allBalances, balanceStaked])
 
   const showError = (err: Error) => {
@@ -126,7 +126,7 @@ export default function DetailAccount() {
                   <Td pl={0} width={150}>
                     <b>Address</b>
                   </Td>
-                  <Td>{account?.address}</Td>
+                  <Td>{address}</Td>
                 </Tr>
                 <Tr>
                   <Td pl={0} width={150}>
@@ -176,25 +176,53 @@ export default function DetailAccount() {
           <Heading size={'md'} mb={4}>
             Balances
           </Heading>
-          <Divider borderColor={'gray'} mb={4} />
-          <TableContainer>
-            <Table variant="simple">
-              <Thead>
-                <Tr>
-                  <Th>Denom</Th>
-                  <Th>Amount</Th>
-                </Tr>
-              </Thead>
-              <Tbody>
-                {allBalances.map((item, index) => (
-                  <Tr key={index}>
-                    <Td>{item.denom}</Td>
-                    <Td>{item.amount}</Td>
-                  </Tr>
-                ))}
-              </Tbody>
-            </Table>
-          </TableContainer>
+          <Heading size={'sm'} mb={4}></Heading>
+          <Tabs size="md">
+            <TabList>
+              <Tab>Available</Tab>
+              <Tab>Delegated</Tab>
+            </TabList>
+            <TabPanels>
+              <TabPanel>
+                <TableContainer>
+                  <Table variant="simple">
+                    <Thead>
+                      <Tr>
+                        <Th>Denom</Th>
+                        <Th>Amount</Th>
+                      </Tr>
+                    </Thead>
+                    <Tbody>
+                      {allBalances.map((item, index) => (
+                        <Tr key={index}>
+                          <Td>{item.denom}</Td>
+                          <Td>{item.amount}</Td>
+                        </Tr>
+                      ))}
+                    </Tbody>
+                  </Table>
+                </TableContainer>
+              </TabPanel>
+              <TabPanel>
+                <TableContainer>
+                  <Table variant="simple">
+                    <Thead>
+                      <Tr>
+                        <Th>Denom</Th>
+                        <Th>Amount</Th>
+                      </Tr>
+                    </Thead>
+                    <Tbody>
+                      <Tr>
+                        <Td>{balanceStaked?.denom}</Td>
+                        <Td>{balanceStaked?.amount}</Td>
+                      </Tr>
+                    </Tbody>
+                  </Table>
+                </TableContainer>
+              </TabPanel>
+            </TabPanels>
+          </Tabs>
         </Box>
       </main>
     </>
