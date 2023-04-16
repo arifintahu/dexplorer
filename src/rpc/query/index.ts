@@ -5,7 +5,12 @@ import {
   IndexedTx,
   StargateClient,
 } from '@cosmjs/stargate'
-import { Tendermint34Client, ValidatorsResponse } from '@cosmjs/tendermint-rpc'
+import {
+  Tendermint34Client,
+  TxSearchResponse,
+  ValidatorsResponse,
+} from '@cosmjs/tendermint-rpc'
+import { Tx } from 'cosmjs-types/cosmos/tx/v1beta1/tx'
 
 export async function getChainId(
   tmClient: Tendermint34Client
@@ -58,4 +63,19 @@ export async function getBalanceStaked(
 ): Promise<Coin | null> {
   const client = await StargateClient.create(tmClient)
   return client.getBalanceStaked(address)
+}
+
+export async function getTxsBySender(
+  tmClient: Tendermint34Client,
+  address: string,
+  page: number,
+  perPage: number
+): Promise<TxSearchResponse> {
+  return tmClient.txSearch({
+    query: `message.sender='${address}'`,
+    prove: true,
+    order_by: 'desc',
+    page: page,
+    per_page: perPage,
+  })
 }

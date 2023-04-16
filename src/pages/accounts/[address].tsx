@@ -12,6 +12,7 @@ import {
   Table,
   TableContainer,
   Tabs,
+  Tag,
   Tbody,
   Td,
   Text,
@@ -27,9 +28,18 @@ import Head from 'next/head'
 import { useRouter } from 'next/router'
 import { useEffect, useState } from 'react'
 import { useSelector } from 'react-redux'
-import { getAccount, getAllBalances, getBalanceStaked } from '@/rpc/query'
+import {
+  getAccount,
+  getAllBalances,
+  getBalanceStaked,
+  getTxsBySender,
+} from '@/rpc/query'
 import { selectTmClient } from '@/store/connectSlice'
 import { Account, Coin } from '@cosmjs/stargate'
+import { TxSearchResponse } from '@cosmjs/tendermint-rpc'
+import { toHex } from '@cosmjs/encoding'
+import { TxBody } from 'cosmjs-types/cosmos/tx/v1beta1/tx'
+import { trimHash } from '@/utils/helper'
 
 export default function DetailAccount() {
   const router = useRouter()
@@ -39,6 +49,14 @@ export default function DetailAccount() {
   const [account, setAccount] = useState<Account | null>(null)
   const [allBalances, setAllBalances] = useState<readonly Coin[]>([])
   const [balanceStaked, setBalanceStaked] = useState<Coin | null>(null)
+  const [txSearch, setTxSearch] = useState<TxSearchResponse | null>(null)
+
+  interface Tx {
+    data: TxBody
+    height: number
+    hash: Uint8Array
+  }
+  const [txs, setTxs] = useState<Tx[]>([])
 
   useEffect(() => {
     if (tmClient && address) {
@@ -59,8 +77,30 @@ export default function DetailAccount() {
           .then(setBalanceStaked)
           .catch(showError)
       }
+
+      getTxsBySender(tmClient, address as string, 1, 30)
+        .then(setTxSearch)
+        .catch(showError)
     }
   }, [tmClient, account, allBalances, balanceStaked])
+
+  useEffect(() => {
+    if (txSearch?.txs.length && !txs.length) {
+      for (const rawTx of txSearch.txs) {
+        if (rawTx.result.data) {
+          const data = TxBody.decode(rawTx.result.data)
+          setTxs((prevTxs) => [
+            ...prevTxs,
+            {
+              data,
+              hash: rawTx.hash,
+              height: rawTx.height,
+            },
+          ])
+        }
+      }
+    }
+  }, [txSearch])
 
   const showError = (err: Error) => {
     const errMsg = err.message
@@ -81,6 +121,33 @@ export default function DetailAccount() {
       duration: 5000,
       isClosable: true,
     })
+  }
+
+  const renderMessages = (messages: any) => {
+    if (messages.length == 1) {
+      return (
+        <HStack>
+          <Tag colorScheme="cyan">{getTypeMsg(messages[0].typeUrl)}</Tag>
+        </HStack>
+      )
+    } else if (messages.length > 1) {
+      return (
+        <HStack>
+          <Tag colorScheme="cyan">{getTypeMsg(messages[0].typeUrl)}</Tag>
+          <Text textColor="cyan.800">+{messages.length - 1}</Text>
+        </HStack>
+      )
+    }
+
+    return ''
+  }
+
+  const getTypeMsg = (typeUrl: string): string => {
+    const arr = typeUrl.split('.')
+    if (arr.length) {
+      return arr[arr.length - 1].replace('Msg', '')
+    }
+    return ''
   }
 
   return (
@@ -223,6 +290,50 @@ export default function DetailAccount() {
               </TabPanel>
             </TabPanels>
           </Tabs>
+        </Box>
+
+        <Box
+          mt={8}
+          bg={useColorModeValue('white', 'gray.900')}
+          shadow={'base'}
+          borderRadius={4}
+          p={4}
+        >
+          <Heading size={'md'} mb={4}>
+            Transactions
+          </Heading>
+          <Divider borderColor={'gray'} mb={4} />
+          <TableContainer>
+            <Table variant="simple">
+              <Thead>
+                <Tr>
+                  <Th>Tx Hash</Th>
+                  <Th>Messages</Th>
+                  <Th>Memo</Th>
+                  <Th>Height</Th>
+                </Tr>
+              </Thead>
+              <Tbody>
+                {txs.map((tx) => (
+                  <Tr key={toHex(tx.hash)}>
+                    <Td>
+                      <Link
+                        as={NextLink}
+                        href={'/txs/' + toHex(tx.hash).toUpperCase()}
+                        style={{ textDecoration: 'none' }}
+                        _focus={{ boxShadow: 'none' }}
+                      >
+                        <Text color={'cyan.400'}>{trimHash(tx.hash)}</Text>
+                      </Link>
+                    </Td>
+                    <Td>{renderMessages(tx.data.messages)}</Td>
+                    <Td>{tx.data.memo}</Td>
+                    <Td>{tx.height}</Td>
+                  </Tr>
+                ))}
+              </Tbody>
+            </Table>
+          </TableContainer>
         </Box>
       </main>
     </>
