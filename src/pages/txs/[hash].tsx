@@ -30,7 +30,7 @@ import { selectTmClient } from '@/store/connectSlice'
 import { getTx, getBlock } from '@/rpc/query'
 import { IndexedTx, Block, Coin } from '@cosmjs/stargate'
 import { Tx } from 'cosmjs-types/cosmos/tx/v1beta1/tx'
-import { timeFromNow, displayDate } from '@/utils/helper'
+import { timeFromNow, displayDate, isBech32Address } from '@/utils/helper'
 import { decodeMsg, DecodeMsg } from '@/encoding'
 
 export default function DetailBlock() {
@@ -85,13 +85,28 @@ export default function DetailBlock() {
     return ''
   }
 
-  const showMsgData = (msgData: any): string => {
-    if (Array.isArray(msgData)) {
-      return JSON.stringify(msgData)
-    }
+  const showMsgData = (msgData: any) => {
+    if (msgData) {
+      if (Array.isArray(msgData)) {
+        return JSON.stringify(msgData)
+      }
 
-    if (!Array.isArray(msgData) && msgData.length) {
-      return String(msgData)
+      if (!Array.isArray(msgData) && msgData.length) {
+        if (isBech32Address(msgData)) {
+          return (
+            <Link
+              as={NextLink}
+              href={'/accounts/' + msgData}
+              style={{ textDecoration: 'none' }}
+              _focus={{ boxShadow: 'none' }}
+            >
+              <Text color={'cyan.400'}>{msgData}</Text>
+            </Link>
+          )
+        } else {
+          return String(msgData)
+        }
+      }
     }
 
     return ''
@@ -106,7 +121,6 @@ export default function DetailBlock() {
   }
 
   const showError = (err: Error) => {
-    console.log(err)
     const errMsg = err.message
     let error = null
     try {

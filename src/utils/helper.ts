@@ -1,6 +1,7 @@
 import dayjs from 'dayjs'
 import relativeTime from 'dayjs/plugin/relativeTime'
 import { toHex } from '@cosmjs/encoding'
+import { bech32 } from 'bech32'
 
 export const timeFromNow = (date: string): string => {
   dayjs.extend(relativeTime)
@@ -20,4 +21,22 @@ export const displayDate = (date: string): string => {
 
 export const replaceHTTPtoWebsocket = (url: string): string => {
   return url.replace('http', 'ws')
+}
+
+export const isBech32Address = (address: string): Boolean => {
+  try {
+    const decoded = bech32.decode(address)
+    if (decoded.prefix.includes('valoper')) {
+      return false
+    }
+
+    if (decoded.words.length < 1) {
+      return false
+    }
+
+    const encoded = bech32.encode(decoded.prefix, decoded.words)
+    return encoded === address
+  } catch (e) {
+    return false
+  }
 }
