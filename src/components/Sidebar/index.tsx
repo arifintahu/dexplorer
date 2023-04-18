@@ -37,9 +37,9 @@ interface LinkItemProps {
 const LinkItems: Array<LinkItemProps> = [
   { name: 'Home', icon: FiHome, route: '/' },
   { name: 'Blocks', icon: FiBox, route: '/blocks' },
-  { name: 'Staking', icon: FiCompass, route: '/staking' },
-  { name: 'Governance', icon: FiStar, route: '/' },
-  { name: 'Parameters', icon: FiSliders, route: '/' },
+  { name: 'Validators', icon: FiCompass, route: '/validators' },
+  { name: 'Proposals', icon: FiStar, route: '/proposals' },
+  { name: 'Parameters', icon: FiSliders, route: '/parameters' },
 ]
 
 export default function Sidebar({ children }: { children: ReactNode }) {

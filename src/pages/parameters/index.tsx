@@ -2,12 +2,12 @@ import Head from 'next/head'
 import Image from 'next/image'
 import styles from '@/styles/Home.module.css'
 
-export default function Staking() {
+export default function Parameters() {
   return (
     <>
       <Head>
-        <title>Blocks | Dexplorer</title>
-        <meta name="description" content="Home | Dexplorer" />
+        <title>Parameters | Dexplorer</title>
+        <meta name="description" content="Parameters | Dexplorer" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
