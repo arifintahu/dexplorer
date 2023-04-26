@@ -1,37 +1,119 @@
 import Head from 'next/head'
-import Image from 'next/image'
-import styles from '@/styles/Home.module.css'
+import {
+  Box,
+  Divider,
+  HStack,
+  Heading,
+  Icon,
+  Link,
+  useColorModeValue,
+  Text,
+} from '@chakra-ui/react'
+import { useEffect, useState } from 'react'
+import { useSelector } from 'react-redux'
+import NextLink from 'next/link'
+import { FiChevronRight, FiHome } from 'react-icons/fi'
+import { selectTmClient } from '@/store/connectSlice'
+import { queryActiveValidators } from '@/rpc/abci'
+import DataTable from '@/components/Datatable'
+import { createColumnHelper } from '@tanstack/react-table'
+
+type ValidatorData = {
+  validator: string
+  status: string
+  votingPower: number
+  commission: number
+}
+
+const columnHelper = createColumnHelper<ValidatorData>()
+
+const columns = [
+  columnHelper.accessor('validator', {
+    cell: (info) => info.getValue(),
+    header: 'Validator',
+  }),
+  columnHelper.accessor('status', {
+    cell: (info) => info.getValue(),
+    header: 'Status',
+  }),
+  columnHelper.accessor('votingPower', {
+    cell: (info) => info.getValue(),
+    header: 'Voting Power',
+    meta: {
+      isNumeric: true,
+    },
+  }),
+  columnHelper.accessor('commission', {
+    cell: (info) => info.getValue(),
+    header: 'Commission',
+    meta: {
+      isNumeric: true,
+    },
+  }),
+]
 
 export default function Validators() {
+  const tmClient = useSelector(selectTmClient)
+  const [page, setPage] = useState(1)
+  const [perPage, setPerPage] = useState(30)
+  const [total, setTotal] = useState(0)
+  const [data, setData] = useState<ValidatorData[]>([])
+
+  useEffect(() => {
+    if (tmClient) {
+      queryActiveValidators(tmClient, page, perPage)
+        .then((response) => {
+          console.log(response)
+          setTotal(response.pagination?.total.low ?? 0)
+          const validatorData: ValidatorData[] = response.validators.map(
+            (val) => {
+              return {
+                validator: val.description?.moniker ?? '',
+                status: val.status === 3 ? 'Active' : '',
+                votingPower: Math.round(Number(val.tokens) / 10 ** 4) / 100,
+                commission:
+                  Number(val.commission?.commissionRates?.rate) / 10 ** 18,
+              }
+            }
+          )
+          setData(validatorData)
+        })
+        .catch(console.log)
+    }
+  }, [tmClient, page, perPage])
+
   return (
     <>
       <Head>
-        <title>Validators | Dexplorer</title>
-        <meta name="description" content="Validators | Dexplorer" />
+        <title>Blocks | Dexplorer</title>
+        <meta name="description" content="Blocks | Dexplorer" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      <main className={styles.main}>
-        <div className={styles.description}>
-          <p>Staking</p>
-          <div>
-            <a
-              href="https://vercel.com?utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              By{' '}
-              <Image
-                src="/vercel.svg"
-                alt="Vercel Logo"
-                className={styles.vercelLogo}
-                width={100}
-                height={24}
-                priority
-              />
-            </a>
-          </div>
-        </div>
+      <main>
+        <HStack h="24px">
+          <Heading size={'md'}>Validators</Heading>
+          <Divider borderColor={'gray'} size="10px" orientation="vertical" />
+          <Link
+            as={NextLink}
+            href={'/'}
+            style={{ textDecoration: 'none' }}
+            _focus={{ boxShadow: 'none' }}
+          >
+            <Icon fontSize="16" color={'cyan.400'} as={FiHome} />
+          </Link>
+          <Icon fontSize="16" as={FiChevronRight} />
+          <Text>Validators</Text>
+        </HStack>
+        <Box
+          mt={8}
+          bg={useColorModeValue('white', 'gray.900')}
+          shadow={'base'}
+          borderRadius={4}
+          p={4}
+        >
+          <DataTable columns={columns} data={data} />
+        </Box>
       </main>
     </>
   )

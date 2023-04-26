@@ -10,7 +10,6 @@ import {
   TxSearchResponse,
   ValidatorsResponse,
 } from '@cosmjs/tendermint-rpc'
-import { Tx } from 'cosmjs-types/cosmos/tx/v1beta1/tx'
 
 export async function getChainId(
   tmClient: Tendermint34Client
