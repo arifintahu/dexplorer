@@ -55,7 +55,7 @@ const columns = [
 export default function Validators() {
   const tmClient = useSelector(selectTmClient)
   const [page, setPage] = useState(1)
-  const [perPage, setPerPage] = useState(30)
+  const [perPage, setPerPage] = useState(10)
   const [total, setTotal] = useState(0)
   const [data, setData] = useState<ValidatorData[]>([])
 
@@ -63,7 +63,6 @@ export default function Validators() {
     if (tmClient) {
       queryActiveValidators(tmClient, page, perPage)
         .then((response) => {
-          console.log(response)
           setTotal(response.pagination?.total.low ?? 0)
           const validatorData: ValidatorData[] = response.validators.map(
             (val) => {
@@ -81,6 +80,14 @@ export default function Validators() {
         .catch(console.log)
     }
   }, [tmClient, page, perPage])
+
+  const onChangePagination = (value: {
+    pageIndex: number
+    pageSize: number
+  }) => {
+    setPage(value.pageIndex + 1)
+    setPerPage(value.pageSize)
+  }
 
   return (
     <>
@@ -112,7 +119,12 @@ export default function Validators() {
           borderRadius={4}
           p={4}
         >
-          <DataTable columns={columns} data={data} />
+          <DataTable
+            columns={columns}
+            data={data}
+            total={total}
+            onChangePagination={onChangePagination}
+          />
         </Box>
       </main>
     </>
