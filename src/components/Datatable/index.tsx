@@ -17,6 +17,7 @@ import {
   NumberDecrementStepper,
   Select,
   Text,
+  SkeletonText,
 } from '@chakra-ui/react'
 import {
   ArrowLeftIcon,
@@ -40,6 +41,7 @@ export type DataTableProps<Data extends object> = {
   data: Data[]
   columns: ColumnDef<Data, any>[]
   total: number
+  isLoading?: boolean
   onChangePagination: Function
 }
 
@@ -47,6 +49,7 @@ export default function DataTable<Data extends object>({
   data,
   columns,
   total,
+  isLoading,
   onChangePagination,
 }: DataTableProps<Data>) {
   const [sorting, setSorting] = useState<SortingState>([])
@@ -122,21 +125,39 @@ export default function DataTable<Data extends object>({
             </Tr>
           ))}
         </Thead>
-        <Tbody>
-          {table.getRowModel().rows.map((row) => (
-            <Tr key={row.id}>
-              {row.getVisibleCells().map((cell) => {
-                // see https://tanstack.com/table/v8/docs/api/core/column-def#meta to type this correctly
-                const meta: any = cell.column.columnDef.meta
-                return (
-                  <Td key={cell.id} isNumeric={meta?.isNumeric}>
-                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                  </Td>
-                )
-              })}
-            </Tr>
-          ))}
-        </Tbody>
+        {isLoading ? (
+          <Tbody>
+            {table.getRowModel().rows.map((row) => (
+              <Tr key={row.id}>
+                {row.getVisibleCells().map((cell) => {
+                  return (
+                    <Td key={cell.id}>
+                      <SkeletonText noOfLines={1}></SkeletonText>
+                    </Td>
+                  )
+                })}
+              </Tr>
+            ))}
+          </Tbody>
+        ) : (
+          <Tbody>
+            {table.getRowModel().rows.map((row) => (
+              <Tr key={row.id}>
+                {row.getVisibleCells().map((cell) => {
+                  const meta: any = cell.column.columnDef.meta
+                  return (
+                    <Td key={cell.id} isNumeric={meta?.isNumeric}>
+                      {flexRender(
+                        cell.column.columnDef.cell,
+                        cell.getContext()
+                      )}
+                    </Td>
+                  )
+                })}
+              </Tr>
+            ))}
+          </Tbody>
+        )}
       </Table>
       <Flex justifyContent="space-between" m={4} alignItems="center">
         <Flex>

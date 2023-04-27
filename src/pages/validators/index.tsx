@@ -8,6 +8,7 @@ import {
   Link,
   useColorModeValue,
   Text,
+  useToast,
 } from '@chakra-ui/react'
 import { useEffect, useState } from 'react'
 import { useSelector } from 'react-redux'
@@ -58,9 +59,12 @@ export default function Validators() {
   const [perPage, setPerPage] = useState(10)
   const [total, setTotal] = useState(0)
   const [data, setData] = useState<ValidatorData[]>([])
+  const [isLoading, setIsLoading] = useState(true)
+  const toast = useToast()
 
   useEffect(() => {
     if (tmClient) {
+      setIsLoading(true)
       queryActiveValidators(tmClient, page, perPage)
         .then((response) => {
           setTotal(response.pagination?.total.low ?? 0)
@@ -76,8 +80,17 @@ export default function Validators() {
             }
           )
           setData(validatorData)
+          setIsLoading(false)
         })
-        .catch(console.log)
+        .catch(() => {
+          toast({
+            title: 'Failed to fetch datatable',
+            description: '',
+            status: 'error',
+            duration: 5000,
+            isClosable: true,
+          })
+        })
     }
   }, [tmClient, page, perPage])
 
@@ -85,7 +98,7 @@ export default function Validators() {
     pageIndex: number
     pageSize: number
   }) => {
-    setPage(value.pageIndex + 1)
+    setPage(value.pageIndex)
     setPerPage(value.pageSize)
   }
 
@@ -123,6 +136,7 @@ export default function Validators() {
             columns={columns}
             data={data}
             total={total}
+            isLoading={isLoading}
             onChangePagination={onChangePagination}
           />
         </Box>
