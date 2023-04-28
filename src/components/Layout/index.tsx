@@ -36,11 +36,8 @@ import {
 } from '@/store/streamSlice'
 import {
   NewBlockEvent,
-  Tendermint34Client,
-  WebsocketClient,
 } from '@cosmjs/tendermint-rpc'
 import { TxEvent } from '@cosmjs/tendermint-rpc'
-import { replaceHTTPtoWebsocket } from '@/utils/helper'
 import { LS_RPC_ADDRESS } from '@/utils/constant'
 import { validateConnection, connectWebsocketClient } from '@/rpc/client'
 
