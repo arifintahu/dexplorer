@@ -40,3 +40,20 @@ export const isBech32Address = (address: string): Boolean => {
     return false
   }
 }
+
+export const convertVotingPower = (tokens: string): string => {
+  return Math.round(Number(tokens) / 10 ** 6).toLocaleString(undefined)
+}
+
+export const convertCommissionToPercent = (
+  rate: string | undefined
+): string => {
+  if (!rate) {
+    return ``
+  }
+  const commission = (Number(rate) / 10 ** 16).toLocaleString(undefined, {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  })
+  return `${commission}%`
+}

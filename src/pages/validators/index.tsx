@@ -18,12 +18,13 @@ import { selectTmClient } from '@/store/connectSlice'
 import { queryActiveValidators } from '@/rpc/abci'
 import DataTable from '@/components/Datatable'
 import { createColumnHelper } from '@tanstack/react-table'
+import { convertCommissionToPercent, convertVotingPower } from '@/utils/helper'
 
 type ValidatorData = {
   validator: string
   status: string
-  votingPower: number
-  commission: number
+  votingPower: string
+  commission: string
 }
 
 const columnHelper = createColumnHelper<ValidatorData>()
@@ -55,7 +56,7 @@ const columns = [
 
 export default function Validators() {
   const tmClient = useSelector(selectTmClient)
-  const [page, setPage] = useState(1)
+  const [page, setPage] = useState(0)
   const [perPage, setPerPage] = useState(10)
   const [total, setTotal] = useState(0)
   const [data, setData] = useState<ValidatorData[]>([])
@@ -73,9 +74,10 @@ export default function Validators() {
               return {
                 validator: val.description?.moniker ?? '',
                 status: val.status === 3 ? 'Active' : '',
-                votingPower: Math.round(Number(val.tokens) / 10 ** 4) / 100,
-                commission:
-                  Number(val.commission?.commissionRates?.rate) / 10 ** 18,
+                votingPower: convertVotingPower(val.tokens),
+                commission: convertCommissionToPercent(
+                  val.commission?.commissionRates?.rate
+                ),
               }
             }
           )
