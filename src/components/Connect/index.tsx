@@ -18,8 +18,8 @@ import {
   setRPCAddress,
 } from '@/store/connectSlice'
 import Head from 'next/head'
-import { Tendermint34Client, WebsocketClient } from '@cosmjs/tendermint-rpc'
-import { replaceHTTPtoWebsocket } from '@/utils/helper'
+import { LS_RPC_ADDRESS } from '@/utils/constant'
+import { validateConnection, connectWebsocketClient } from '@/rpc/client'
 
 export default function Connect() {
   const [address, setAddress] = useState('')
@@ -30,33 +30,43 @@ export default function Connect() {
   const dispatch = useDispatch()
 
   const connectClient = async (e: FormEvent) => {
-    e.preventDefault()
-    setError(false)
-    setState('submitting')
+    try {
+      e.preventDefault()
+      setError(false)
+      setState('submitting')
 
-    if (!address) {
+      if (!address) {
+        setError(true)
+        setState('initial')
+        return
+      }
+
+      const isValid = await validateConnection(address)
+      if (!isValid) {
+        setError(true)
+        setState('initial')
+        return
+      }
+
+      const tmClient = await connectWebsocketClient(address)
+
+      if (!tmClient) {
+        setError(true)
+        setState('initial')
+        return
+      }
+
+      dispatch(setConnectState(true))
+      dispatch(setTmClient(tmClient))
+      dispatch(setRPCAddress(address))
+      setState('success')
+
+      window.localStorage.setItem(LS_RPC_ADDRESS, address)
+    } catch (err) {
       setError(true)
       setState('initial')
       return
     }
-
-    const wsClient = new WebsocketClient(replaceHTTPtoWebsocket(address))
-    const tmClient = await Tendermint34Client.create(wsClient).catch((err) => {
-      console.error(err)
-    })
-
-    if (!tmClient) {
-      setError(true)
-      setState('initial')
-      return
-    }
-
-    dispatch(setConnectState(true))
-    dispatch(setTmClient(tmClient))
-    dispatch(setRPCAddress(address))
-    setState('success')
-
-    window.localStorage.setItem('RPC_ADDRESS', address)
   }
 
   return (
@@ -82,12 +92,16 @@ export default function Connect() {
         >
           <Heading
             as={'h2'}
-            fontSize={{ base: 'xl', sm: '2xl' }}
+            fontSize={{ base: '2xl', sm: '3xl' }}
             textAlign={'center'}
-            mb={5}
+            fontFamily="monospace"
+            fontWeight="bold"
           >
-            Connect to RPC Address
+            Dexplorer
           </Heading>
+          <Text as={'h2'} fontSize="lg" textAlign={'center'} mb={5}>
+            Disposable Explorer for Cosmos SDK Chains
+          </Text>
           <Stack
             direction={{ base: 'column', md: 'row' }}
             as={'form'}
@@ -132,8 +146,8 @@ export default function Connect() {
             color={error ? 'red.500' : 'gray.500'}
           >
             {error
-              ? 'Oh no an error occured! 😢 Please try again later.'
-              : 'For any Cosmos SDK chain! ✌️'}
+              ? 'Oh no cannot connect to client! 😢 Please try another RPC address.'
+              : ''}
           </Text>
         </Container>
       </Flex>

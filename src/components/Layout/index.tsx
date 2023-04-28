@@ -41,6 +41,8 @@ import {
 } from '@cosmjs/tendermint-rpc'
 import { TxEvent } from '@cosmjs/tendermint-rpc'
 import { replaceHTTPtoWebsocket } from '@/utils/helper'
+import { LS_RPC_ADDRESS } from '@/utils/constant'
+import { validateConnection, connectWebsocketClient } from '@/rpc/client'
 
 export default function Layout({ children }: { children: ReactNode }) {
   const router = useRouter()
@@ -74,7 +76,7 @@ export default function Layout({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     if (isLoading) {
-      const address = window.localStorage.getItem('RPC_ADDRESS')
+      const address = window.localStorage.getItem(LS_RPC_ADDRESS)
       if (!address) {
         setIsLoading(false)
         return
@@ -126,21 +128,28 @@ export default function Layout({ children }: { children: ReactNode }) {
   }
 
   const connect = async (address: string) => {
-    const wsClient = new WebsocketClient(replaceHTTPtoWebsocket(address))
-    const tmClient = await Tendermint34Client.create(wsClient).catch((err) => {
-      console.error(err)
-    })
+    try {
+      const isValid = await validateConnection(address)
+      if (!isValid) {
+        setIsLoading(false)
+        return
+      }
 
-    if (!tmClient) {
+      const tmClient = await connectWebsocketClient(address)
+      if (!tmClient) {
+        setIsLoading(false)
+        return
+      }
+
+      dispatch(setConnectState(true))
+      dispatch(setTmClient(tmClient))
+      dispatch(setRPCAddress(address))
+
+      setIsLoading(false)
+    } catch (error) {
       setIsLoading(false)
       return
     }
-
-    dispatch(setConnectState(true))
-    dispatch(setTmClient(tmClient))
-    dispatch(setRPCAddress(address))
-
-    setIsLoading(false)
   }
 
   return (

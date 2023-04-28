@@ -28,6 +28,7 @@ import { IconType } from 'react-icons'
 import NextLink from 'next/link'
 import { selectSubsNewBlock, selectSubsTxEvent } from '@/store/streamSlice'
 import { useSelector } from 'react-redux'
+import { LS_RPC_ADDRESS } from '@/utils/constant'
 
 interface LinkItemProps {
   name: string
@@ -83,7 +84,7 @@ const SidebarContent = ({ onClose, ...rest }: SidebarProps) => {
   const handleDisconnect = () => {
     subsNewBlock?.unsubscribe()
     subsTxEvent?.unsubscribe()
-    window.localStorage.removeItem('RPC_ADDRESS')
+    window.localStorage.removeItem(LS_RPC_ADDRESS)
     window.location.replace('/')
   }
 
