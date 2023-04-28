@@ -188,7 +188,7 @@ export default function Connect() {
             return (
               <Flex
                 maxW={'lg'}
-                bg={useColorModeValue('white', 'whiteAlpha.100')}
+                bg={'white'}
                 boxShadow={'lg'}
                 rounded={'sm'}
                 px={6}
