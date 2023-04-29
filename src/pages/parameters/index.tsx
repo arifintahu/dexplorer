@@ -4,6 +4,7 @@ import NextLink from 'next/link'
 import { FiChevronRight, FiHome } from 'react-icons/fi'
 import MintParameters from '@/components/Parameters/MintParameters'
 import StakingParameters from '@/components/Parameters/StakingParameters'
+import DistributionParameters from '@/components/Parameters/DistributionParameters'
 
 export default function Parameters() {
   return (
@@ -31,6 +32,7 @@ export default function Parameters() {
         </HStack>
         <MintParameters />
         <StakingParameters />
+        <DistributionParameters />
       </main>
     </>
   )
