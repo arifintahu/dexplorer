@@ -1,6 +1,8 @@
+import { Divider, HStack, Heading, Icon, Link, Text } from '@chakra-ui/react'
 import Head from 'next/head'
-import Image from 'next/image'
-import styles from '@/styles/Home.module.css'
+import NextLink from 'next/link'
+import { FiChevronRight, FiHome } from 'react-icons/fi'
+import MintParameters from '@/components/Parameters/MintParameters'
 
 export default function Parameters() {
   return (
@@ -11,27 +13,22 @@ export default function Parameters() {
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      <main className={styles.main}>
-        <div className={styles.description}>
-          <p>Staking</p>
-          <div>
-            <a
-              href="https://vercel.com?utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              By{' '}
-              <Image
-                src="/vercel.svg"
-                alt="Vercel Logo"
-                className={styles.vercelLogo}
-                width={100}
-                height={24}
-                priority
-              />
-            </a>
-          </div>
-        </div>
+      <main>
+        <HStack h="24px">
+          <Heading size={'md'}>Parameters</Heading>
+          <Divider borderColor={'gray'} size="10px" orientation="vertical" />
+          <Link
+            as={NextLink}
+            href={'/'}
+            style={{ textDecoration: 'none' }}
+            _focus={{ boxShadow: 'none' }}
+          >
+            <Icon fontSize="16" color={'cyan.400'} as={FiHome} />
+          </Link>
+          <Icon fontSize="16" as={FiChevronRight} />
+          <Text>Parameters</Text>
+        </HStack>
+        <MintParameters />
       </main>
     </>
   )

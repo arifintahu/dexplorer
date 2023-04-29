@@ -45,9 +45,7 @@ export const convertVotingPower = (tokens: string): string => {
   return Math.round(Number(tokens) / 10 ** 6).toLocaleString(undefined)
 }
 
-export const convertCommissionToPercent = (
-  rate: string | undefined
-): string => {
+export const convertRateToPercent = (rate: string | undefined): string => {
   if (!rate) {
     return ``
   }
