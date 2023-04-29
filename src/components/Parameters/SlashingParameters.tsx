@@ -12,23 +12,25 @@ import {
 import { useState, useEffect } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
 import { selectTmClient } from '@/store/connectSlice'
-import { selectMintParams, setMintParams } from '@/store/paramsSlice'
-import { queryMintParams } from '@/rpc/abci'
-import { convertRateToPercent } from '@/utils/helper'
+import { selectSlashingParams, setSlashingParams } from '@/store/paramsSlice'
+import { querySlashingParams } from '@/rpc/abci'
+import { displayDurationSeconds, convertRateToPercent } from '@/utils/helper'
+import { fromUtf8 } from '@cosmjs/encoding'
 
-export default function MintParameters() {
+export default function SlashingParameters() {
   const [isHidden, setIsHidden] = useState(false)
   const [isLoaded, setIsLoaded] = useState(false)
   const dispatch = useDispatch()
   const tmClient = useSelector(selectTmClient)
-  const params = useSelector(selectMintParams)
+  const params = useSelector(selectSlashingParams)
 
   useEffect(() => {
     if (tmClient && !params && !isLoaded) {
-      queryMintParams(tmClient)
+      querySlashingParams(tmClient)
         .then((response) => {
+          console.log(response)
           if (response.params) {
-            dispatch(setMintParams(response.params))
+            dispatch(setSlashingParams(response.params))
           }
           setIsLoaded(true)
         })
@@ -54,7 +56,7 @@ export default function MintParameters() {
     >
       <Flex mb={8} alignItems={'center'} gap={2}>
         <Tooltip
-          label="These are values of parameters for minting a block."
+          label="These are values of parameters for slashing decided by the foundation."
           fontSize="sm"
         >
           <InfoOutlineIcon
@@ -64,67 +66,65 @@ export default function MintParameters() {
           />
         </Tooltip>
         <Heading size={'md'} fontWeight={'medium'}>
-          Minting Parameters
+          Slashing Parameters
         </Heading>
       </Flex>
       <SimpleGrid minChildWidth="200px" spacing="40px" pl={4}>
         <Skeleton isLoaded={isLoaded}>
           <Box>
             <Heading size="xs" fontWeight={'normal'}>
-              Blocks per Year
+              Signed Blocks Window
             </Heading>
             <Text pt="2" fontSize="lg" fontWeight={'medium'}>
-              {params?.blocksPerYear.low.toLocaleString() ?? ''}
+              {params?.signedBlocksWindow.low.toLocaleString() ?? ''}
             </Text>
           </Box>
         </Skeleton>
         <Skeleton isLoaded={isLoaded}>
           <Box>
             <Heading size="xs" fontWeight={'normal'}>
-              Goal Bonded
+              Min Signed Per Window
             </Heading>
             <Text pt="2" fontSize="lg" fontWeight={'medium'}>
-              {convertRateToPercent(params?.goalBonded)}
+              {convertRateToPercent(
+                fromUtf8(params?.minSignedPerWindow ?? new Uint8Array())
+              )}
             </Text>
           </Box>
         </Skeleton>
         <Skeleton isLoaded={isLoaded}>
           <Box>
             <Heading size="xs" fontWeight={'normal'}>
-              Inflation Max
+              Downtime Jail Duration
             </Heading>
             <Text pt="2" fontSize="lg" fontWeight={'medium'}>
-              {convertRateToPercent(params?.inflationMax)}
+              {displayDurationSeconds(
+                params?.downtimeJailDuration?.seconds.low
+              )}
             </Text>
           </Box>
         </Skeleton>
         <Skeleton isLoaded={isLoaded}>
           <Box>
             <Heading size="xs" fontWeight={'normal'}>
-              Inflation Min
+              Slash Fraction Doublesign
             </Heading>
             <Text pt="2" fontSize="lg" fontWeight={'medium'}>
-              {convertRateToPercent(params?.inflationMin)}
+              {convertRateToPercent(
+                fromUtf8(params?.slashFractionDoubleSign ?? new Uint8Array())
+              )}
             </Text>
           </Box>
         </Skeleton>
         <Skeleton isLoaded={isLoaded}>
           <Box>
             <Heading size="xs" fontWeight={'normal'}>
-              Inflation Rate Change
+              Slash Fraction Downtime
             </Heading>
             <Text pt="2" fontSize="lg" fontWeight={'medium'}>
-              {convertRateToPercent(params?.inflationRateChange)}
-            </Text>
-          </Box>
-        </Skeleton>
-        <Skeleton isLoaded={isLoaded}>
-          <Box>
-            <Heading size="xs" fontWeight={'normal'}>
-              Mint Denom
-            </Heading>
-            <Text pt="2" fontSize="lg" fontWeight={'medium'}>
-              {params?.mintDenom ?? ''}
+              {convertRateToPercent(
+                fromUtf8(params?.slashFractionDowntime ?? new Uint8Array())
+              )}
             </Text>
           </Box>
         </Skeleton>

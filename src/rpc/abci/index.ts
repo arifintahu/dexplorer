@@ -102,7 +102,7 @@ export async function querySlashingParams(
   const queryClient = new QueryClient(tmClient)
   const req = QuerySlashingParamsRequest.encode({}).finish()
   const { value } = await queryClient.queryAbci(
-    '/cosmos.mint.v1beta1.Query/Params',
+    '/cosmos.slashing.v1beta1.Query/Params',
     req
   )
   return QuerySlashingParamsResponse.decode(value)
