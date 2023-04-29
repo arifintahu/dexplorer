@@ -1,5 +1,6 @@
 import dayjs from 'dayjs'
 import relativeTime from 'dayjs/plugin/relativeTime'
+import duration from 'dayjs/plugin/duration'
 import { toHex } from '@cosmjs/encoding'
 import { bech32 } from 'bech32'
 
@@ -17,6 +18,15 @@ export const trimHash = (txHash: Uint8Array): string => {
 
 export const displayDate = (date: string): string => {
   return dayjs(date).format('YYYY-MM-DD HH:mm:ss')
+}
+
+export const displayDurationSeconds = (seconds: number | undefined): string => {
+  if (!seconds) {
+    return ``
+  }
+  dayjs.extend(duration)
+  dayjs.extend(relativeTime)
+  return dayjs.duration({ seconds: seconds }).humanize()
 }
 
 export const replaceHTTPtoWebsocket = (url: string): string => {

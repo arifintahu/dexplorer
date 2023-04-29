@@ -12,23 +12,23 @@ import {
 import { useState, useEffect } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
 import { selectTmClient } from '@/store/connectSlice'
-import { selectMintParams, setMintParams } from '@/store/paramsSlice'
-import { queryMintParams } from '@/rpc/abci'
-import { convertRateToPercent } from '@/utils/helper'
+import { selectStakingParams, setStakingParams } from '@/store/paramsSlice'
+import { queryStakingParams } from '@/rpc/abci'
+import { displayDurationSeconds } from '@/utils/helper'
 
-export default function MintParameters() {
+export default function StakingParameters() {
   const [isHidden, setIsHidden] = useState(false)
   const [isLoaded, setIsLoaded] = useState(false)
   const dispatch = useDispatch()
   const tmClient = useSelector(selectTmClient)
-  const params = useSelector(selectMintParams)
+  const params = useSelector(selectStakingParams)
 
   useEffect(() => {
     if (tmClient && !params && !isLoaded) {
-      queryMintParams(tmClient)
+      queryStakingParams(tmClient)
         .then((response) => {
           if (response.params) {
-            dispatch(setMintParams(response.params))
+            dispatch(setStakingParams(response.params))
           }
           setIsLoaded(true)
         })
@@ -54,7 +54,7 @@ export default function MintParameters() {
     >
       <Flex mb={8} alignItems={'center'} gap={2}>
         <Tooltip
-          label="These are values of parameters for minting a block."
+          label="These are values of parameters for staking the token including details of token policy."
           fontSize="sm"
         >
           <InfoOutlineIcon
@@ -64,67 +64,57 @@ export default function MintParameters() {
           />
         </Tooltip>
         <Heading size={'md'} fontWeight={'medium'}>
-          Minting Parameters
+          Staking Parameters
         </Heading>
       </Flex>
       <SimpleGrid minChildWidth="200px" spacing="40px" pl={4}>
         <Skeleton isLoaded={isLoaded}>
           <Box>
             <Heading size="xs" fontWeight={'normal'}>
-              Blocks per Year
+              Unbonding Time
             </Heading>
             <Text pt="2" fontSize="lg" fontWeight={'medium'}>
-              {params?.blocksPerYear.low.toLocaleString() ?? ''}
+              {displayDurationSeconds(params?.unbondingTime?.seconds?.low)}
             </Text>
           </Box>
         </Skeleton>
         <Skeleton isLoaded={isLoaded}>
           <Box>
             <Heading size="xs" fontWeight={'normal'}>
-              Goal Bonded
+              Max Validators
             </Heading>
             <Text pt="2" fontSize="lg" fontWeight={'medium'}>
-              {convertRateToPercent(params?.goalBonded) ?? ''}
+              {params?.maxValidators ?? ''}
             </Text>
           </Box>
         </Skeleton>
         <Skeleton isLoaded={isLoaded}>
           <Box>
             <Heading size="xs" fontWeight={'normal'}>
-              Inflation Max
+              Max Entries
             </Heading>
             <Text pt="2" fontSize="lg" fontWeight={'medium'}>
-              {convertRateToPercent(params?.inflationMax) ?? ''}
+              {params?.maxEntries ?? ''}
             </Text>
           </Box>
         </Skeleton>
         <Skeleton isLoaded={isLoaded}>
           <Box>
             <Heading size="xs" fontWeight={'normal'}>
-              Inflation Min
+              Historical Entries
             </Heading>
             <Text pt="2" fontSize="lg" fontWeight={'medium'}>
-              {convertRateToPercent(params?.inflationMin) ?? ''}
+              {params?.historicalEntries.toLocaleString() ?? ''}
             </Text>
           </Box>
         </Skeleton>
         <Skeleton isLoaded={isLoaded}>
           <Box>
             <Heading size="xs" fontWeight={'normal'}>
-              Inflation Rate Change
+              Bond Denom
             </Heading>
             <Text pt="2" fontSize="lg" fontWeight={'medium'}>
-              {convertRateToPercent(params?.inflationRateChange) ?? ''}
-            </Text>
-          </Box>
-        </Skeleton>
-        <Skeleton isLoaded={isLoaded}>
-          <Box>
-            <Heading size="xs" fontWeight={'normal'}>
-              Mint Denom
-            </Heading>
-            <Text pt="2" fontSize="lg" fontWeight={'medium'}>
-              {params?.mintDenom ?? ''}
+              {params?.bondDenom ?? ''}
             </Text>
           </Box>
         </Skeleton>

@@ -3,6 +3,7 @@ import Head from 'next/head'
 import NextLink from 'next/link'
 import { FiChevronRight, FiHome } from 'react-icons/fi'
 import MintParameters from '@/components/Parameters/MintParameters'
+import StakingParameters from '@/components/Parameters/StakingParameters'
 
 export default function Parameters() {
   return (
@@ -29,6 +30,7 @@ export default function Parameters() {
           <Text>Parameters</Text>
         </HStack>
         <MintParameters />
+        <StakingParameters />
       </main>
     </>
   )
