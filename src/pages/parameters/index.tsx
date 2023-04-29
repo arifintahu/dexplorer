@@ -6,6 +6,7 @@ import MintParameters from '@/components/Parameters/MintParameters'
 import StakingParameters from '@/components/Parameters/StakingParameters'
 import DistributionParameters from '@/components/Parameters/DistributionParameters'
 import SlashingParameters from '@/components/Parameters/SlashingParameters'
+import GovParameters from '@/components/Parameters/GovParameters'
 
 export default function Parameters() {
   return (
@@ -33,6 +34,7 @@ export default function Parameters() {
         </HStack>
         <MintParameters />
         <StakingParameters />
+        <GovParameters />
         <DistributionParameters />
         <SlashingParameters />
       </main>

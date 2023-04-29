@@ -5,6 +5,11 @@ import { Params as StakingParams } from 'cosmjs-types/cosmos/staking/v1beta1/sta
 import { Params as MintParams } from 'cosmjs-types/cosmos/mint/v1beta1/mint'
 import { Params as DistributionParams } from 'cosmjs-types/cosmos/distribution/v1beta1/distribution'
 import { Params as SlashingParams } from 'cosmjs-types/cosmos/slashing/v1beta1/slashing'
+import {
+  VotingParams,
+  DepositParams,
+  TallyParams,
+} from 'cosmjs-types/cosmos/gov/v1beta1/gov'
 
 // Type for our state
 export interface ParamsState {
@@ -12,6 +17,9 @@ export interface ParamsState {
   mintParams: MintParams | null
   distributionParams: DistributionParams | null
   slashingParams: SlashingParams | null
+  govVotingParams: VotingParams | null
+  govDepositParams: DepositParams | null
+  govTallyParams: TallyParams | null
 }
 
 // Initial state
@@ -20,6 +28,9 @@ const initialState: ParamsState = {
   mintParams: null,
   distributionParams: null,
   slashingParams: null,
+  govVotingParams: null,
+  govDepositParams: null,
+  govTallyParams: null,
 }
 
 // Actual Slice
@@ -39,6 +50,15 @@ export const paramsSlice = createSlice({
     setSlashingParams(state, action) {
       state.slashingParams = action.payload
     },
+    setGovVotingParams(state, action) {
+      state.govVotingParams = action.payload
+    },
+    setGovDepositParams(state, action) {
+      state.govDepositParams = action.payload
+    },
+    setGovTallyParams(state, action) {
+      state.govTallyParams = action.payload
+    },
   },
 
   // Special reducer for hydrating the state. Special case for next-redux-wrapper
@@ -57,6 +77,9 @@ export const {
   setMintParams,
   setDistributionParams,
   setSlashingParams,
+  setGovVotingParams,
+  setGovDepositParams,
+  setGovTallyParams,
 } = paramsSlice.actions
 
 export const selectStakingParams = (state: AppState) =>
@@ -66,5 +89,11 @@ export const selectDistributionParams = (state: AppState) =>
   state.params.distributionParams
 export const selectSlashingParams = (state: AppState) =>
   state.params.slashingParams
+export const selectGovVotingParams = (state: AppState) =>
+  state.params.govVotingParams
+export const selectGovDepositParams = (state: AppState) =>
+  state.params.govDepositParams
+export const selectGovTallyParams = (state: AppState) =>
+  state.params.govTallyParams
 
 export default paramsSlice.reducer

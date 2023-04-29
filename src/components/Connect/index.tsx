@@ -182,7 +182,7 @@ export default function Connect() {
             fontFamily="monospace"
             mb={6}
           >
-            Try out RPCs of popular chains
+            Try out these RPCs
           </Heading>
           {chainList.map((chain) => {
             return (

@@ -3,6 +3,7 @@ import relativeTime from 'dayjs/plugin/relativeTime'
 import duration from 'dayjs/plugin/duration'
 import { toHex } from '@cosmjs/encoding'
 import { bech32 } from 'bech32'
+import { Coin } from 'cosmjs-types/cosmos/base/v1beta1/coin'
 
 export const timeFromNow = (date: string): string => {
   dayjs.extend(relativeTime)
@@ -64,4 +65,13 @@ export const convertRateToPercent = (rate: string | undefined): string => {
     maximumFractionDigits: 2,
   })
   return `${commission}%`
+}
+
+export const displayCoin = (deposit: Coin) => {
+  if (deposit.denom.startsWith('u')) {
+    const amount = Math.round(Number(deposit.amount) / 10 ** 6)
+    const symbol = deposit.denom.slice(1).toUpperCase()
+    return `${amount.toLocaleString()} ${symbol}`
+  }
+  return `${Number(deposit.amount).toLocaleString()} ${deposit.denom}`
 }
