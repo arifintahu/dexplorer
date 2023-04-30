@@ -14,6 +14,7 @@ import {
   BoxProps,
   FlexProps,
   Button,
+  Heading,
 } from '@chakra-ui/react'
 import {
   FiHome,
@@ -23,6 +24,8 @@ import {
   FiSliders,
   FiMenu,
   FiLogOut,
+  FiGithub,
+  FiAlertCircle,
 } from 'react-icons/fi'
 import { IconType } from 'react-icons'
 import NextLink from 'next/link'
@@ -34,6 +37,7 @@ interface LinkItemProps {
   name: string
   icon: IconType
   route: string
+  isBlank?: boolean
 }
 const LinkItems: Array<LinkItemProps> = [
   { name: 'Home', icon: FiHome, route: '/' },
@@ -41,6 +45,20 @@ const LinkItems: Array<LinkItemProps> = [
   { name: 'Validators', icon: FiCompass, route: '/validators' },
   { name: 'Proposals', icon: FiStar, route: '/proposals' },
   { name: 'Parameters', icon: FiSliders, route: '/parameters' },
+]
+const RefLinkItems: Array<LinkItemProps> = [
+  {
+    name: 'Github',
+    icon: FiGithub,
+    route: 'https://github.com/arifintahu/dexplorer',
+    isBlank: true,
+  },
+  {
+    name: 'Report Issues',
+    icon: FiAlertCircle,
+    route: 'https://github.com/arifintahu/dexplorer/issues',
+    isBlank: true,
+  },
 ]
 
 export default function Sidebar({ children }: { children: ReactNode }) {
@@ -119,6 +137,27 @@ const SidebarContent = ({ onClose, ...rest }: SidebarProps) => {
               {link.name}
             </NavItem>
           ))}
+          <Heading
+            mt="6"
+            p="4"
+            mx="4"
+            size={'xs'}
+            textTransform="uppercase"
+            textColor="gray.500"
+            fontWeight="medium"
+          >
+            Links
+          </Heading>
+          {RefLinkItems.map((link) => (
+            <NavItem
+              key={link.name}
+              icon={link.icon}
+              route={link.route}
+              isBlank={link.isBlank}
+            >
+              {link.name}
+            </NavItem>
+          ))}
         </Box>
         <Flex justifyContent="center" mb="4">
           <Button
@@ -139,14 +178,16 @@ interface NavItemProps extends FlexProps {
   icon: IconType
   children: string | number
   route: string
+  isBlank?: boolean
 }
-const NavItem = ({ icon, children, route, ...rest }: NavItemProps) => {
+const NavItem = ({ icon, children, route, isBlank, ...rest }: NavItemProps) => {
   return (
     <Link
       as={NextLink}
       href={route}
       style={{ textDecoration: 'none' }}
       _focus={{ boxShadow: 'none' }}
+      target={isBlank ? '_blank' : '_self'}
     >
       <Flex
         align="center"
@@ -201,7 +242,7 @@ const MobileNav = ({ onOpen, ...rest }: MobileProps) => {
       />
 
       <Text fontSize="2xl" ml="8" fontFamily="monospace" fontWeight="bold">
-        Logo
+        Dexplorer
       </Text>
     </Flex>
   )
