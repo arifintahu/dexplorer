@@ -1,38 +1,22 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+<div align="center">
+  <h3 align="center">Dexplorer</h3>
 
-## Getting Started
+  <p align="center">
+    Disposable Cosmos-based Blockchain Explorer
+    <br />
+    <br />
+    <a href="https://github.com/arifintahu/dexplorer/issues">Report Issues</a>
+    ·
+    <a href="https://github.com/arifintahu/dexplorer/issues">Request Feature</a>
+  </p>
+</div>
 
-First, run the development server:
+`Dexplorer` is a disposable light explorer for Cosmos-based blockchains. It is designed to connect to any Cosmos SDK chain using only WebSocket RPC. This can be useful when developing Cosmos-based chains and exploring blockchain data through a UI.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-```
+### How is Dexplorer different from other explorers?
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+`Dexplorer` is only a frontend app, meaning there is no cache or pre-processing. It pulls data from RPC as needed.
 
-You can start editing the page by modifying `pages/index.tsx`. The page auto-updates as you edit the file.
+### Contributors
 
-[API routes](https://nextjs.org/docs/api-routes/introduction) can be accessed on [http://localhost:3000/api/hello](http://localhost:3000/api/hello). This endpoint can be edited in `pages/api/hello.ts`.
-
-The `pages/api` directory is mapped to `/api/*`. Files in this directory are treated as [API routes](https://nextjs.org/docs/api-routes/introduction) instead of React pages.
-
-This project uses [`next/font`](https://nextjs.org/docs/basic-features/font-optimization) to automatically optimize and load Inter, a custom Google Font.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+[@arifintahu](https://github.com/arifintahu)
