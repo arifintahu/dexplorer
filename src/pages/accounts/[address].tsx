@@ -39,7 +39,7 @@ import { Account, Coin } from '@cosmjs/stargate'
 import { TxSearchResponse } from '@cosmjs/tendermint-rpc'
 import { toHex } from '@cosmjs/encoding'
 import { TxBody } from 'cosmjs-types/cosmos/tx/v1beta1/tx'
-import { trimHash } from '@/utils/helper'
+import { trimHash, getTypeMsg } from '@/utils/helper'
 
 export default function DetailAccount() {
   const router = useRouter()
@@ -139,14 +139,6 @@ export default function DetailAccount() {
       )
     }
 
-    return ''
-  }
-
-  const getTypeMsg = (typeUrl: string): string => {
-    const arr = typeUrl.split('.')
-    if (arr.length) {
-      return arr[arr.length - 1].replace('Msg', '')
-    }
     return ''
   }
 

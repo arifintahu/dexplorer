@@ -30,7 +30,12 @@ import { selectTmClient } from '@/store/connectSlice'
 import { getTx, getBlock } from '@/rpc/query'
 import { IndexedTx, Block, Coin } from '@cosmjs/stargate'
 import { Tx } from 'cosmjs-types/cosmos/tx/v1beta1/tx'
-import { timeFromNow, displayDate, isBech32Address } from '@/utils/helper'
+import {
+  timeFromNow,
+  displayDate,
+  isBech32Address,
+  getTypeMsg,
+} from '@/utils/helper'
 import { decodeMsg, DecodeMsg } from '@/encoding'
 
 export default function DetailBlock() {
@@ -109,14 +114,6 @@ export default function DetailBlock() {
       }
     }
 
-    return ''
-  }
-
-  const getTypeMsg = (typeUrl: string): string => {
-    const arr = typeUrl.split('.')
-    if (arr.length) {
-      return arr[arr.length - 1].replace('Msg', '')
-    }
     return ''
   }
 

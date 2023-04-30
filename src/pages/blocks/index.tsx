@@ -32,7 +32,7 @@ import { FiChevronRight, FiHome, FiCheck, FiX } from 'react-icons/fi'
 import { selectNewBlock, selectTxEvent } from '@/store/streamSlice'
 import { toHex } from '@cosmjs/encoding'
 import { TxBody } from 'cosmjs-types/cosmos/tx/v1beta1/tx'
-import { timeFromNow, trimHash } from '@/utils/helper'
+import { timeFromNow, trimHash, getTypeMsg } from '@/utils/helper'
 
 const MAX_ROWS = 20
 
@@ -108,14 +108,6 @@ export default function Blocks() {
       }
     }
 
-    return ''
-  }
-
-  const getTypeMsg = (typeUrl: string): string => {
-    const arr = typeUrl.split('.')
-    if (arr.length) {
-      return arr[arr.length - 1].replace('Msg', '')
-    }
     return ''
   }
 

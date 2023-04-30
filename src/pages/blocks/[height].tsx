@@ -29,7 +29,7 @@ import { Block, Coin } from '@cosmjs/stargate'
 import { Tx as TxData } from 'cosmjs-types/cosmos/tx/v1beta1/tx'
 import { sha256 } from '@cosmjs/crypto'
 import { toHex } from '@cosmjs/encoding'
-import { timeFromNow, trimHash, displayDate } from '@/utils/helper'
+import { timeFromNow, trimHash, displayDate, getTypeMsg } from '@/utils/helper'
 
 export default function DetailBlock() {
   const router = useRouter()
@@ -84,14 +84,6 @@ export default function DetailBlock() {
       )
     }
 
-    return ''
-  }
-
-  const getTypeMsg = (typeUrl: string): string => {
-    const arr = typeUrl.split('.')
-    if (arr.length) {
-      return arr[arr.length - 1].replace('Msg', '')
-    }
     return ''
   }
 
