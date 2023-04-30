@@ -1,5 +1,5 @@
 <div align="center">
-  <h2 align="center">Dexplorer</h3>
+  <h1 align="center">Dexplorer</h1>
 
   <p align="center">
     Disposable Cosmos-based Blockchain Explorer
