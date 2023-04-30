@@ -75,3 +75,11 @@ export const displayCoin = (deposit: Coin) => {
   }
   return `${Number(deposit.amount).toLocaleString()} ${deposit.denom}`
 }
+
+export const getTypeMsg = (typeUrl: string): string => {
+  const arr = typeUrl.split('.')
+  if (arr.length) {
+    return arr[arr.length - 1].replace('Msg', '')
+  }
+  return ''
+}
