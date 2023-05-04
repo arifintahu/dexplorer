@@ -80,6 +80,7 @@ export default function Connect() {
 
       window.localStorage.setItem(LS_RPC_ADDRESS, rpcAddress)
     } catch (err) {
+      console.error(err)
       setError(true)
       setState('initial')
       return

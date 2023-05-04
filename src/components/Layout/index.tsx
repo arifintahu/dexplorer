@@ -143,7 +143,8 @@ export default function Layout({ children }: { children: ReactNode }) {
       dispatch(setRPCAddress(address))
 
       setIsLoading(false)
-    } catch (error) {
+    } catch (err) {
+      console.error(err)
       window.localStorage.removeItem(LS_RPC_ADDRESS)
       setIsLoading(false)
       return

@@ -20,26 +20,26 @@ export async function validateConnection(rpcAddress: string): Promise<Boolean> {
 
 export async function connectWebsocketClient(
   rpcAddress: string
-): Promise<Tendermint34Client | null> {
-  try {
-    const wsUrl = replaceHTTPtoWebsocket(rpcAddress)
-    const wsClient = new WebsocketClient(wsUrl, (err) => {
-      console.error(err)
-      return null
-    })
-    const tmClient = await Tendermint34Client.create(wsClient)
-    if (!tmClient) {
-      return null
-    }
+): Promise<Tendermint34Client> {
+  return new Promise(async (resolve, reject) => {
+    try {
+      const wsUrl = replaceHTTPtoWebsocket(rpcAddress)
+      const wsClient = new WebsocketClient(wsUrl, (err) => {
+        reject(err)
+      })
+      const tmClient = await Tendermint34Client.create(wsClient)
+      if (!tmClient) {
+        reject(new Error('cannot create tendermint client'))
+      }
 
-    const status = await tmClient.status()
-    if (!status) {
-      return null
-    }
+      const status = await tmClient.status()
+      if (!status) {
+        reject(new Error('cannot get client status'))
+      }
 
-    return tmClient
-  } catch (error) {
-    console.error(error)
-    return null
-  }
+      resolve(tmClient)
+    } catch (err) {
+      reject(err)
+    }
+  })
 }
