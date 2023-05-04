@@ -1,18 +1,21 @@
 import { replaceHTTPtoWebsocket } from '@/utils/helper'
 import { Tendermint34Client, WebsocketClient } from '@cosmjs/tendermint-rpc'
+import { StreamingSocket } from '@cosmjs/socket'
 
 export async function validateConnection(rpcAddress: string): Promise<Boolean> {
-  try {
-    const tmClient = await Tendermint34Client.connect(rpcAddress)
-    const status = await tmClient.status()
-    if (!status) {
-      return false
-    }
-    return true
-  } catch (error) {
-    console.error(error)
-    return false
-  }
+  return new Promise((resolve) => {
+    const wsUrl = replaceHTTPtoWebsocket(rpcAddress)
+    const path = wsUrl.endsWith('/') ? 'websocket' : '/websocket'
+    const socket = new StreamingSocket(wsUrl + path, 3000)
+    socket.events.subscribe({
+      error: () => {
+        resolve(false)
+      },
+    })
+
+    socket.connect()
+    socket.connected.then(() => resolve(true)).catch(() => resolve(false))
+  })
 }
 
 export async function connectWebsocketClient(

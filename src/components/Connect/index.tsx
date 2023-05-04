@@ -169,9 +169,7 @@ export default function Connect() {
             textAlign={'center'}
             color={error ? 'red.500' : 'gray.500'}
           >
-            {error
-              ? 'Oh no, cannot connect to client! 😢 Please try another RPC address.'
-              : ''}
+            {error ? 'Oh no, cannot connect to websocket client! 😢' : ''}
           </Text>
         </Container>
         <Container p={0}>
