@@ -11,7 +11,7 @@
   </p>
 
   [![GitHub](https://img.shields.io/github/license/arifintahu/dexplorer.svg)](https://github.com/arifintahu/dexplorer/blob/main/LICENSE)
-  ![Dexplorer Deploy](https://vercelbadge.vercel.app/api/arifintahu/dexplorer)
+  [![Dexplorer Deploy](https://vercelbadge.vercel.app/api/arifintahu/dexplorer)](https://github.com/arifintahu/dexplorer/deployments/activity_log)
   [![Contributors](https://img.shields.io/github/contributors/arifintahu/dexplorer)](https://github.com/arifintahu/dexplorer/graphs/contributors)
 </div>
 
