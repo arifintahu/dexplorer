@@ -22,7 +22,7 @@ import DataTable from '@/components/Datatable'
 import { createColumnHelper } from '@tanstack/react-table'
 import { getTypeMsg, displayDate } from '@/utils/helper'
 import { proposalStatus, proposalStatusList } from '@/utils/constant'
-import { decodeContentProposal } from '@/encoding/proposal'
+import { decodeContentProposal } from '@/encoding'
 
 type Proposal = {
   id: number
