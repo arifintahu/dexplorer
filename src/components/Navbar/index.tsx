@@ -13,9 +13,12 @@ import {
   Input,
   Select,
   Skeleton,
+  useColorMode,
+  Button,
 } from '@chakra-ui/react'
 import { FiRadio, FiSearch } from 'react-icons/fi'
 import { selectNewBlock, selectTxEvent } from '@/store/streamSlice'
+import { MoonIcon, SunIcon } from '@chakra-ui/icons'
 
 export default function Navbar() {
   const router = useRouter()
@@ -24,6 +27,8 @@ export default function Navbar() {
   const newBlock = useSelector(selectNewBlock)
   const txEvent = useSelector(selectTxEvent)
   const dispatch = useDispatch()
+
+  const { colorMode, toggleColorMode } = useColorMode()
 
   const [searchBy, setSearchBy] = useState('block')
   const [inputSearch, setInputSearch] = useState('')
@@ -93,7 +98,7 @@ export default function Navbar() {
         </Box>
       </HStack>
       <HStack>
-        <InputGroup size="md">
+        {/* <InputGroup size="md">
           <Select
             variant={'outline'}
             defaultValue="block"
@@ -113,14 +118,22 @@ export default function Navbar() {
             placeholder={`Search by ${searchBy}`}
             onChange={handleInputSearch}
           />
-        </InputGroup>
+        </InputGroup> */}
         <IconButton
-          colorScheme="green"
+          variant="ghost"
           aria-label="Search"
           size="md"
           fontSize="20"
           icon={<FiSearch />}
           onClick={handleSearch}
+        />
+        <IconButton
+          variant="ghost"
+          aria-label="Color mode"
+          size="md"
+          fontSize="20"
+          icon={colorMode === 'light' ? <MoonIcon /> : <SunIcon />}
+          onClick={toggleColorMode}
         />
       </HStack>
     </Box>
