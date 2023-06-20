@@ -104,13 +104,13 @@ export default function Connect() {
         minH={'100vh'}
         align={'center'}
         justify={'center'}
-        bg={useColorModeValue('gray.100', 'gray.900')}
+        bg={useColorModeValue('light-bg', 'dark-bg')}
         flexDirection={'column'}
         gap={16}
       >
         <Container
           maxW={'lg'}
-          bg={useColorModeValue('white', 'whiteAlpha.100')}
+          bg={useColorModeValue('light-container', 'dark-container')}
           boxShadow={'xl'}
           rounded={'lg'}
           p={6}
@@ -187,7 +187,7 @@ export default function Connect() {
             return (
               <Flex
                 maxW={'lg'}
-                bg={'white'}
+                bg={useColorModeValue('light-container', 'dark-container')}
                 boxShadow={'lg'}
                 rounded={'sm'}
                 px={6}
