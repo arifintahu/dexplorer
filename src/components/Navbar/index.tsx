@@ -16,6 +16,14 @@ import {
   useColorMode,
   Button,
   useColorModeValue,
+  useDisclosure,
+  Modal,
+  ModalOverlay,
+  ModalContent,
+  ModalHeader,
+  ModalCloseButton,
+  ModalBody,
+  ModalFooter,
 } from '@chakra-ui/react'
 import { FiRadio, FiSearch } from 'react-icons/fi'
 import { selectNewBlock, selectTxEvent } from '@/store/streamSlice'
@@ -30,6 +38,7 @@ export default function Navbar() {
   const dispatch = useDispatch()
 
   const { colorMode, toggleColorMode } = useColorMode()
+  const { isOpen, onOpen, onClose } = useDisclosure()
 
   const [searchBy, setSearchBy] = useState('block')
   const [inputSearch, setInputSearch] = useState('')
@@ -75,31 +84,32 @@ export default function Navbar() {
   }
 
   return (
-    <Box
-      bg={useColorModeValue('light-container', 'dark-container')}
-      w="100%"
-      p={4}
-      shadow={'base'}
-      borderRadius={4}
-      marginBottom={4}
-      display={'flex'}
-      justifyContent={'space-between'}
-    >
-      <HStack>
-        <Icon mr="4" fontSize="32" color={'green.600'} as={FiRadio} />
-        <Box>
-          <Skeleton isLoaded={isLoadedSkeleton}>
-            <Heading size="xs">{newBlock?.header.chainId}</Heading>
-          </Skeleton>
-          <Skeleton isLoaded={isLoadedSkeleton}>
-            <Text pt="2" fontSize="sm">
-              {address}
-            </Text>
-          </Skeleton>
-        </Box>
-      </HStack>
-      <HStack>
-        {/* <InputGroup size="md">
+    <>
+      <Box
+        bg={useColorModeValue('light-container', 'dark-container')}
+        w="100%"
+        p={4}
+        shadow={'base'}
+        borderRadius={4}
+        marginBottom={4}
+        display={'flex'}
+        justifyContent={'space-between'}
+      >
+        <HStack>
+          <Icon mr="4" fontSize="32" color={'green.600'} as={FiRadio} />
+          <Box>
+            <Skeleton isLoaded={isLoadedSkeleton}>
+              <Heading size="xs">{newBlock?.header.chainId}</Heading>
+            </Skeleton>
+            <Skeleton isLoaded={isLoadedSkeleton}>
+              <Text pt="2" fontSize="sm">
+                {address}
+              </Text>
+            </Skeleton>
+          </Box>
+        </HStack>
+        <HStack>
+          {/* <InputGroup size="md">
           <Select
             variant={'outline'}
             defaultValue="block"
@@ -120,23 +130,46 @@ export default function Navbar() {
             onChange={handleInputSearch}
           />
         </InputGroup> */}
-        <IconButton
-          variant="ghost"
-          aria-label="Search"
-          size="md"
-          fontSize="20"
-          icon={<FiSearch />}
-          onClick={handleSearch}
-        />
-        <IconButton
-          variant="ghost"
-          aria-label="Color mode"
-          size="md"
-          fontSize="20"
-          icon={colorMode === 'light' ? <MoonIcon /> : <SunIcon />}
-          onClick={toggleColorMode}
-        />
-      </HStack>
-    </Box>
+          <IconButton
+            variant="ghost"
+            aria-label="Search"
+            size="md"
+            fontSize="20"
+            icon={<FiSearch />}
+            onClick={onOpen}
+          />
+          <IconButton
+            variant="ghost"
+            aria-label="Color mode"
+            size="md"
+            fontSize="20"
+            icon={colorMode === 'light' ? <MoonIcon /> : <SunIcon />}
+            onClick={toggleColorMode}
+          />
+        </HStack>
+      </Box>
+      <Modal isOpen={isOpen} onClose={onClose}>
+        <ModalOverlay />
+        <ModalContent>
+          <ModalHeader>Search</ModalHeader>
+          <ModalCloseButton />
+          <ModalBody>
+            <Input
+              width={400}
+              type={'text'}
+              borderColor={'gray.900'}
+              placeholder="Height/Transaction/Account Address"
+              onChange={handleInputSearch}
+            />
+          </ModalBody>
+
+          <ModalFooter>
+            <Button colorScheme="cyan" w="full" textTransform="uppercase">
+              Confirm
+            </Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
+    </>
   )
 }
