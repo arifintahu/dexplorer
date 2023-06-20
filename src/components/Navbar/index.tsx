@@ -15,6 +15,7 @@ import {
   Skeleton,
   useColorMode,
   Button,
+  useColorModeValue,
 } from '@chakra-ui/react'
 import { FiRadio, FiSearch } from 'react-icons/fi'
 import { selectNewBlock, selectTxEvent } from '@/store/streamSlice'
@@ -75,7 +76,7 @@ export default function Navbar() {
 
   return (
     <Box
-      bg="white"
+      bg={useColorModeValue('light-container', 'dark-container')}
       w="100%"
       p={4}
       shadow={'base'}
