@@ -1,6 +1,8 @@
 {
-  "extends": "next/core-web-vitals",
+  "extends": ["next/core-web-vitals", "plugin:prettier/recommended"],
   "rules": {
-    "react-hooks/exhaustive-deps": "off"
+    "prettier/prettier": 1,
+    "react-hooks/exhaustive-deps": 0,
+    "react-hooks/rules-of-hooks": 0
   }
 }
