@@ -169,7 +169,7 @@ export default function DetailAccount() {
         </HStack>
         <Box
           mt={8}
-          bg={useColorModeValue('white', 'gray.900')}
+          bg={useColorModeValue('light-container', 'dark-container')}
           shadow={'base'}
           borderRadius={4}
           p={4}
@@ -227,7 +227,7 @@ export default function DetailAccount() {
 
         <Box
           mt={8}
-          bg={useColorModeValue('white', 'gray.900')}
+          bg={useColorModeValue('light-container', 'dark-container')}
           shadow={'base'}
           borderRadius={4}
           p={4}
@@ -286,7 +286,7 @@ export default function DetailAccount() {
 
         <Box
           mt={8}
-          bg={useColorModeValue('white', 'gray.900')}
+          bg={useColorModeValue('light-container', 'dark-container')}
           shadow={'base'}
           borderRadius={4}
           p={4}
