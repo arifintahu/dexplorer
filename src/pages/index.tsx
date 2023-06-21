@@ -78,7 +78,7 @@ export default function Home() {
                 bgColor="cyan.200"
                 color="cyan.600"
                 icon={FiBox}
-                name="Height"
+                name="Latest Height"
                 value={newBlock?.header.height}
               />
             </Skeleton>
@@ -87,7 +87,7 @@ export default function Home() {
                 bgColor="green.200"
                 color="green.600"
                 icon={FiClock}
-                name="Update"
+                name="Latest Time"
                 value={
                   newBlock?.header.time
                     ? displayDate(newBlock?.header.time?.toISOString())

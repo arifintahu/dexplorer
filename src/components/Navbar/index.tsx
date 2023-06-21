@@ -9,14 +9,13 @@ import {
   HStack,
   Icon,
   IconButton,
-  InputGroup,
   Input,
-  Select,
   Skeleton,
   useColorMode,
   Button,
   useColorModeValue,
   useDisclosure,
+  useToast,
   Modal,
   ModalOverlay,
   ModalContent,
@@ -29,6 +28,10 @@ import { FiRadio, FiSearch } from 'react-icons/fi'
 import { selectNewBlock, selectTxEvent } from '@/store/streamSlice'
 import { MoonIcon, SunIcon } from '@chakra-ui/icons'
 
+const heightRegex = /^\d+$/
+const txhashRegex = /^[A-Z\d]{64}$/
+const addrRegex = /^[a-z\d]+1[a-z\d]{38,58}$/
+
 export default function Navbar() {
   const router = useRouter()
   const tmClient = useSelector(selectTmClient)
@@ -36,11 +39,11 @@ export default function Navbar() {
   const newBlock = useSelector(selectNewBlock)
   const txEvent = useSelector(selectTxEvent)
   const dispatch = useDispatch()
+  const toast = useToast()
 
   const { colorMode, toggleColorMode } = useColorMode()
   const { isOpen, onOpen, onClose } = useDisclosure()
 
-  const [searchBy, setSearchBy] = useState('block')
   const [inputSearch, setInputSearch] = useState('')
   const [isLoadedSkeleton, setIsLoadedSkeleton] = useState(false)
 
@@ -50,37 +53,37 @@ export default function Navbar() {
     }
   }, [tmClient, newBlock, txEvent, dispatch])
 
-  const handleSelect = (event: any) => {
-    setSearchBy(event.target.value as string)
-  }
-
   const handleInputSearch = (event: any) => {
     setInputSearch(event.target.value as string)
   }
 
   const handleSearch = () => {
-    let path = '/blocks'
-    if (inputSearch) {
-      switch (searchBy) {
-        case 'block':
-          path = '/blocks/'
-          break
-
-        case 'tx hash':
-          path = '/txs/'
-          break
-
-        case 'account':
-          path = '/accounts/'
-          break
-
-        default:
-          break
-      }
+    if (!inputSearch) {
+      toast({
+        title: 'Please enter a value!',
+        status: 'warning',
+        isClosable: true,
+      })
+      return
     }
 
-    router.push(path + inputSearch)
-    return
+    if (heightRegex.test(inputSearch)) {
+      router.push('/blocks/' + inputSearch)
+    } else if (txhashRegex.test(inputSearch)) {
+      router.push('/txs/' + inputSearch)
+    } else if (addrRegex.test(inputSearch)) {
+      router.push('/accounts/' + inputSearch)
+    } else {
+      toast({
+        title: 'Invalid Height, Transaction or Account Address!',
+        status: 'error',
+        isClosable: true,
+      })
+      return
+    }
+    setTimeout(() => {
+      onClose()
+    }, 500)
   }
 
   return (
@@ -109,27 +112,6 @@ export default function Navbar() {
           </Box>
         </HStack>
         <HStack>
-          {/* <InputGroup size="md">
-          <Select
-            variant={'outline'}
-            defaultValue="block"
-            borderColor={'gray.900'}
-            width={110}
-            isRequired
-            onChange={handleSelect}
-          >
-            <option value="block">Block</option>
-            <option value="tx hash">Tx Hash</option>
-            <option value="account">Account</option>
-          </Select>
-          <Input
-            width={400}
-            type={'text'}
-            borderColor={'gray.900'}
-            placeholder={`Search by ${searchBy}`}
-            onChange={handleInputSearch}
-          />
-        </InputGroup> */}
           <IconButton
             variant="ghost"
             aria-label="Search"
@@ -164,7 +146,12 @@ export default function Navbar() {
           </ModalBody>
 
           <ModalFooter>
-            <Button colorScheme="cyan" w="full" textTransform="uppercase">
+            <Button
+              colorScheme="cyan"
+              w="full"
+              textTransform="uppercase"
+              onClick={handleSearch}
+            >
               Confirm
             </Button>
           </ModalFooter>
