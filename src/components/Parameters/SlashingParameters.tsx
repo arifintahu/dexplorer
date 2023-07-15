@@ -28,7 +28,6 @@ export default function SlashingParameters() {
     if (tmClient && !params && !isLoaded) {
       querySlashingParams(tmClient)
         .then((response) => {
-          console.log(response)
           if (response.params) {
             dispatch(setSlashingParams(response.params))
           }
@@ -62,7 +61,7 @@ export default function SlashingParameters() {
           <InfoOutlineIcon
             boxSize={5}
             justifyItems={'center'}
-            color={'gray.600'}
+            color={useColorModeValue('light-theme', 'dark-theme')}
           />
         </Tooltip>
         <Heading size={'md'} fontWeight={'medium'}>
