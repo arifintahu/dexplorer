@@ -139,7 +139,7 @@ export default function Navbar() {
             <Input
               width={400}
               type={'text'}
-              borderColor={'gray.900'}
+              borderColor={useColorModeValue('light-theme', 'dark-theme')}
               placeholder="Height/Transaction/Account Address"
               onChange={handleInputSearch}
             />
@@ -147,7 +147,11 @@ export default function Navbar() {
 
           <ModalFooter>
             <Button
-              colorScheme="cyan"
+              bg={useColorModeValue('light-theme', 'dark-theme')}
+              _hover={{
+                opacity: 0.8,
+              }}
+              color="white"
               w="full"
               textTransform="uppercase"
               onClick={handleSearch}

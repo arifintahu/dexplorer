@@ -65,8 +65,14 @@ export default function Home() {
             href={'/'}
             style={{ textDecoration: 'none' }}
             _focus={{ boxShadow: 'none' }}
+            display="flex"
+            justifyContent="center"
           >
-            <Icon fontSize="16" color={'cyan.400'} as={FiHome} />
+            <Icon
+              fontSize="16"
+              color={useColorModeValue('light-theme', 'dark-theme')}
+              as={FiHome}
+            />
           </Link>
           <Icon fontSize="16" as={FiChevronRight} />
           <Text>Home</Text>
@@ -78,7 +84,7 @@ export default function Home() {
                 bgColor="cyan.200"
                 color="cyan.600"
                 icon={FiBox}
-                name="Latest Height"
+                name="Latest Block Height"
                 value={newBlock?.header.height}
               />
             </Skeleton>
@@ -87,7 +93,7 @@ export default function Home() {
                 bgColor="green.200"
                 color="green.600"
                 icon={FiClock}
-                name="Latest Time"
+                name="Latest Block Time"
                 value={
                   newBlock?.header.time
                     ? displayDate(newBlock?.header.time?.toISOString())
