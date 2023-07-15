@@ -1,4 +1,12 @@
-import { Divider, HStack, Heading, Icon, Link, Text } from '@chakra-ui/react'
+import {
+  Divider,
+  HStack,
+  Heading,
+  Icon,
+  Link,
+  Text,
+  useColorModeValue,
+} from '@chakra-ui/react'
 import Head from 'next/head'
 import NextLink from 'next/link'
 import { FiChevronRight, FiHome } from 'react-icons/fi'
@@ -26,8 +34,14 @@ export default function Parameters() {
             href={'/'}
             style={{ textDecoration: 'none' }}
             _focus={{ boxShadow: 'none' }}
+            display="flex"
+            justifyContent="center"
           >
-            <Icon fontSize="16" color={'cyan.400'} as={FiHome} />
+            <Icon
+              fontSize="16"
+              color={useColorModeValue('light-theme', 'dark-theme')}
+              as={FiHome}
+            />
           </Link>
           <Icon fontSize="16" as={FiChevronRight} />
           <Text>Parameters</Text>
