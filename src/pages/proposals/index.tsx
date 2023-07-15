@@ -97,7 +97,6 @@ export default function Proposals() {
             }
           })
           setProposals(proposalsList)
-          console.log(response)
           setIsLoading(false)
         })
         .catch(() => {

@@ -1,4 +1,4 @@
-import React, { ReactNode } from 'react'
+import React, { ReactNode, useEffect, useState } from 'react'
 import {
   IconButton,
   Box,
@@ -29,6 +29,7 @@ import {
 } from 'react-icons/fi'
 import { IconType } from 'react-icons'
 import NextLink from 'next/link'
+import { useRouter } from 'next/router'
 import { selectSubsNewBlock, selectSubsTxEvent } from '@/store/streamSlice'
 import { useSelector } from 'react-redux'
 import { LS_RPC_ADDRESS } from '@/utils/constant'
@@ -144,7 +145,7 @@ const SidebarContent = ({ onClose, ...rest }: SidebarProps) => {
             mx="4"
             size={'xs'}
             textTransform="uppercase"
-            textColor="gray.500"
+            textColor={useColorModeValue('gray.500', 'gray.100')}
             fontWeight="medium"
           >
             Links
@@ -182,6 +183,17 @@ interface NavItemProps extends FlexProps {
   isBlank?: boolean
 }
 const NavItem = ({ icon, children, route, isBlank, ...rest }: NavItemProps) => {
+  const router = useRouter()
+  const [isSelected, setIsSelected] = useState(false)
+
+  useEffect(() => {
+    if (route === '/') {
+      setIsSelected(router.route === route)
+    } else {
+      setIsSelected(router.route.includes(route))
+    }
+  }, [router])
+
   return (
     <Link
       as={NextLink}
@@ -197,9 +209,16 @@ const NavItem = ({ icon, children, route, isBlank, ...rest }: NavItemProps) => {
         borderRadius="lg"
         role="group"
         cursor="pointer"
+        bg={
+          isSelected
+            ? useColorModeValue('light-theme', 'dark-theme')
+            : 'transparent'
+        }
+        color={isSelected ? 'white' : useColorModeValue('black', 'white')}
         _hover={{
-          bg: useColorModeValue('light-theme', 'dark-theme'),
-          color: 'white',
+          color: isSelected
+            ? 'white'
+            : useColorModeValue('light-theme', 'dark-theme'),
         }}
         {...rest}
       >
@@ -208,7 +227,9 @@ const NavItem = ({ icon, children, route, isBlank, ...rest }: NavItemProps) => {
             mr="4"
             fontSize="16"
             _groupHover={{
-              color: 'white',
+              color: isSelected
+                ? 'white'
+                : useColorModeValue('light-theme', 'dark-theme'),
             }}
             as={icon}
           />
