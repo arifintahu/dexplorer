@@ -97,7 +97,6 @@ export default function Proposals() {
             }
           })
           setProposals(proposalsList)
-          console.log(response)
           setIsLoading(false)
         })
         .catch(() => {
@@ -137,8 +136,14 @@ export default function Proposals() {
             href={'/'}
             style={{ textDecoration: 'none' }}
             _focus={{ boxShadow: 'none' }}
+            display="flex"
+            justifyContent="center"
           >
-            <Icon fontSize="16" color={'cyan.400'} as={FiHome} />
+            <Icon
+              fontSize="16"
+              color={useColorModeValue('light-theme', 'dark-theme')}
+              as={FiHome}
+            />
           </Link>
           <Icon fontSize="16" as={FiChevronRight} />
           <Text>Proposals</Text>

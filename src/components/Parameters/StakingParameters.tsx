@@ -60,7 +60,7 @@ export default function StakingParameters() {
           <InfoOutlineIcon
             boxSize={5}
             justifyItems={'center'}
-            color={'gray.600'}
+            color={useColorModeValue('light-theme', 'dark-theme')}
           />
         </Tooltip>
         <Heading size={'md'} fontWeight={'medium'}>

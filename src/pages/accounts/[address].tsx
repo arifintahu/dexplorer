@@ -152,15 +152,21 @@ export default function DetailAccount() {
       </Head>
       <main>
         <HStack h="24px">
-          <Heading size={'md'}>Block</Heading>
+          <Heading size={'md'}>Account</Heading>
           <Divider borderColor={'gray'} size="10px" orientation="vertical" />
           <Link
             as={NextLink}
             href={'/'}
             style={{ textDecoration: 'none' }}
             _focus={{ boxShadow: 'none' }}
+            display="flex"
+            justifyContent="center"
           >
-            <Icon fontSize="16" color={'cyan.400'} as={FiHome} />
+            <Icon
+              fontSize="16"
+              color={useColorModeValue('light-theme', 'dark-theme')}
+              as={FiHome}
+            />
           </Link>
           <Icon fontSize="16" as={FiChevronRight} />
           <Text>Accounts</Text>
@@ -315,12 +321,29 @@ export default function DetailAccount() {
                         style={{ textDecoration: 'none' }}
                         _focus={{ boxShadow: 'none' }}
                       >
-                        <Text color={'cyan.400'}>{trimHash(tx.hash)}</Text>
+                        <Text
+                          color={useColorModeValue('light-theme', 'dark-theme')}
+                        >
+                          {trimHash(tx.hash)}
+                        </Text>
                       </Link>
                     </Td>
                     <Td>{renderMessages(tx.data.messages)}</Td>
                     <Td>{tx.data.memo}</Td>
-                    <Td>{tx.height}</Td>
+                    <Td>
+                      <Link
+                        as={NextLink}
+                        href={'/blocks/' + tx.height}
+                        style={{ textDecoration: 'none' }}
+                        _focus={{ boxShadow: 'none' }}
+                      >
+                        <Text
+                          color={useColorModeValue('light-theme', 'dark-theme')}
+                        >
+                          {tx.height}
+                        </Text>
+                      </Link>
+                    </Td>
                   </Tr>
                 ))}
               </Tbody>
