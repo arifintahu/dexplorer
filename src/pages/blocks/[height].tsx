@@ -137,8 +137,14 @@ export default function DetailBlock() {
             href={'/'}
             style={{ textDecoration: 'none' }}
             _focus={{ boxShadow: 'none' }}
+            display="flex"
+            justifyContent="center"
           >
-            <Icon fontSize="16" color={'cyan.400'} as={FiHome} />
+            <Icon
+              fontSize="16"
+              color={useColorModeValue('light-theme', 'dark-theme')}
+              as={FiHome}
+            />
           </Link>
           <Icon fontSize="16" as={FiChevronRight} />
           <Link
@@ -147,7 +153,9 @@ export default function DetailBlock() {
             style={{ textDecoration: 'none' }}
             _focus={{ boxShadow: 'none' }}
           >
-            <Text color={'cyan.400'}>Blocks</Text>
+            <Text color={useColorModeValue('light-theme', 'dark-theme')}>
+              Blocks
+            </Text>
           </Link>
           <Icon fontSize="16" as={FiChevronRight} />
           <Text>Block #{height}</Text>
