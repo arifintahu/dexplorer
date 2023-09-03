@@ -29,24 +29,27 @@ import { getValidators } from '@/rpc/query'
 import { selectTmClient } from '@/store/connectSlice'
 import { selectNewBlock } from '@/store/streamSlice'
 import { displayDate } from '@/utils/helper'
+import { StatusResponse } from '@cosmjs/tendermint-rpc'
 
 export default function Home() {
   const tmClient = useSelector(selectTmClient)
   const newBlock = useSelector(selectNewBlock)
   const [validators, setValidators] = useState<number>()
   const [isLoaded, setIsLoaded] = useState(false)
+  const [status, setStatus] = useState<StatusResponse | null>()
 
   useEffect(() => {
     if (tmClient) {
+      tmClient.status().then((response) => setStatus(response))
       getValidators(tmClient).then((response) => setValidators(response.total))
     }
   }, [tmClient])
 
   useEffect(() => {
-    if (!isLoaded && newBlock) {
+    if ((!isLoaded && newBlock) || (!isLoaded && status)) {
       setIsLoaded(true)
     }
-  }, [isLoaded, newBlock])
+  }, [isLoaded, newBlock, status])
 
   return (
     <>
@@ -85,7 +88,11 @@ export default function Home() {
                 color="cyan.600"
                 icon={FiBox}
                 name="Latest Block Height"
-                value={newBlock?.header.height}
+                value={
+                  newBlock?.header.height
+                    ? newBlock?.header.height
+                    : status?.syncInfo.latestBlockHeight
+                }
               />
             </Skeleton>
             <Skeleton isLoaded={isLoaded}>
@@ -97,6 +104,10 @@ export default function Home() {
                 value={
                   newBlock?.header.time
                     ? displayDate(newBlock?.header.time?.toISOString())
+                    : status?.syncInfo.latestBlockTime
+                    ? displayDate(
+                        status?.syncInfo.latestBlockTime.toISOString()
+                      )
                     : ''
                 }
               />
@@ -108,7 +119,11 @@ export default function Home() {
                 color="orange.600"
                 icon={FiCpu}
                 name="Network"
-                value={newBlock?.header.chainId}
+                value={
+                  newBlock?.header.chainId
+                    ? newBlock?.header.chainId
+                    : status?.nodeInfo.network
+                }
               />
             </Skeleton>
 
