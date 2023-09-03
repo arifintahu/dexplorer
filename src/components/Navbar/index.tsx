@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/router'
-import { useDispatch, useSelector } from 'react-redux'
+import { useSelector } from 'react-redux'
 import { selectTmClient, selectRPCAddress } from '@/store/connectSlice'
 import {
   Box,
@@ -25,8 +25,9 @@ import {
   ModalFooter,
 } from '@chakra-ui/react'
 import { FiRadio, FiSearch } from 'react-icons/fi'
-import { selectNewBlock, selectTxEvent } from '@/store/streamSlice'
+import { selectNewBlock } from '@/store/streamSlice'
 import { MoonIcon, SunIcon } from '@chakra-ui/icons'
+import { StatusResponse } from '@cosmjs/tendermint-rpc'
 
 const heightRegex = /^\d+$/
 const txhashRegex = /^[A-Z\d]{64}$/
@@ -37,9 +38,8 @@ export default function Navbar() {
   const tmClient = useSelector(selectTmClient)
   const address = useSelector(selectRPCAddress)
   const newBlock = useSelector(selectNewBlock)
-  const txEvent = useSelector(selectTxEvent)
-  const dispatch = useDispatch()
   const toast = useToast()
+  const [status, setStatus] = useState<StatusResponse | null>()
 
   const { colorMode, toggleColorMode } = useColorMode()
   const { isOpen, onOpen, onClose } = useDisclosure()
@@ -48,10 +48,16 @@ export default function Navbar() {
   const [isLoadedSkeleton, setIsLoadedSkeleton] = useState(false)
 
   useEffect(() => {
-    if (newBlock) {
+    if (tmClient) {
+      tmClient.status().then((response) => setStatus(response))
+    }
+  }, [tmClient])
+
+  useEffect(() => {
+    if (newBlock || status) {
       setIsLoadedSkeleton(true)
     }
-  }, [tmClient, newBlock, txEvent, dispatch])
+  }, [tmClient, newBlock, status])
 
   const handleInputSearch = (event: any) => {
     setInputSearch(event.target.value as string)
@@ -102,7 +108,11 @@ export default function Navbar() {
           <Icon mr="4" fontSize="32" color={'green.600'} as={FiRadio} />
           <Box>
             <Skeleton isLoaded={isLoadedSkeleton}>
-              <Heading size="xs">{newBlock?.header.chainId}</Heading>
+              <Heading size="xs">
+                {newBlock?.header.chainId
+                  ? newBlock?.header.chainId
+                  : status?.nodeInfo.network}
+              </Heading>
             </Skeleton>
             <Skeleton isLoaded={isLoadedSkeleton}>
               <Text pt="2" fontSize="sm">
