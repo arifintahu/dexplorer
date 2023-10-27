@@ -1,4 +1,4 @@
-export const LS_RPC_ADDRESS = 'RPC_ADDRESS'
+export const LS_RPC_ADDRESS = 'https://cvm.cosvm.net'
 export const GOV_PARAMS_TYPE = {
   VOTING: 'voting',
   DEPOSIT: 'deposit',
