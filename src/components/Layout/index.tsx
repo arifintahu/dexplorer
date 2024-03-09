@@ -24,6 +24,8 @@ import { NewBlockEvent } from '@cosmjs/tendermint-rpc'
 import { TxEvent } from '@cosmjs/tendermint-rpc'
 import { LS_RPC_ADDRESS } from '@/utils/constant'
 import { validateConnection, connectWebsocketClient } from '@/rpc/client'
+import { NextRouter, useRouter } from 'next/router'
+import { getUrlFromPath, isValidUrl, normalizeUrl } from '@/utils/helper'
 
 export default function Layout({ children }: { children: ReactNode }) {
   const connectState = useSelector(selectConnectState)
@@ -31,7 +33,7 @@ export default function Layout({ children }: { children: ReactNode }) {
   const newBlock = useSelector(selectNewBlock)
   const txEvent = useSelector(selectTxEvent)
   const dispatch = useDispatch()
-
+  const router = useRouter()
   const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
@@ -48,6 +50,13 @@ export default function Layout({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     if (isLoading) {
+      const url = getQueryUrl(router)
+      if (url.length) {
+        const address = normalizeUrl(url)
+        connect(address)
+        return
+      }
+
       const address = window.localStorage.getItem(LS_RPC_ADDRESS)
       if (!address) {
         setIsLoading(false)
@@ -64,6 +73,18 @@ export default function Layout({ children }: { children: ReactNode }) {
 
   const updateTxEvent = (event: TxEvent): void => {
     dispatch(setTxEvent(event))
+  }
+
+  const getQueryUrl = (router: NextRouter): string => {
+    if (router.route !== '/') {
+      return ''
+    }
+
+    const url = getUrlFromPath(router.asPath)
+    if (!isValidUrl(url)) {
+      return ''
+    }
+    return url
   }
 
   const connect = async (address: string) => {
@@ -87,6 +108,7 @@ export default function Layout({ children }: { children: ReactNode }) {
       dispatch(setRPCAddress(address))
 
       setIsLoading(false)
+      window.localStorage.setItem(LS_RPC_ADDRESS, address)
     } catch (err) {
       console.error(err)
       window.localStorage.removeItem(LS_RPC_ADDRESS)
