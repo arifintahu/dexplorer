@@ -1,4 +1,4 @@
-import { Tendermint34Client } from '@cosmjs/tendermint-rpc'
+import { Tendermint37Client } from '@cosmjs/tendermint-rpc'
 import { QueryClient } from '@cosmjs/stargate'
 import { PageRequest } from 'cosmjs-types/cosmos/base/query/v1beta1/pagination'
 import {
@@ -27,7 +27,7 @@ import {
 } from 'cosmjs-types/cosmos/slashing/v1beta1/query'
 
 export async function queryActiveValidators(
-  tmClient: Tendermint34Client,
+  tmClient: Tendermint37Client,
   page: number,
   perPage: number
 ): Promise<QueryValidatorsResponse> {
@@ -48,7 +48,7 @@ export async function queryActiveValidators(
 }
 
 export async function queryProposals(
-  tmClient: Tendermint34Client,
+  tmClient: Tendermint37Client,
   page: number,
   perPage: number
 ): Promise<QueryProposalsResponse> {
@@ -70,7 +70,7 @@ export async function queryProposals(
 }
 
 export async function queryStakingParams(
-  tmClient: Tendermint34Client
+  tmClient: Tendermint37Client
 ): Promise<QueryStakingParamsResponse> {
   const queryClient = new QueryClient(tmClient)
   const req = QueryStakingParamsRequest.encode({}).finish()
@@ -82,7 +82,7 @@ export async function queryStakingParams(
 }
 
 export async function queryMintParams(
-  tmClient: Tendermint34Client
+  tmClient: Tendermint37Client
 ): Promise<QueryMintParamsResponse> {
   const queryClient = new QueryClient(tmClient)
   const req = QueryMintParamsRequest.encode({}).finish()
@@ -94,7 +94,7 @@ export async function queryMintParams(
 }
 
 export async function queryGovParams(
-  tmClient: Tendermint34Client,
+  tmClient: Tendermint37Client,
   paramsType: string
 ): Promise<QueryGovParamsResponse> {
   const queryClient = new QueryClient(tmClient)
@@ -109,7 +109,7 @@ export async function queryGovParams(
 }
 
 export async function queryDistributionParams(
-  tmClient: Tendermint34Client
+  tmClient: Tendermint37Client
 ): Promise<QueryDistributionParamsResponse> {
   const queryClient = new QueryClient(tmClient)
   const req = QueryDistributionParamsRequest.encode({}).finish()
@@ -121,7 +121,7 @@ export async function queryDistributionParams(
 }
 
 export async function querySlashingParams(
-  tmClient: Tendermint34Client
+  tmClient: Tendermint37Client
 ): Promise<QuerySlashingParamsResponse> {
   const queryClient = new QueryClient(tmClient)
   const req = QuerySlashingParamsRequest.encode({}).finish()
