@@ -23,8 +23,9 @@ import {
   ModalCloseButton,
   ModalBody,
   ModalFooter,
+  Flex,
 } from '@chakra-ui/react'
-import { FiRadio, FiSearch } from 'react-icons/fi'
+import { FiRadio, FiSearch, FiRefreshCcw } from 'react-icons/fi'
 import { selectNewBlock } from '@/store/streamSlice'
 import { MoonIcon, SunIcon } from '@chakra-ui/icons'
 import { StatusResponse } from '@cosmjs/tendermint-rpc'
@@ -43,6 +44,11 @@ export default function Navbar() {
 
   const { colorMode, toggleColorMode } = useColorMode()
   const { isOpen, onOpen, onClose } = useDisclosure()
+  const {
+    isOpen: isOpenRPCs,
+    onOpen: onOpenRPCs,
+    onClose: onCloseRPCs,
+  } = useDisclosure()
 
   const [inputSearch, setInputSearch] = useState('')
   const [isLoadedSkeleton, setIsLoadedSkeleton] = useState(false)
@@ -106,20 +112,35 @@ export default function Navbar() {
       >
         <HStack>
           <Icon mr="4" fontSize="32" color={'green.600'} as={FiRadio} />
-          <Box>
-            <Skeleton isLoaded={isLoadedSkeleton}>
-              <Heading size="xs">
-                {newBlock?.header.chainId
-                  ? newBlock?.header.chainId
-                  : status?.nodeInfo.network}
-              </Heading>
-            </Skeleton>
-            <Skeleton isLoaded={isLoadedSkeleton}>
-              <Text pt="2" fontSize="sm">
-                {address}
-              </Text>
-            </Skeleton>
-          </Box>
+          <Flex
+            flexDirection="row"
+            gap="4"
+            border="1px"
+            p="2"
+            borderRadius="md"
+            borderColor={useColorModeValue('gray.500', 'gray.100')}
+          >
+            <Box>
+              <Skeleton isLoaded={isLoadedSkeleton}>
+                <Heading size="xs">
+                  {newBlock?.header.chainId
+                    ? newBlock?.header.chainId
+                    : status?.nodeInfo.network}
+                </Heading>
+              </Skeleton>
+              <Skeleton isLoaded={isLoadedSkeleton}>
+                <Text fontSize="sm">{address}</Text>
+              </Skeleton>
+            </Box>
+            <IconButton
+              variant="solid"
+              aria-label="Change RPC"
+              size="md"
+              fontSize="20"
+              icon={<FiRefreshCcw />}
+              onClick={onOpenRPCs}
+            />
+          </Flex>
         </HStack>
         <HStack>
           <IconButton
@@ -169,6 +190,23 @@ export default function Navbar() {
               Confirm
             </Button>
           </ModalFooter>
+        </ModalContent>
+      </Modal>
+
+      <Modal isOpen={isOpenRPCs} onClose={onCloseRPCs}>
+        <ModalOverlay />
+        <ModalContent>
+          <ModalHeader>Change Connection</ModalHeader>
+          <ModalCloseButton />
+          <ModalBody>
+            <Input
+              width={400}
+              type={'text'}
+              borderColor={useColorModeValue('light-theme', 'dark-theme')}
+              placeholder="Height/Transaction/Account Address"
+              onChange={handleInputSearch}
+            />
+          </ModalBody>
         </ModalContent>
       </Modal>
     </>
