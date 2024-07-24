@@ -11,6 +11,27 @@ const makeStore = () =>
       [streamSlice.name]: streamSlice.reducer,
       [paramsSlice.name]: paramsSlice.reducer,
     },
+    middleware: (getDefaultMiddleware) =>
+      getDefaultMiddleware({
+        serializableCheck: {
+          // Ignore these action types
+          ignoredActions: [
+            'stream/setNewBlock',
+            'stream/setSubsNewBlock',
+            'stream/setTxEvent',
+            'stream/setSubsTxEvent',
+            'connect/setTmClient',
+          ],
+          // Ignore these paths in the state
+          ignoredPaths: [
+            'connect.tmClient',
+            'stream.subsNewBlock',
+            'stream.subsTxEvent',
+            'stream.newBlock',
+            'stream.txEvent',
+          ],
+        },
+      }),
     devTools: true,
   })
 
