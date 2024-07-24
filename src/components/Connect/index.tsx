@@ -196,6 +196,7 @@ export default function Connect() {
                 alignItems="center"
                 key={chain.name}
                 mb={4}
+                mx={'auto'}
               >
                 <Box>
                   <Heading size="xs" textTransform="uppercase">
