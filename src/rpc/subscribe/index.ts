@@ -1,12 +1,9 @@
-import {
-  NewBlockEvent,
-  Tendermint34Client,
-  TxEvent,
-} from '@cosmjs/tendermint-rpc'
+import { NewBlockEvent, Tendermint37Client } from '@cosmjs/tendermint-rpc'
+import { TxEvent } from '@cosmjs/tendermint-rpc/build/tendermint37'
 import { Subscription } from 'xstream'
 
 export function subscribeNewBlock(
-  tmClient: Tendermint34Client,
+  tmClient: Tendermint37Client,
   callback: (event: NewBlockEvent) => any
 ): Subscription {
   const stream = tmClient.subscribeNewBlock()
@@ -24,7 +21,7 @@ export function subscribeNewBlock(
 }
 
 export function subscribeTx(
-  tmClient: Tendermint34Client,
+  tmClient: Tendermint37Client,
   callback: (event: TxEvent) => any
 ): Subscription {
   const stream = tmClient.subscribeTx()

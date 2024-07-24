@@ -6,26 +6,26 @@ import {
   StargateClient,
 } from '@cosmjs/stargate'
 import {
-  Tendermint34Client,
+  Tendermint37Client,
   TxSearchResponse,
   ValidatorsResponse,
 } from '@cosmjs/tendermint-rpc'
 
 export async function getChainId(
-  tmClient: Tendermint34Client
+  tmClient: Tendermint37Client
 ): Promise<string> {
   const client = await StargateClient.create(tmClient)
   return client.getChainId()
 }
 
 export async function getValidators(
-  tmClient: Tendermint34Client
+  tmClient: Tendermint37Client
 ): Promise<ValidatorsResponse> {
   return tmClient.validatorsAll()
 }
 
 export async function getBlock(
-  tmClient: Tendermint34Client,
+  tmClient: Tendermint37Client,
   height: number
 ): Promise<Block> {
   const client = await StargateClient.create(tmClient)
@@ -33,7 +33,7 @@ export async function getBlock(
 }
 
 export async function getTx(
-  tmClient: Tendermint34Client,
+  tmClient: Tendermint37Client,
   hash: string
 ): Promise<IndexedTx | null> {
   const client = await StargateClient.create(tmClient)
@@ -41,7 +41,7 @@ export async function getTx(
 }
 
 export async function getAccount(
-  tmClient: Tendermint34Client,
+  tmClient: Tendermint37Client,
   address: string
 ): Promise<Account | null> {
   const client = await StargateClient.create(tmClient)
@@ -49,7 +49,7 @@ export async function getAccount(
 }
 
 export async function getAllBalances(
-  tmClient: Tendermint34Client,
+  tmClient: Tendermint37Client,
   address: string
 ): Promise<readonly Coin[]> {
   const client = await StargateClient.create(tmClient)
@@ -57,7 +57,7 @@ export async function getAllBalances(
 }
 
 export async function getBalanceStaked(
-  tmClient: Tendermint34Client,
+  tmClient: Tendermint37Client,
   address: string
 ): Promise<Coin | null> {
   const client = await StargateClient.create(tmClient)
@@ -65,7 +65,7 @@ export async function getBalanceStaked(
 }
 
 export async function getTxsBySender(
-  tmClient: Tendermint34Client,
+  tmClient: Tendermint37Client,
   address: string,
   page: number,
   perPage: number
