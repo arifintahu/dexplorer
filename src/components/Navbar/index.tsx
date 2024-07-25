@@ -1,7 +1,12 @@
-import { useEffect, useState } from 'react'
+import { ChangeEvent, FormEvent, useEffect, useState } from 'react'
 import { useRouter } from 'next/router'
-import { useSelector } from 'react-redux'
-import { selectTmClient, selectRPCAddress } from '@/store/connectSlice'
+import { useDispatch, useSelector } from 'react-redux'
+import {
+  selectTmClient,
+  selectRPCAddress,
+  setRPCAddress,
+  setTmClient,
+} from '@/store/connectSlice'
 import {
   Box,
   Heading,
@@ -24,11 +29,15 @@ import {
   ModalBody,
   ModalFooter,
   Flex,
+  Stack,
+  FormControl,
 } from '@chakra-ui/react'
 import { FiRadio, FiSearch, FiRefreshCcw } from 'react-icons/fi'
 import { selectNewBlock } from '@/store/streamSlice'
-import { MoonIcon, SunIcon } from '@chakra-ui/icons'
+import { CheckIcon, MoonIcon, SunIcon } from '@chakra-ui/icons'
 import { StatusResponse } from '@cosmjs/tendermint-rpc'
+import { connectWebsocketClient, validateConnection } from '@/rpc/client'
+import { LS_RPC_ADDRESS, LS_RPC_ADDRESS_LIST } from '@/utils/constant'
 
 const heightRegex = /^\d+$/
 const txhashRegex = /^[A-Z\d]{64}$/
@@ -41,6 +50,13 @@ export default function Navbar() {
   const newBlock = useSelector(selectNewBlock)
   const toast = useToast()
   const [status, setStatus] = useState<StatusResponse | null>()
+
+  const [state, setState] = useState<'initial' | 'submitting' | 'success'>(
+    'initial'
+  )
+  const [newAddress, setNewAddress] = useState('')
+  const [error, setError] = useState(false)
+  const dispatch = useDispatch()
 
   const { colorMode, toggleColorMode } = useColorMode()
   const { isOpen, onOpen, onClose } = useDisclosure()
@@ -98,6 +114,57 @@ export default function Navbar() {
     }, 500)
   }
 
+  const submitForm = async (e: FormEvent) => {
+    e.preventDefault()
+    await connectClient(newAddress)
+  }
+
+  const connectClient = async (rpcAddress: string) => {
+    try {
+      setError(false)
+      setState('submitting')
+
+      if (!rpcAddress) {
+        setError(true)
+        setState('initial')
+        return
+      }
+
+      const isValid = await validateConnection(rpcAddress)
+      if (!isValid) {
+        setError(true)
+        setState('initial')
+        return
+      }
+
+      const tmClient = await connectWebsocketClient(rpcAddress)
+
+      if (!tmClient) {
+        setError(true)
+        setState('initial')
+        return
+      }
+
+      dispatch(setTmClient(tmClient))
+      dispatch(setRPCAddress(rpcAddress))
+      setState('success')
+
+      window.localStorage.setItem(LS_RPC_ADDRESS, rpcAddress)
+      const rpcAddresses = JSON.parse(
+        window.localStorage.getItem(LS_RPC_ADDRESS_LIST) || '[]'
+      )
+      window.localStorage.setItem(
+        LS_RPC_ADDRESS_LIST,
+        JSON.stringify([rpcAddress, ...rpcAddresses])
+      )
+    } catch (err) {
+      console.error(err)
+      setError(true)
+      setState('initial')
+      return
+    }
+  }
+
   return (
     <>
       <Box
@@ -138,7 +205,12 @@ export default function Navbar() {
               size="md"
               fontSize="20"
               icon={<FiRefreshCcw />}
-              onClick={onOpenRPCs}
+              onClick={() => {
+                setState('initial')
+                setNewAddress('')
+                setError(false)
+                onOpenRPCs()
+              }}
             />
           </Flex>
         </HStack>
@@ -199,13 +271,64 @@ export default function Navbar() {
           <ModalHeader>Change Connection</ModalHeader>
           <ModalCloseButton />
           <ModalBody>
-            <Input
-              width={400}
-              type={'text'}
-              borderColor={useColorModeValue('light-theme', 'dark-theme')}
-              placeholder="Height/Transaction/Account Address"
-              onChange={handleInputSearch}
-            />
+            <Stack
+              direction={{ base: 'column', md: 'row' }}
+              as={'form'}
+              spacing={'12px'}
+              onSubmit={submitForm}
+            >
+              <FormControl>
+                <Input
+                  variant={'solid'}
+                  borderWidth={1}
+                  color={'gray.800'}
+                  _placeholder={{
+                    color: 'gray.400',
+                  }}
+                  borderColor={useColorModeValue('gray.300', 'gray.700')}
+                  id={'newAddress'}
+                  type={'url'}
+                  required
+                  placeholder={'Connect new RPC Address'}
+                  aria-label={'Connect new RPC Address'}
+                  value={newAddress}
+                  disabled={state !== 'initial'}
+                  onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                    setNewAddress(e.target.value)
+                  }
+                />
+              </FormControl>
+              <FormControl w={{ base: '100%', md: '40%' }}>
+                <Button
+                  backgroundColor={useColorModeValue(
+                    'light-theme',
+                    'dark-theme'
+                  )}
+                  color={'white'}
+                  _hover={{
+                    backgroundColor: useColorModeValue(
+                      'dark-theme',
+                      'light-theme'
+                    ),
+                  }}
+                  isLoading={state === 'submitting'}
+                  w="100%"
+                  type={state === 'success' ? 'button' : 'submit'}
+                >
+                  {state === 'success' ? <CheckIcon /> : 'Connect'}
+                </Button>
+              </FormControl>
+            </Stack>
+            <Text
+              mt={2}
+              textAlign={'center'}
+              color={error ? 'red.500' : 'gray.500'}
+            >
+              {error ? 'Oh no, cannot connect to websocket client! 😢' : ''}
+            </Text>
+            <Text mt={2} textAlign={'center'}>
+              Available RPCs
+            </Text>
           </ModalBody>
         </ModalContent>
       </Modal>
