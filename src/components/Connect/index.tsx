@@ -156,7 +156,14 @@ export default function Connect() {
             </FormControl>
             <FormControl w={{ base: '100%', md: '40%' }}>
               <Button
-                colorScheme={state === 'success' ? 'green' : 'blue'}
+                backgroundColor={useColorModeValue('light-theme', 'dark-theme')}
+                color={'white'}
+                _hover={{
+                  backgroundColor: useColorModeValue(
+                    'dark-theme',
+                    'light-theme'
+                  ),
+                }}
                 isLoading={state === 'submitting'}
                 w="100%"
                 type={state === 'success' ? 'button' : 'submit'}
