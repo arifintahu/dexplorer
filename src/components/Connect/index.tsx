@@ -20,7 +20,7 @@ import {
   setRPCAddress,
 } from '@/store/connectSlice'
 import Head from 'next/head'
-import { LS_RPC_ADDRESS } from '@/utils/constant'
+import { LS_RPC_ADDRESS, LS_RPC_ADDRESS_LIST } from '@/utils/constant'
 import { validateConnection, connectWebsocketClient } from '@/rpc/client'
 
 const chainList = [
@@ -79,6 +79,10 @@ export default function Connect() {
       setState('success')
 
       window.localStorage.setItem(LS_RPC_ADDRESS, rpcAddress)
+      window.localStorage.setItem(
+        LS_RPC_ADDRESS_LIST,
+        JSON.stringify([rpcAddress])
+      )
     } catch (err) {
       console.error(err)
       setError(true)
