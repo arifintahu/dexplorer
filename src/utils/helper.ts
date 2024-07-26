@@ -110,3 +110,13 @@ export const getUrlFromPath = (pathString: string): string => {
   const match = regex.exec(pathString)
   return match ? decodeURIComponent(match[1]) : ''
 }
+
+export function removeTrailingSlash(url: string): string {
+  // Check if the URL ends with a trailing slash
+  if (url.endsWith('/')) {
+    // Remove the trailing slash
+    return url.slice(0, -1)
+  }
+  // Return the URL as is if it doesn't end with a trailing slash
+  return url
+}
