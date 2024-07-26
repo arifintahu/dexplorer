@@ -22,6 +22,7 @@ import {
 import Head from 'next/head'
 import { LS_RPC_ADDRESS, LS_RPC_ADDRESS_LIST } from '@/utils/constant'
 import { validateConnection, connectWebsocketClient } from '@/rpc/client'
+import { removeTrailingSlash } from '@/utils/helper'
 
 const chainList = [
   {
@@ -44,7 +45,8 @@ export default function Connect() {
 
   const submitForm = async (e: FormEvent) => {
     e.preventDefault()
-    await connectClient(address)
+    const addr = removeTrailingSlash(address)
+    await connectClient(addr)
   }
 
   const connectClient = async (rpcAddress: string) => {
