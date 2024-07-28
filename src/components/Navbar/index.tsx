@@ -1,12 +1,7 @@
 import { ChangeEvent, FormEvent, useEffect, useState } from 'react'
 import { useRouter } from 'next/router'
-import { useDispatch, useSelector } from 'react-redux'
-import {
-  selectTmClient,
-  selectRPCAddress,
-  setRPCAddress,
-  setTmClient,
-} from '@/store/connectSlice'
+import { useSelector } from 'react-redux'
+import { selectTmClient, selectRPCAddress } from '@/store/connectSlice'
 import {
   Box,
   Heading,
@@ -36,10 +31,8 @@ import {
   FiRadio,
   FiSearch,
   FiRefreshCcw,
-  FiWifi,
-  FiWifiOff,
   FiZap,
-  FiZapOff,
+  FiTrash2,
 } from 'react-icons/fi'
 import { selectNewBlock } from '@/store/streamSlice'
 import { CheckIcon, MoonIcon, SunIcon } from '@chakra-ui/icons'
@@ -65,7 +58,6 @@ export default function Navbar() {
   )
   const [newAddress, setNewAddress] = useState('')
   const [error, setError] = useState(false)
-  const dispatch = useDispatch()
 
   const { colorMode, toggleColorMode } = useColorMode()
   const { isOpen, onOpen, onClose } = useDisclosure()
@@ -137,6 +129,10 @@ export default function Navbar() {
       return
     }
     await connectClient(addr)
+    window.localStorage.setItem(
+      LS_RPC_ADDRESS_LIST,
+      JSON.stringify([addr, ...rpcAddresses])
+    )
     setRPCList(getRPCList())
   }
 
@@ -158,26 +154,17 @@ export default function Navbar() {
         return
       }
 
-      const tmClient = await connectWebsocketClient(rpcAddress)
+      const tc = await connectWebsocketClient(rpcAddress)
 
-      if (!tmClient) {
+      if (!tc) {
         setError(true)
         setState('initial')
         return
       }
 
-      dispatch(setTmClient(tmClient))
-      dispatch(setRPCAddress(rpcAddress))
-      setState('success')
-
       window.localStorage.setItem(LS_RPC_ADDRESS, rpcAddress)
-      const rpcAddresses = JSON.parse(
-        window.localStorage.getItem(LS_RPC_ADDRESS_LIST) || '[]'
-      )
-      window.localStorage.setItem(
-        LS_RPC_ADDRESS_LIST,
-        JSON.stringify([rpcAddress, ...rpcAddresses])
-      )
+      window.location.reload()
+      setState('success')
     } catch (err) {
       console.error(err)
       setError(true)
@@ -423,7 +410,7 @@ export default function Navbar() {
                         aria-label="Remove RPC"
                         size="sm"
                         fontSize="20"
-                        icon={<FiZapOff />}
+                        icon={<FiTrash2 />}
                       />
                     </Stack>
                   ) : (
