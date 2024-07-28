@@ -32,7 +32,7 @@ import NextLink from 'next/link'
 import { useRouter } from 'next/router'
 import { selectSubsNewBlock, selectSubsTxEvent } from '@/store/streamSlice'
 import { useSelector } from 'react-redux'
-import { LS_RPC_ADDRESS } from '@/utils/constant'
+import { LS_RPC_ADDRESS, LS_RPC_ADDRESS_LIST } from '@/utils/constant'
 
 interface LinkItemProps {
   name: string
@@ -105,6 +105,7 @@ const SidebarContent = ({ onClose, ...rest }: SidebarProps) => {
     subsNewBlock?.unsubscribe()
     subsTxEvent?.unsubscribe()
     window.localStorage.removeItem(LS_RPC_ADDRESS)
+    window.localStorage.removeItem(LS_RPC_ADDRESS_LIST)
     window.location.replace('/')
   }
 
@@ -168,7 +169,7 @@ const SidebarContent = ({ onClose, ...rest }: SidebarProps) => {
             variant="outline"
             onClick={handleDisconnect}
           >
-            Disconnect
+            Disconnect All
           </Button>
         </Flex>
       </Flex>

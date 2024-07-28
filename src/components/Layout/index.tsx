@@ -21,7 +21,7 @@ import {
   setSubsTxEvent,
 } from '@/store/streamSlice'
 import { NewBlockEvent } from '@cosmjs/tendermint-rpc'
-import { TxEvent } from '@cosmjs/tendermint-rpc'
+import { TxEvent } from '@cosmjs/tendermint-rpc/build/tendermint37'
 import { LS_RPC_ADDRESS } from '@/utils/constant'
 import { validateConnection, connectWebsocketClient } from '@/rpc/client'
 import { NextRouter, useRouter } from 'next/router'
