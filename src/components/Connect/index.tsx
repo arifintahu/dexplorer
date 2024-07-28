@@ -12,7 +12,7 @@ import {
   Box,
   IconButton,
 } from '@chakra-ui/react'
-import { AddIcon, CheckIcon } from '@chakra-ui/icons'
+import { CheckIcon } from '@chakra-ui/icons'
 import { useDispatch } from 'react-redux'
 import {
   setConnectState,
@@ -20,8 +20,10 @@ import {
   setRPCAddress,
 } from '@/store/connectSlice'
 import Head from 'next/head'
-import { LS_RPC_ADDRESS } from '@/utils/constant'
+import { LS_RPC_ADDRESS, LS_RPC_ADDRESS_LIST } from '@/utils/constant'
 import { validateConnection, connectWebsocketClient } from '@/rpc/client'
+import { removeTrailingSlash } from '@/utils/helper'
+import { FiZap } from 'react-icons/fi'
 
 const chainList = [
   {
@@ -44,7 +46,8 @@ export default function Connect() {
 
   const submitForm = async (e: FormEvent) => {
     e.preventDefault()
-    await connectClient(address)
+    const addr = removeTrailingSlash(address)
+    await connectClient(addr)
   }
 
   const connectClient = async (rpcAddress: string) => {
@@ -79,6 +82,10 @@ export default function Connect() {
       setState('success')
 
       window.localStorage.setItem(LS_RPC_ADDRESS, rpcAddress)
+      window.localStorage.setItem(
+        LS_RPC_ADDRESS_LIST,
+        JSON.stringify([rpcAddress])
+      )
     } catch (err) {
       console.error(err)
       setError(true)
@@ -156,7 +163,14 @@ export default function Connect() {
             </FormControl>
             <FormControl w={{ base: '100%', md: '40%' }}>
               <Button
-                colorScheme={state === 'success' ? 'green' : 'blue'}
+                backgroundColor={useColorModeValue('light-theme', 'dark-theme')}
+                color={'white'}
+                _hover={{
+                  backgroundColor: useColorModeValue(
+                    'dark-theme',
+                    'light-theme'
+                  ),
+                }}
                 isLoading={state === 'submitting'}
                 w="100%"
                 type={state === 'success' ? 'button' : 'submit'}
@@ -208,11 +222,21 @@ export default function Connect() {
                 </Box>
                 <IconButton
                   onClick={() => selectChain(chain.rpc)}
-                  variant="outline"
-                  colorScheme="blue"
-                  aria-label="Add RPC"
-                  fontSize="20px"
-                  icon={<AddIcon />}
+                  backgroundColor={useColorModeValue(
+                    'light-theme',
+                    'dark-theme'
+                  )}
+                  color={'white'}
+                  _hover={{
+                    backgroundColor: useColorModeValue(
+                      'dark-theme',
+                      'light-theme'
+                    ),
+                  }}
+                  aria-label="Connect RPC"
+                  size="sm"
+                  fontSize="20"
+                  icon={<FiZap />}
                 />
               </Flex>
             )
