@@ -52,14 +52,14 @@ export default function GovParameters() {
         queryGovParams(tmClient, GOV_PARAMS_TYPE.TALLY),
       ])
         .then((responses) => {
-          if (responses[0].votingParams) {
-            dispatch(setGovVotingParams(responses[0].votingParams))
+          if (responses[0].params) {
+            dispatch(setGovVotingParams(responses[0].params))
           }
-          if (responses[1].depositParams) {
-            dispatch(setGovDepositParams(responses[1].depositParams))
+          if (responses[1].params) {
+            dispatch(setGovDepositParams(responses[1].params))
           }
-          if (responses[2].tallyParams) {
-            dispatch(setGovTallyParams(responses[2].tallyParams))
+          if (responses[2].params) {
+            dispatch(setGovTallyParams(responses[2].params))
           }
           setIsLoaded(true)
         })
@@ -118,7 +118,7 @@ export default function GovParameters() {
             </Heading>
             <Text pt="2" fontSize="lg" fontWeight={'medium'}>
               {displayDurationSeconds(
-                depositParams?.maxDepositPeriod?.seconds.low
+                Number(depositParams?.maxDepositPeriod?.seconds)
               )}
             </Text>
           </Box>
@@ -129,7 +129,9 @@ export default function GovParameters() {
               Voting Period
             </Heading>
             <Text pt="2" fontSize="lg" fontWeight={'medium'}>
-              {displayDurationSeconds(votingParams?.votingPeriod?.seconds.low)}
+              {displayDurationSeconds(
+                Number(votingParams?.votingPeriod?.seconds)
+              )}
             </Text>
           </Box>
         </Skeleton>
@@ -139,9 +141,7 @@ export default function GovParameters() {
               Quorum
             </Heading>
             <Text pt="2" fontSize="lg" fontWeight={'medium'}>
-              {convertRateToPercent(
-                fromUtf8(tallyParams?.quorum ?? new Uint8Array())
-              )}
+              {convertRateToPercent(tallyParams?.quorum)}
             </Text>
           </Box>
         </Skeleton>
@@ -151,9 +151,7 @@ export default function GovParameters() {
               Threshold
             </Heading>
             <Text pt="2" fontSize="lg" fontWeight={'medium'}>
-              {convertRateToPercent(
-                fromUtf8(tallyParams?.threshold ?? new Uint8Array())
-              )}
+              {convertRateToPercent(tallyParams?.threshold)}
             </Text>
           </Box>
         </Skeleton>
@@ -163,9 +161,7 @@ export default function GovParameters() {
               Veto Threshold
             </Heading>
             <Text pt="2" fontSize="lg" fontWeight={'medium'}>
-              {convertRateToPercent(
-                fromUtf8(tallyParams?.vetoThreshold ?? new Uint8Array())
-              )}
+              {convertRateToPercent(tallyParams?.vetoThreshold)}
             </Text>
           </Box>
         </Skeleton>

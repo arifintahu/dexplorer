@@ -22,10 +22,9 @@ import DataTable from '@/components/Datatable'
 import { createColumnHelper } from '@tanstack/react-table'
 import { getTypeMsg, displayDate } from '@/utils/helper'
 import { proposalStatus, proposalStatusList } from '@/utils/constant'
-import { decodeContentProposal } from '@/encoding'
 
 type Proposal = {
-  id: number
+  id: bigint
   title: string
   types: string
   status: proposalStatus | undefined
@@ -77,19 +76,19 @@ export default function Proposals() {
       setIsLoading(true)
       queryProposals(tmClient, page, perPage)
         .then((response) => {
-          setTotal(response.pagination?.total.low ?? 0)
+          setTotal(Number(response.pagination?.total))
           const proposalsList: Proposal[] = response.proposals.map((val) => {
             const votingEnd = val.votingEndTime?.nanos
-              ? new Date(val.votingEndTime?.seconds.low * 1000).toISOString()
+              ? new Date(
+                  Number(val.votingEndTime?.seconds) * 1000
+                ).toISOString()
               : null
-            const content = decodeContentProposal(
-              val.content?.typeUrl ?? '',
-              val.content?.value ?? new Uint8Array()
-            )
             return {
-              id: val.proposalId.low,
-              title: content.data?.title ?? '',
-              types: getTypeMsg(val.content?.typeUrl ?? ''),
+              id: val.id,
+              title: val.title,
+              types: getTypeMsg(
+                val.messages.length ? val.messages[0].typeUrl : ''
+              ),
               status: proposalStatusList.find(
                 (item) => item.id === Number(val.status.toString())
               ),
@@ -99,9 +98,10 @@ export default function Proposals() {
           setProposals(proposalsList)
           setIsLoading(false)
         })
-        .catch(() => {
+        .catch((err) => {
+          console.error(err)
           toast({
-            title: 'Failed to fetch datatable',
+            title: 'Failed to fetch proposals',
             description: '',
             status: 'error',
             duration: 5000,

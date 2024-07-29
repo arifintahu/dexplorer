@@ -75,7 +75,9 @@ export default function SlashingParameters() {
               Signed Blocks Window
             </Heading>
             <Text pt="2" fontSize="lg" fontWeight={'medium'}>
-              {params?.signedBlocksWindow.low.toLocaleString() ?? ''}
+              {params?.signedBlocksWindow
+                ? Number(params?.signedBlocksWindow)
+                : ''}
             </Text>
           </Box>
         </Skeleton>
@@ -98,7 +100,7 @@ export default function SlashingParameters() {
             </Heading>
             <Text pt="2" fontSize="lg" fontWeight={'medium'}>
               {displayDurationSeconds(
-                params?.downtimeJailDuration?.seconds.low
+                Number(params?.downtimeJailDuration?.seconds)
               )}
             </Text>
           </Box>

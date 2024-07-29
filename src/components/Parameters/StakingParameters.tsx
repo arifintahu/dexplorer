@@ -74,7 +74,7 @@ export default function StakingParameters() {
               Unbonding Time
             </Heading>
             <Text pt="2" fontSize="lg" fontWeight={'medium'}>
-              {displayDurationSeconds(params?.unbondingTime?.seconds?.low)}
+              {displayDurationSeconds(Number(params?.unbondingTime?.seconds))}
             </Text>
           </Box>
         </Skeleton>

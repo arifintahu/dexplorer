@@ -16,7 +16,7 @@ import {
   QueryProposalsResponse,
   QueryParamsRequest as QueryGovParamsRequest,
   QueryParamsResponse as QueryGovParamsResponse,
-} from 'cosmjs-types/cosmos/gov/v1beta1/query'
+} from 'cosmjs-types/cosmos/gov/v1/query'
 import {
   QueryParamsRequest as QueryDistributionParamsRequest,
   QueryParamsResponse as QueryDistributionParamsResponse,
@@ -63,7 +63,7 @@ export async function queryProposals(
   })
   const req = QueryProposalsRequest.encode(proposalsRequest).finish()
   const { value } = await queryClient.queryAbci(
-    '/cosmos.gov.v1beta1.Query/Proposals',
+    '/cosmos.gov.v1.Query/Proposals',
     req
   )
   return QueryProposalsResponse.decode(value)
@@ -102,7 +102,7 @@ export async function queryGovParams(
     paramsType: paramsType,
   }).finish()
   const { value } = await queryClient.queryAbci(
-    '/cosmos.gov.v1beta1.Query/Params',
+    '/cosmos.gov.v1.Query/Params',
     req
   )
   return QueryGovParamsResponse.decode(value)
