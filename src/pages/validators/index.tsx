@@ -68,7 +68,7 @@ export default function Validators() {
       setIsLoading(true)
       queryActiveValidators(tmClient, page, perPage)
         .then((response) => {
-          setTotal(response.pagination?.total.low ?? 0)
+          setTotal(Number(response.pagination?.total))
           const validatorData: ValidatorData[] = response.validators.map(
             (val) => {
               return {
