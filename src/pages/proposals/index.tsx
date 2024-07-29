@@ -99,9 +99,10 @@ export default function Proposals() {
           setProposals(proposalsList)
           setIsLoading(false)
         })
-        .catch(() => {
+        .catch((err) => {
+          console.error(err)
           toast({
-            title: 'Failed to fetch datatable',
+            title: 'Failed to fetch proposals',
             description: '',
             status: 'error',
             duration: 5000,
