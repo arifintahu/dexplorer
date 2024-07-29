@@ -63,7 +63,7 @@ export async function queryProposals(
   })
   const req = QueryProposalsRequest.encode(proposalsRequest).finish()
   const { value } = await queryClient.queryAbci(
-    '/cosmos.gov.v1beta1.Query/Proposals',
+    '/cosmos.gov.v1.Query/Proposals',
     req
   )
   return QueryProposalsResponse.decode(value)
