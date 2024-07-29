@@ -74,7 +74,7 @@ export default function MintParameters() {
               Blocks per Year
             </Heading>
             <Text pt="2" fontSize="lg" fontWeight={'medium'}>
-              {params?.blocksPerYear.low.toLocaleString() ?? ''}
+              {params?.blocksPerYear ? Number(params?.blocksPerYear) : ''}
             </Text>
           </Box>
         </Skeleton>
