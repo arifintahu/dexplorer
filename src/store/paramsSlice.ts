@@ -9,7 +9,7 @@ import {
   VotingParams,
   DepositParams,
   TallyParams,
-} from 'cosmjs-types/cosmos/gov/v1beta1/gov'
+} from 'cosmjs-types/cosmos/gov/v1/gov'
 
 // Type for our state
 export interface ParamsState {
