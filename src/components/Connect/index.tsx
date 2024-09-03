@@ -27,12 +27,8 @@ import { FiZap } from 'react-icons/fi'
 
 const chainList = [
   {
-    name: 'Cosmos Hub',
-    rpc: 'https://cosmoshub-rpc.lavenderfive.com',
-  },
-  {
-    name: 'Osmosis',
-    rpc: 'https://rpc-osmosis.ecostake.com',
+    name: 'Surge',
+    rpc: 'https://superstack.surge.dev/rpc',
   },
 ]
 
@@ -102,8 +98,11 @@ export default function Connect() {
   return (
     <>
       <Head>
-        <title>Dexplorer | Connect</title>
-        <meta name="description" content="Dexplorer | Connect to RPC Address" />
+        <title>Surge Explorer | Connect</title>
+        <meta
+          name="description"
+          content="Surge Explorer | Connect to RPC Address"
+        />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
@@ -129,7 +128,7 @@ export default function Connect() {
             fontFamily="monospace"
             fontWeight="bold"
           >
-            Dexplorer
+            Surge Explorer
           </Heading>
           <Text as={'h2'} fontSize="lg" textAlign={'center'} mb={5}>
             Disposable Cosmos SDK Chain Explorer

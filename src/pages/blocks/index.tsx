@@ -114,7 +114,7 @@ export default function Blocks() {
   return (
     <>
       <Head>
-        <title>Blocks | Dexplorer</title>
+        <title>Blocks | Surge Explorer</title>
         <meta name="description" content="Blocks | Dexplorer" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="icon" href="/favicon.ico" />

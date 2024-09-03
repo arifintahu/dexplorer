@@ -128,7 +128,7 @@ const SidebarContent = ({ onClose, ...rest }: SidebarProps) => {
             justifyContent="space-between"
           >
             <Text fontSize="2xl" fontFamily="monospace" fontWeight="bold">
-              Dexplorer
+              Surge Explorer
             </Text>
             <CloseButton
               display={{ base: 'flex', md: 'none' }}
@@ -265,7 +265,7 @@ const MobileNav = ({ onOpen, ...rest }: MobileProps) => {
       />
 
       <Text fontSize="2xl" ml="8" fontFamily="monospace" fontWeight="bold">
-        Dexplorer
+        Surge Explorer
       </Text>
     </Flex>
   )

@@ -141,7 +141,7 @@ export default function DetailBlock() {
   return (
     <>
       <Head>
-        <title>Detail Transaction | Dexplorer</title>
+        <title>Detail Transaction | Surge Explorer</title>
         <meta name="description" content="Txs | Dexplorer" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="icon" href="/favicon.ico" />

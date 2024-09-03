@@ -5,8 +5,8 @@ export default function LoadingPage() {
   return (
     <>
       <Head>
-        <title>Dexplorer</title>
-        <meta name="description" content="Dexplorer" />
+        <title>Surge Explorer</title>
+        <meta name="description" content="Surge Explorer" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="icon" href="/favicon.ico" />
       </Head>

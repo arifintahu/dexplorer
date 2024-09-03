@@ -122,7 +122,7 @@ export default function Proposals() {
   return (
     <>
       <Head>
-        <title>Proposals | Dexplorer</title>
+        <title>Proposals | Surge Explorer</title>
         <meta name="description" content="Proposals | Dexplorer" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="icon" href="/favicon.ico" />
