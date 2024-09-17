@@ -120,3 +120,12 @@ export function removeTrailingSlash(url: string): string {
   // Return the URL as is if it doesn't end with a trailing slash
   return url
 }
+
+export function isValidJSON(text: string): boolean {
+  try {
+    JSON.parse(text)
+    return true
+  } catch (error) {
+    return false
+  }
+}
