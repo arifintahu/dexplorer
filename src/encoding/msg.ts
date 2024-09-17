@@ -2,7 +2,10 @@ import { MsgSend } from 'cosmjs-types/cosmos/bank/v1beta1/tx'
 import { MsgWithdrawDelegatorReward } from 'cosmjs-types/cosmos/distribution/v1beta1/tx'
 import { MsgDelegate } from 'cosmjs-types/cosmos/staking/v1beta1/tx'
 import { MsgUpdateClient } from 'cosmjs-types/ibc/core/client/v1/tx'
-import { MsgAcknowledgement } from 'cosmjs-types/ibc/core/channel/v1/tx'
+import {
+  MsgAcknowledgement,
+  MsgRecvPacket,
+} from 'cosmjs-types/ibc/core/channel/v1/tx'
 import {
   MsgExec,
   MsgGrant,
@@ -17,6 +20,7 @@ const TYPE = {
   MsgDelegate: '/cosmos.staking.v1beta1.MsgDelegate',
   MsgUpdateClient: '/ibc.core.client.v1.MsgUpdateClient',
   MsgAcknowledgement: '/ibc.core.channel.v1.MsgAcknowledgement',
+  MsgRecvPacket: '/ibc.core.channel.v1.MsgRecvPacket',
   MsgExec: '/cosmos.authz.v1beta1.MsgExec',
   MsgGrant: '/cosmos.authz.v1beta1.MsgGrant',
   MsgRevoke: '/cosmos.authz.v1beta1.MsgRevoke',
@@ -45,6 +49,9 @@ export const decodeMsg = (typeUrl: string, value: Uint8Array): DecodeMsg => {
       break
     case TYPE.MsgAcknowledgement:
       data = MsgAcknowledgement.decode(value)
+      break
+    case TYPE.MsgRecvPacket:
+      data = MsgRecvPacket.decode(value)
       break
     case TYPE.MsgExec:
       data = MsgExec.decode(value)

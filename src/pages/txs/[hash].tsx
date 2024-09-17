@@ -37,6 +37,7 @@ import {
   getTypeMsg,
 } from '@/utils/helper'
 import { decodeMsg, DecodeMsg } from '@/encoding'
+import CodeBlock from '@/components/CodeBlock'
 
 export default function DetailBlock() {
   const router = useRouter()
@@ -93,7 +94,8 @@ export default function DetailBlock() {
   const showMsgData = (msgData: any) => {
     if (msgData) {
       if (Array.isArray(msgData)) {
-        return JSON.stringify(msgData)
+        const data = JSON.stringify(msgData, null, 2)
+        return <CodeBlock language="json" codeString={data}></CodeBlock>
       }
 
       if (!Array.isArray(msgData) && msgData.length) {
