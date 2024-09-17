@@ -1,9 +1,5 @@
 import { Box, useColorMode } from '@chakra-ui/react'
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter'
-import {
-  materialDark,
-  materialLight,
-} from 'react-syntax-highlighter/dist/esm/styles/prism'
 
 const CodeBlock = ({
   language,
@@ -15,12 +11,7 @@ const CodeBlock = ({
   const { colorMode } = useColorMode()
   return (
     <Box overflow="hidden">
-      <SyntaxHighlighter
-        language={language}
-        style={colorMode === 'dark' ? materialDark : materialLight}
-      >
-        {codeString}
-      </SyntaxHighlighter>
+      <SyntaxHighlighter language={language}>{codeString}</SyntaxHighlighter>
     </Box>
   )
 }
