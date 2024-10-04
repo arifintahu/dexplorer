@@ -28,7 +28,7 @@ import { FiZap } from 'react-icons/fi'
 const chainList = [
   {
     name: 'Surge',
-    rpc: 'https://superstack.surge.dev/rpc',
+    rpc: 'https://devnet.surge.dev/rpc',
   },
 ]
 
