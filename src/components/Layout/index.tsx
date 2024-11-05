@@ -22,7 +22,11 @@ import {
 } from '@/store/streamSlice'
 import { NewBlockEvent } from '@cosmjs/tendermint-rpc'
 import { TxEvent } from '@cosmjs/tendermint-rpc/build/tendermint37'
-import { LS_RPC_ADDRESS } from '@/utils/constant'
+import {
+  LS_RPC_ADDRESS,
+  LS_RPC_ADDRESS_LIST,
+  RPC_ADDRESS,
+} from '@/utils/constant'
 import { validateConnection, connectWebsocketClient } from '@/rpc/client'
 import { NextRouter, useRouter } from 'next/router'
 import { getUrlFromPath, isValidUrl, normalizeUrl } from '@/utils/helper'
@@ -35,6 +39,11 @@ export default function Layout({ children }: { children: ReactNode }) {
   const dispatch = useDispatch()
   const router = useRouter()
   const [isLoading, setIsLoading] = useState(true)
+  const [address, setAddress] = useState('')
+  const [error, setError] = useState(false)
+  const [state, setState] = useState<'initial' | 'submitting' | 'success'>(
+    'initial'
+  )
 
   useEffect(() => {
     if (tmClient && !newBlock) {
@@ -50,10 +59,14 @@ export default function Layout({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     if (isLoading) {
+      console.log(isLoading)
       const url = getQueryUrl(router)
+
+      selectChain(RPC_ADDRESS ?? '')
       if (url.length) {
         const address = normalizeUrl(url)
-        connect(address)
+        console.log(address, 'address')
+
         return
       }
 
@@ -63,9 +76,9 @@ export default function Layout({ children }: { children: ReactNode }) {
         return
       }
 
-      connect(address)
+      window.localStorage.setItem(LS_RPC_ADDRESS, address)
     }
-  }, [isLoading])
+  }, [])
 
   const updateNewBlock = (event: NewBlockEvent): void => {
     dispatch(setNewBlock(event))
@@ -87,34 +100,54 @@ export default function Layout({ children }: { children: ReactNode }) {
     return url
   }
 
-  const connect = async (address: string) => {
+  const connectClient = async (rpcAddress: string) => {
+    console.log(rpcAddress, 'rpcAddress')
     try {
-      const isValid = await validateConnection(address)
-      if (!isValid) {
-        window.localStorage.removeItem(LS_RPC_ADDRESS)
-        setIsLoading(false)
+      setError(false)
+      setState('submitting')
+
+      if (!rpcAddress) {
+        setError(true)
+        setState('initial')
         return
       }
 
-      const tmClient = await connectWebsocketClient(address)
+      const isValid = await validateConnection(rpcAddress)
+      if (!isValid) {
+        setError(true)
+        setState('initial')
+        return
+      }
+
+      const tmClient = await connectWebsocketClient(rpcAddress)
+
       if (!tmClient) {
-        window.localStorage.removeItem(LS_RPC_ADDRESS)
-        setIsLoading(false)
+        setError(true)
+        setState('initial')
         return
       }
 
       dispatch(setConnectState(true))
       dispatch(setTmClient(tmClient))
-      dispatch(setRPCAddress(address))
+      dispatch(setRPCAddress(rpcAddress))
+      setState('success')
 
-      setIsLoading(false)
-      window.localStorage.setItem(LS_RPC_ADDRESS, address)
+      window.localStorage.setItem(LS_RPC_ADDRESS, rpcAddress)
+      window.localStorage.setItem(
+        LS_RPC_ADDRESS_LIST,
+        JSON.stringify([rpcAddress])
+      )
     } catch (err) {
       console.error(err)
-      window.localStorage.removeItem(LS_RPC_ADDRESS)
-      setIsLoading(false)
+      setError(true)
+      setState('initial')
       return
     }
+  }
+
+  const selectChain = (rpcAddress: string) => {
+    setAddress(rpcAddress)
+    connectClient(rpcAddress)
   }
 
   return (
@@ -128,7 +161,7 @@ export default function Layout({ children }: { children: ReactNode }) {
       ) : (
         <></>
       )}
-      {!connectState && !isLoading ? <Connect /> : <></>}
+      {/* {!connectState && !isLoading ? <Connect /> : <></>} */}
     </>
   )
 }

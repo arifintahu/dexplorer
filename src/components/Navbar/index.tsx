@@ -215,38 +215,6 @@ export default function Navbar() {
         justifyContent={'space-between'}
       >
         <HStack>
-          <Icon mr="4" fontSize="32" color={'green.600'} as={FiRadio} />
-          <Flex
-            flexDirection="row"
-            gap="4"
-            border="1px"
-            p="2"
-            borderRadius="md"
-            borderColor={useColorModeValue('gray.500', 'gray.100')}
-          >
-            <Box>
-              <Skeleton isLoaded={isLoadedSkeleton}>
-                <Heading size="xs">
-                  {newBlock?.header.chainId
-                    ? newBlock?.header.chainId
-                    : status?.nodeInfo.network}
-                </Heading>
-              </Skeleton>
-              <Skeleton isLoaded={isLoadedSkeleton}>
-                <Text fontSize="sm">{address}</Text>
-              </Skeleton>
-            </Box>
-            <IconButton
-              variant="solid"
-              aria-label="Change RPC"
-              size="md"
-              fontSize="20"
-              icon={<FiRefreshCcw />}
-              onClick={onChangeRPC}
-            />
-          </Flex>
-        </HStack>
-        <HStack>
           <IconButton
             variant="ghost"
             aria-label="Search"

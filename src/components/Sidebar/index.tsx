@@ -44,22 +44,22 @@ const LinkItems: Array<LinkItemProps> = [
   { name: 'Home', icon: FiHome, route: '/' },
   { name: 'Blocks', icon: FiBox, route: '/blocks' },
   { name: 'Validators', icon: FiCompass, route: '/validators' },
-  { name: 'Proposals', icon: FiStar, route: '/proposals' },
-  { name: 'Parameters', icon: FiSliders, route: '/parameters' },
+  // { name: 'Proposals', icon: FiStar, route: '/proposals' },
+  // { name: 'Parameters', icon: FiSliders, route: '/parameters' },
 ]
 const RefLinkItems: Array<LinkItemProps> = [
   {
     name: 'Github',
     icon: FiGithub,
-    route: 'https://github.com/arifintahu/dexplorer',
+    route: 'https://github.com/surgebuild',
     isBlank: true,
   },
-  {
-    name: 'Report Issues',
-    icon: FiAlertCircle,
-    route: 'https://github.com/arifintahu/dexplorer/issues',
-    isBlank: true,
-  },
+  // {
+  //   name: 'Report Issues',
+  //   icon: FiAlertCircle,
+  //   route: 'https://github.com/arifintahu/dexplorer/issues',
+  //   isBlank: true,
+  // },
 ]
 
 export default function Sidebar({ children }: { children: ReactNode }) {
@@ -162,7 +162,7 @@ const SidebarContent = ({ onClose, ...rest }: SidebarProps) => {
             </NavItem>
           ))}
         </Box>
-        <Flex justifyContent="center" mb="4">
+        {/* <Flex justifyContent="center" mb="4">
           <Button
             leftIcon={<FiLogOut />}
             colorScheme="red"
@@ -171,7 +171,7 @@ const SidebarContent = ({ onClose, ...rest }: SidebarProps) => {
           >
             Disconnect All
           </Button>
-        </Flex>
+        </Flex> */}
       </Flex>
     </Box>
   )
