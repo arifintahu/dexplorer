@@ -92,7 +92,6 @@ export default function Layout({ children }: { children: ReactNode }) {
   }
 
   const connectClient = async (rpcAddress: string) => {
-    debugger
     try {
       setError(false)
       setState('submitting')
