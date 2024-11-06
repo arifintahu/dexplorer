@@ -59,8 +59,6 @@ export default function Layout({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     if (isLoading) {
-      console.log(isLoading)
-
       selectChain(RPC_ADDRESS ?? '')
 
       const address = window.localStorage.getItem(LS_RPC_ADDRESS)

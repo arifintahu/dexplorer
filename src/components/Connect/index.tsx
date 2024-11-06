@@ -37,19 +37,18 @@ export default function Connect() {
   const [state, setState] = useState<'initial' | 'submitting' | 'success'>(
     'initial'
   )
-  console.log(state, 'state')
+
   const [error, setError] = useState(false)
   const dispatch = useDispatch()
 
   const submitForm = async (e: FormEvent) => {
     e.preventDefault()
     const addr = removeTrailingSlash(address)
-    console.log(addr, 'addr')
+
     await connectClient(addr)
   }
 
   const connectClient = async (rpcAddress: string) => {
-    console.log(rpcAddress, 'rpcAddress')
     try {
       setError(false)
       setState('submitting')
