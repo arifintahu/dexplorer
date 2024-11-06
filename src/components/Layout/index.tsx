@@ -60,15 +60,8 @@ export default function Layout({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (isLoading) {
       console.log(isLoading)
-      const url = getQueryUrl(router)
 
       selectChain(RPC_ADDRESS ?? '')
-      if (url.length) {
-        const address = normalizeUrl(url)
-        console.log(address, 'address')
-
-        return
-      }
 
       const address = window.localStorage.getItem(LS_RPC_ADDRESS)
       if (!address) {
@@ -78,7 +71,7 @@ export default function Layout({ children }: { children: ReactNode }) {
 
       window.localStorage.setItem(LS_RPC_ADDRESS, address)
     }
-  }, [])
+  }, [isLoading])
 
   const updateNewBlock = (event: NewBlockEvent): void => {
     dispatch(setNewBlock(event))
@@ -101,7 +94,7 @@ export default function Layout({ children }: { children: ReactNode }) {
   }
 
   const connectClient = async (rpcAddress: string) => {
-    console.log(rpcAddress, 'rpcAddress')
+    debugger
     try {
       setError(false)
       setState('submitting')
@@ -137,6 +130,7 @@ export default function Layout({ children }: { children: ReactNode }) {
         LS_RPC_ADDRESS_LIST,
         JSON.stringify([rpcAddress])
       )
+      setIsLoading(false)
     } catch (err) {
       console.error(err)
       setError(true)

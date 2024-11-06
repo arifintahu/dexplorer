@@ -212,7 +212,7 @@ export default function Navbar() {
         borderRadius={4}
         marginBottom={4}
         display={'flex'}
-        justifyContent={'space-between'}
+        justifyContent={'flex-end'}
       >
         <HStack>
           <IconButton

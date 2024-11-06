@@ -140,38 +140,40 @@ const SidebarContent = ({ onClose, ...rest }: SidebarProps) => {
               {link.name}
             </NavItem>
           ))}
-          <Heading
-            mt="6"
-            p="4"
-            mx="4"
-            size={'xs'}
-            textTransform="uppercase"
-            textColor={useColorModeValue('gray.500', 'gray.100')}
-            fontWeight="medium"
-          >
-            Links
-          </Heading>
-          {RefLinkItems.map((link) => (
-            <NavItem
-              key={link.name}
-              icon={link.icon}
-              route={link.route}
-              isBlank={link.isBlank}
-            >
-              {link.name}
-            </NavItem>
-          ))}
         </Box>
-        {/* <Flex justifyContent="center" mb="4">
-          <Button
+        <Flex justifyContent="left" mb="4">
+          <Box>
+            {/* <Button
             leftIcon={<FiLogOut />}
             colorScheme="red"
             variant="outline"
             onClick={handleDisconnect}
           >
             Disconnect All
-          </Button>
-        </Flex> */}
+          </Button> */}
+            <Heading
+              mt="6"
+              p="4"
+              mx="4"
+              size={'xs'}
+              textTransform="uppercase"
+              textColor={useColorModeValue('gray.500', 'gray.100')}
+              fontWeight="medium"
+            >
+              Links
+            </Heading>
+            {RefLinkItems.map((link) => (
+              <NavItem
+                key={link.name}
+                icon={link.icon}
+                route={link.route}
+                isBlank={link.isBlank}
+              >
+                {link.name}
+              </NavItem>
+            ))}
+          </Box>
+        </Flex>
       </Flex>
     </Box>
   )
