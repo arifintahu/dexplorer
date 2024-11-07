@@ -9,13 +9,14 @@ import {
   Tooltip,
   useColorModeValue,
 } from '@chakra-ui/react'
-import { useState, useEffect } from 'react'
-import { useSelector, useDispatch } from 'react-redux'
+import { fromUtf8 } from '@cosmjs/encoding'
+import { useEffect, useState } from 'react'
+import { useDispatch, useSelector } from 'react-redux'
+
+import { querySlashingParams } from '@/rpc/abci'
 import { selectTmClient } from '@/store/connectSlice'
 import { selectSlashingParams, setSlashingParams } from '@/store/paramsSlice'
-import { querySlashingParams } from '@/rpc/abci'
-import { displayDurationSeconds, convertRateToPercent } from '@/utils/helper'
-import { fromUtf8 } from '@cosmjs/encoding'
+import { convertRateToPercent, displayDurationSeconds } from '@/utils/helper'
 
 export default function SlashingParameters() {
   const [isHidden, setIsHidden] = useState(false)

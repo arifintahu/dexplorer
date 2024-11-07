@@ -1,6 +1,7 @@
-import { replaceHTTPtoWebsocket } from '@/utils/helper'
-import { Tendermint37Client, WebsocketClient } from '@cosmjs/tendermint-rpc'
 import { StreamingSocket } from '@cosmjs/socket'
+import { Tendermint37Client, WebsocketClient } from '@cosmjs/tendermint-rpc'
+
+import { replaceHTTPtoWebsocket } from '@/utils/helper'
 
 export async function validateConnection(rpcAddress: string): Promise<Boolean> {
   return new Promise((resolve) => {

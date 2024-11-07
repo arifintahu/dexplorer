@@ -1,38 +1,39 @@
-import Head from 'next/head'
-import { useEffect, useState } from 'react'
-import { useSelector } from 'react-redux'
-import { NewBlockEvent, TxEvent } from '@cosmjs/tendermint-rpc'
 import {
   Box,
   Divider,
-  HStack,
   Heading,
+  HStack,
   Icon,
   Link,
+  Tab,
   Table,
-  useColorModeValue,
   TableContainer,
+  TabList,
+  TabPanel,
+  TabPanels,
+  Tabs,
+  Tag,
+  TagLabel,
+  TagLeftIcon,
   Tbody,
   Td,
   Text,
   Th,
   Thead,
   Tr,
-  Tabs,
-  TabList,
-  Tab,
-  TabPanels,
-  TabPanel,
-  Tag,
-  TagLeftIcon,
-  TagLabel,
+  useColorModeValue,
 } from '@chakra-ui/react'
-import NextLink from 'next/link'
-import { FiChevronRight, FiHome, FiCheck, FiX } from 'react-icons/fi'
-import { selectNewBlock, selectTxEvent } from '@/store/streamSlice'
 import { toHex } from '@cosmjs/encoding'
+import { NewBlockEvent, TxEvent } from '@cosmjs/tendermint-rpc'
 import { TxBody } from 'cosmjs-types/cosmos/tx/v1beta1/tx'
-import { timeFromNow, trimHash, getTypeMsg } from '@/utils/helper'
+import Head from 'next/head'
+import NextLink from 'next/link'
+import { useEffect, useState } from 'react'
+import { FiCheck, FiChevronRight, FiHome, FiX } from 'react-icons/fi'
+import { useSelector } from 'react-redux'
+
+import { selectNewBlock, selectTxEvent } from '@/store/streamSlice'
+import { getTypeMsg, timeFromNow, trimHash } from '@/utils/helper'
 
 const MAX_ROWS = 20
 

@@ -1,35 +1,37 @@
+import { NewBlockEvent } from '@cosmjs/tendermint-rpc'
+import { TxEvent } from '@cosmjs/tendermint-rpc/build/tendermint37'
+import { NextRouter, useRouter } from 'next/router'
 import { ReactNode, useEffect, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
-import Sidebar from '../Sidebar'
-import Connect from '../Connect'
-import LoadingPage from '../LoadingPage'
-import Navbar from '../Navbar'
+
+import { connectWebsocketClient, validateConnection } from '@/rpc/client'
+import { subscribeNewBlock, subscribeTx } from '@/rpc/subscribe'
 import {
   selectConnectState,
   selectTmClient,
   setConnectState,
-  setTmClient,
   setRPCAddress,
+  setTmClient,
 } from '@/store/connectSlice'
-import { subscribeNewBlock, subscribeTx } from '@/rpc/subscribe'
 import {
-  setNewBlock,
   selectNewBlock,
-  setTxEvent,
   selectTxEvent,
+  setNewBlock,
   setSubsNewBlock,
   setSubsTxEvent,
+  setTxEvent,
 } from '@/store/streamSlice'
-import { NewBlockEvent } from '@cosmjs/tendermint-rpc'
-import { TxEvent } from '@cosmjs/tendermint-rpc/build/tendermint37'
 import {
   LS_RPC_ADDRESS,
   LS_RPC_ADDRESS_LIST,
   RPC_ADDRESS,
 } from '@/utils/constant'
-import { validateConnection, connectWebsocketClient } from '@/rpc/client'
-import { NextRouter, useRouter } from 'next/router'
 import { getUrlFromPath, isValidUrl, normalizeUrl } from '@/utils/helper'
+
+import Connect from '../Connect'
+import LoadingPage from '../LoadingPage'
+import Navbar from '../Navbar'
+import Sidebar from '../Sidebar'
 
 export default function Layout({ children }: { children: ReactNode }) {
   const connectState = useSelector(selectConnectState)
@@ -143,15 +145,15 @@ export default function Layout({ children }: { children: ReactNode }) {
 
   return (
     <>
-      {/* {isLoading ? <LoadingPage /> : <></>} */}
-      {/* {connectState && !isLoading ? ( */}
-      <Sidebar>
-        <Navbar />
-        {children}
-      </Sidebar>
-      {/* ) : (
+      {isLoading ? <LoadingPage /> : <></>}
+      {connectState && !isLoading ? (
+        <Sidebar>
+          <Navbar />
+          {children}
+        </Sidebar>
+      ) : (
         <></>
-      )} */}
+      )}
       {/* {!connectState && !isLoading ? <Connect /> : <></>} */}
     </>
   )

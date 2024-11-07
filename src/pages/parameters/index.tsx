@@ -1,7 +1,7 @@
 import {
   Divider,
-  HStack,
   Heading,
+  HStack,
   Icon,
   Link,
   Text,
@@ -10,11 +10,12 @@ import {
 import Head from 'next/head'
 import NextLink from 'next/link'
 import { FiChevronRight, FiHome } from 'react-icons/fi'
-import MintParameters from '@/components/Parameters/MintParameters'
-import StakingParameters from '@/components/Parameters/StakingParameters'
+
 import DistributionParameters from '@/components/Parameters/DistributionParameters'
-import SlashingParameters from '@/components/Parameters/SlashingParameters'
 import GovParameters from '@/components/Parameters/GovParameters'
+import MintParameters from '@/components/Parameters/MintParameters'
+import SlashingParameters from '@/components/Parameters/SlashingParameters'
+import StakingParameters from '@/components/Parameters/StakingParameters'
 
 export default function Parameters() {
   return (

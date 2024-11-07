@@ -4,8 +4,8 @@ import {
   CardBody,
   CardHeader,
   Divider,
-  HStack,
   Heading,
+  HStack,
   Icon,
   Link,
   Table,
@@ -20,23 +20,24 @@ import {
   useColorModeValue,
   useToast,
 } from '@chakra-ui/react'
-import { FiChevronRight, FiHome, FiCheck, FiX } from 'react-icons/fi'
-import NextLink from 'next/link'
+import { Block, Coin, IndexedTx } from '@cosmjs/stargate'
+import { Tx } from 'cosmjs-types/cosmos/tx/v1beta1/tx'
 import Head from 'next/head'
+import NextLink from 'next/link'
 import { useRouter } from 'next/router'
 import { useEffect, useState } from 'react'
+import { FiCheck, FiChevronRight, FiHome, FiX } from 'react-icons/fi'
 import { useSelector } from 'react-redux'
+
+import { DecodeMsg, decodeMsg } from '@/encoding'
+import { getBlock, getTx } from '@/rpc/query'
 import { selectTmClient } from '@/store/connectSlice'
-import { getTx, getBlock } from '@/rpc/query'
-import { IndexedTx, Block, Coin } from '@cosmjs/stargate'
-import { Tx } from 'cosmjs-types/cosmos/tx/v1beta1/tx'
 import {
-  timeFromNow,
   displayDate,
-  isBech32Address,
   getTypeMsg,
+  isBech32Address,
+  timeFromNow,
 } from '@/utils/helper'
-import { decodeMsg, DecodeMsg } from '@/encoding'
 
 export default function DetailBlock() {
   const router = useRouter()

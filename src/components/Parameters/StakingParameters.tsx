@@ -9,11 +9,12 @@ import {
   Tooltip,
   useColorModeValue,
 } from '@chakra-ui/react'
-import { useState, useEffect } from 'react'
-import { useSelector, useDispatch } from 'react-redux'
+import { useEffect, useState } from 'react'
+import { useDispatch, useSelector } from 'react-redux'
+
+import { queryStakingParams } from '@/rpc/abci'
 import { selectTmClient } from '@/store/connectSlice'
 import { selectStakingParams, setStakingParams } from '@/store/paramsSlice'
-import { queryStakingParams } from '@/rpc/abci'
 import { displayDurationSeconds } from '@/utils/helper'
 
 export default function StakingParameters() {

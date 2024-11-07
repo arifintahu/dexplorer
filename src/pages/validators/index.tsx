@@ -1,23 +1,24 @@
-import Head from 'next/head'
 import {
   Box,
   Divider,
-  HStack,
   Heading,
+  HStack,
   Icon,
   Link,
-  useColorModeValue,
   Text,
+  useColorModeValue,
   useToast,
 } from '@chakra-ui/react'
-import { useEffect, useState } from 'react'
-import { useSelector } from 'react-redux'
-import NextLink from 'next/link'
-import { FiChevronRight, FiHome } from 'react-icons/fi'
-import { selectTmClient } from '@/store/connectSlice'
-import { queryActiveValidators } from '@/rpc/abci'
-import DataTable from '@/components/Datatable'
 import { createColumnHelper } from '@tanstack/react-table'
+import Head from 'next/head'
+import NextLink from 'next/link'
+import { useEffect, useState } from 'react'
+import { FiChevronRight, FiHome } from 'react-icons/fi'
+import { useSelector } from 'react-redux'
+
+import DataTable from '@/components/Datatable'
+import { queryActiveValidators } from '@/rpc/abci'
+import { selectTmClient } from '@/store/connectSlice'
 import { convertRateToPercent, convertVotingPower } from '@/utils/helper'
 
 type ValidatorData = {

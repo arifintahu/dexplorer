@@ -1,37 +1,35 @@
-import React, { ReactNode, useEffect, useState } from 'react'
 import {
-  IconButton,
   Box,
+  BoxProps,
   CloseButton,
-  Flex,
-  Icon,
-  useColorModeValue,
-  Link,
   Drawer,
   DrawerContent,
-  Text,
-  useDisclosure,
-  BoxProps,
+  Flex,
   FlexProps,
-  Image,
   HStack,
+  Icon,
+  IconButton,
+  Image,
+  Link,
+  Text,
+  useColorModeValue,
+  useDisclosure,
 } from '@chakra-ui/react'
-import { MdOutlineHome } from 'react-icons/md'
-import { FiMenu } from 'react-icons/fi'
-import { IconType } from 'react-icons'
 import NextLink from 'next/link'
 import { useRouter } from 'next/router'
-import { selectSubsNewBlock, selectSubsTxEvent } from '@/store/streamSlice'
-import { useSelector } from 'react-redux'
-import { images } from '@/utils/images'
-import { HiOutlineUsers } from 'react-icons/hi2'
-import { GiTwoCoins } from 'react-icons/gi'
-import { PiTreeStructure, PiDevToLogoFill } from 'react-icons/pi'
+import React, { ReactNode, useEffect, useState } from 'react'
+import { IconType } from 'react-icons'
+import { AiFillExclamationCircle } from 'react-icons/ai'
 import { FaGlobeAmericas } from 'react-icons/fa'
+import { FiMenu } from 'react-icons/fi'
+import { GiTwoCoins } from 'react-icons/gi'
+import { HiOutlineUsers } from 'react-icons/hi2'
 import { IoLogoGithub } from 'react-icons/io'
+import { MdOutlineHome } from 'react-icons/md'
+import { PiDevToLogoFill, PiTreeStructure } from 'react-icons/pi'
 import { VscGlobe } from 'react-icons/vsc'
 
-import { AiFillExclamationCircle } from 'react-icons/ai'
+import { images } from '@/utils/images'
 
 interface LinkItemProps {
   name: string
@@ -110,14 +108,11 @@ interface SidebarProps extends BoxProps {
 }
 
 const SidebarContent = ({ onClose, ...rest }: SidebarProps) => {
-  const subsNewBlock = useSelector(selectSubsNewBlock)
-  const subsTxEvent = useSelector(selectSubsTxEvent)
-
   return (
     <Box
       bg={'dark-bg'}
       borderRight="1px"
-      borderRightColor={'border-gray-900'}
+      borderRightColor={'gray-900'}
       w={{ base: 'full', md: 80 }}
       pos="fixed"
       h="full"

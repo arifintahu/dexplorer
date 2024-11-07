@@ -9,25 +9,26 @@ import {
   Tooltip,
   useColorModeValue,
 } from '@chakra-ui/react'
-import { useState, useEffect } from 'react'
-import { useSelector, useDispatch } from 'react-redux'
+import { fromUtf8 } from '@cosmjs/encoding'
+import { useEffect, useState } from 'react'
+import { useDispatch, useSelector } from 'react-redux'
+
+import { queryGovParams } from '@/rpc/abci'
 import { selectTmClient } from '@/store/connectSlice'
 import {
-  selectGovVotingParams,
   selectGovDepositParams,
   selectGovTallyParams,
-  setGovVotingParams,
+  selectGovVotingParams,
   setGovDepositParams,
   setGovTallyParams,
+  setGovVotingParams,
 } from '@/store/paramsSlice'
-import { queryGovParams } from '@/rpc/abci'
+import { GOV_PARAMS_TYPE } from '@/utils/constant'
 import {
-  displayDurationSeconds,
   convertRateToPercent,
   displayCoin,
+  displayDurationSeconds,
 } from '@/utils/helper'
-import { fromUtf8 } from '@cosmjs/encoding'
-import { GOV_PARAMS_TYPE } from '@/utils/constant'
 
 export default function GovParameters() {
   const [isHidden, setIsHidden] = useState(false)

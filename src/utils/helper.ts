@@ -1,9 +1,9 @@
-import dayjs from 'dayjs'
-import relativeTime from 'dayjs/plugin/relativeTime'
-import duration from 'dayjs/plugin/duration'
 import { toHex } from '@cosmjs/encoding'
 import { bech32 } from 'bech32'
 import { Coin } from 'cosmjs-types/cosmos/base/v1beta1/coin'
+import dayjs from 'dayjs'
+import duration from 'dayjs/plugin/duration'
+import relativeTime from 'dayjs/plugin/relativeTime'
 
 export const timeFromNow = (date: string): string => {
   dayjs.extend(relativeTime)

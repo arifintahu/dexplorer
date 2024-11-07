@@ -1,15 +1,16 @@
 import { createSlice } from '@reduxjs/toolkit'
-import { AppState } from './index'
-import { HYDRATE } from 'next-redux-wrapper'
-import { Params as StakingParams } from 'cosmjs-types/cosmos/staking/v1beta1/staking'
-import { Params as MintParams } from 'cosmjs-types/cosmos/mint/v1beta1/mint'
 import { Params as DistributionParams } from 'cosmjs-types/cosmos/distribution/v1beta1/distribution'
-import { Params as SlashingParams } from 'cosmjs-types/cosmos/slashing/v1beta1/slashing'
 import {
-  VotingParams,
   DepositParams,
   TallyParams,
+  VotingParams,
 } from 'cosmjs-types/cosmos/gov/v1/gov'
+import { Params as MintParams } from 'cosmjs-types/cosmos/mint/v1beta1/mint'
+import { Params as SlashingParams } from 'cosmjs-types/cosmos/slashing/v1beta1/slashing'
+import { Params as StakingParams } from 'cosmjs-types/cosmos/staking/v1beta1/staking'
+import { HYDRATE } from 'next-redux-wrapper'
+
+import { AppState } from './index'
 
 // Type for our state
 export interface ParamsState {
