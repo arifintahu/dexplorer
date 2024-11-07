@@ -29,6 +29,7 @@ import { selectTmClient } from '@/store/connectSlice'
 import { selectNewBlock } from '@/store/streamSlice'
 import { displayDate } from '@/utils/helper'
 import { images } from '@/utils/images'
+import TransactionList from '@/components/TransactionList'
 
 export default function Home() {
   const tmClient = useSelector(selectTmClient)
@@ -133,8 +134,8 @@ export default function Home() {
             </SimpleGrid>
           </Box>
           <Grid templateColumns="repeat(12, 1fr)" gap={5}>
-            <GridItem colSpan={7} h="10" bg="tomato">
-              Test
+            <GridItem colSpan={7}>
+              <TransactionList title="Transactions" />
             </GridItem>
             <GridItem colSpan={5} h="10" bg="papayawhip">
               Test2
