@@ -143,15 +143,15 @@ export default function Layout({ children }: { children: ReactNode }) {
 
   return (
     <>
-      {isLoading ? <LoadingPage /> : <></>}
-      {connectState && !isLoading ? (
-        <Sidebar>
-          <Navbar />
-          {children}
-        </Sidebar>
-      ) : (
+      {/* {isLoading ? <LoadingPage /> : <></>} */}
+      {/* {connectState && !isLoading ? ( */}
+      <Sidebar>
+        <Navbar />
+        {children}
+      </Sidebar>
+      {/* ) : (
         <></>
-      )}
+      )} */}
       {/* {!connectState && !isLoading ? <Connect /> : <></>} */}
     </>
   )

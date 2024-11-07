@@ -23,7 +23,6 @@ import NextLink from 'next/link'
 import { useRouter } from 'next/router'
 import { selectSubsNewBlock, selectSubsTxEvent } from '@/store/streamSlice'
 import { useSelector } from 'react-redux'
-import { LS_RPC_ADDRESS, LS_RPC_ADDRESS_LIST } from '@/utils/constant'
 import { images } from '@/utils/images'
 import { HiOutlineUsers } from 'react-icons/hi2'
 import { GiTwoCoins } from 'react-icons/gi'
@@ -113,14 +112,6 @@ interface SidebarProps extends BoxProps {
 const SidebarContent = ({ onClose, ...rest }: SidebarProps) => {
   const subsNewBlock = useSelector(selectSubsNewBlock)
   const subsTxEvent = useSelector(selectSubsTxEvent)
-
-  const handleDisconnect = () => {
-    subsNewBlock?.unsubscribe()
-    subsTxEvent?.unsubscribe()
-    window.localStorage.removeItem(LS_RPC_ADDRESS)
-    window.localStorage.removeItem(LS_RPC_ADDRESS_LIST)
-    window.location.replace('/')
-  }
 
   return (
     <Box
@@ -252,19 +243,7 @@ const RefLinkItem = ({
   route,
   isBlank,
   iconColor,
-  ...rest
 }: RefLinkItemProps) => {
-  const router = useRouter()
-  const [isSelected, setIsSelected] = useState(false)
-
-  useEffect(() => {
-    if (route === '/') {
-      setIsSelected(router.route === route)
-    } else {
-      setIsSelected(router.route.includes(route))
-    }
-  }, [router])
-
   return (
     <Link
       as={NextLink}

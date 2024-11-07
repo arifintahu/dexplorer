@@ -1,6 +1,7 @@
 import logo from '../../public/assets/images/logo.svg'
+import pattern from '../../public/assets/images/pattern.png'
 
-export type ImageType = 'logo'
+export type ImageType = 'logo' | 'pattern'
 
 export type NextImage = {
   src: string
@@ -10,4 +11,5 @@ export type NextImage = {
 
 export const images: Record<ImageType, NextImage> = {
   logo,
+  pattern,
 }

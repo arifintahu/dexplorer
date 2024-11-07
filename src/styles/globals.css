@@ -18,3 +18,13 @@ a {
 .primary_gradient {
   background: linear-gradient(90deg, #f4431c 0%, #371108 100%);
 }
+
+main {
+  padding: 0px 56px;
+}
+
+.home_main {
+  height: calc(100vh - 65px);
+  position: relative;
+  padding-top: 112px;
+}
