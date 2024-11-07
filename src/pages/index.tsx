@@ -80,6 +80,7 @@ export default function Home() {
           <Icon fontSize="16" as={FiChevronRight} />
           <Text>Home</Text>
         </HStack>
+
         <Box mt={8}>
           <SimpleGrid minChildWidth="200px" spacing="40px">
             <Skeleton isLoaded={isLoaded}>

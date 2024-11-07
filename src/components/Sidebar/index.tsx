@@ -15,6 +15,7 @@ import {
   FlexProps,
   Button,
   Heading,
+  Image,
 } from '@chakra-ui/react'
 import {
   FiHome,
@@ -33,6 +34,7 @@ import { useRouter } from 'next/router'
 import { selectSubsNewBlock, selectSubsTxEvent } from '@/store/streamSlice'
 import { useSelector } from 'react-redux'
 import { LS_RPC_ADDRESS, LS_RPC_ADDRESS_LIST } from '@/utils/constant'
+import { images } from '@/utils/images'
 
 interface LinkItemProps {
   name: string
@@ -127,9 +129,8 @@ const SidebarContent = ({ onClose, ...rest }: SidebarProps) => {
             mx="8"
             justifyContent="space-between"
           >
-            <Text fontSize="2xl" fontFamily="monospace" fontWeight="bold">
-              Surge Explorer
-            </Text>
+            <Image src={images.logo.src} alt="logo" />
+
             <CloseButton
               display={{ base: 'flex', md: 'none' }}
               onClick={onClose}

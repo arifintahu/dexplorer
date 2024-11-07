@@ -4,7 +4,7 @@ import { components } from './components'
 
 const theme: Theme = extendTheme({
   config: {
-    initialColorMode: 'light',
+    initialColorMode: 'dark',
     useSystemColorMode: false,
   } as Theme['config'],
   fonts: {
