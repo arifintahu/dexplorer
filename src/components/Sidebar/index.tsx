@@ -203,7 +203,7 @@ const NavItem = ({ icon, children, route, isBlank, ...rest }: NavItemProps) => {
         borderRadius="lg"
         role="group"
         cursor="pointer"
-        color={isSelected ? 'white' : 'text-gray-500'}
+        color={isSelected ? 'white' : 'gray-500'}
         fontWeight={isSelected ? 'bold' : 'medium'}
         _hover={{
           color: isSelected ? 'white' : 'dark-theme',
@@ -251,7 +251,7 @@ const RefLinkItem = ({
     >
       {icon && (
         <Icon
-          color={iconColor ? '#F66949' : 'text-gray-500'}
+          color={iconColor ? '#F66949' : 'gray-500'}
           _hover={{
             color: 'primary-400',
           }}

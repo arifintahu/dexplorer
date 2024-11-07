@@ -14,16 +14,14 @@ import {
   Skeleton,
   Text,
   Tooltip,
-  useColorModeValue,
   VStack,
 } from '@chakra-ui/react'
 import { StatusResponse } from '@cosmjs/tendermint-rpc'
 import Head from 'next/head'
 import { useEffect, useState } from 'react'
-import { IconType } from 'react-icons'
-import { FiBox, FiClock, FiCpu, FiUsers } from 'react-icons/fi'
 import { useSelector } from 'react-redux'
 
+import RecentBlocks from '@/components/RecentBlocks'
 import { getValidators } from '@/rpc/query'
 import { selectTmClient } from '@/store/connectSlice'
 import { selectNewBlock } from '@/store/streamSlice'
@@ -137,8 +135,17 @@ export default function Home() {
             <GridItem colSpan={7}>
               <TransactionList title="Transactions" />
             </GridItem>
-            <GridItem colSpan={5} h="10" bg="papayawhip">
-              Test2
+            <GridItem
+              colSpan={5}
+              bg="dark-bg"
+              px={7}
+              pt={10}
+              pb={6}
+              borderRadius={12}
+              border={'1px'}
+              borderColor={'gray-900'}
+            >
+              <RecentBlocks />
             </GridItem>
           </Grid>
         </Box>
@@ -165,7 +172,7 @@ const BoxInfo = ({ name, value, tooltipText }: BoxInfoProps) => {
       align={'flex-start'}
     >
       <HStack mb={'14px'}>
-        <Heading size={'xs'} color={'text-gray-500'} fontWeight={500}>
+        <Heading size={'xs'} color={'gray-500'} fontWeight={500}>
           {name}
         </Heading>
         <Tooltip
@@ -174,7 +181,7 @@ const BoxInfo = ({ name, value, tooltipText }: BoxInfoProps) => {
           bg="gray.300"
           color="black"
         >
-          <Icon as={InfoOutlineIcon} w={'13px'} color="text-gray-500" />
+          <Icon as={InfoOutlineIcon} w={'13px'} color="gray-500" />
         </Tooltip>
       </HStack>
 

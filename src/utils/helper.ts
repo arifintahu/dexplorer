@@ -17,6 +17,27 @@ export const trimHash = (txHash: Uint8Array): string => {
   return first + '...' + last
 }
 
+export const shortenAddress = (
+  str?: string,
+  isLengthier?: boolean,
+  addLength = 15
+) => {
+  if (!str) {
+    return ''
+  }
+  if (str && isLengthier) {
+    return (
+      str.substring(0, addLength) +
+      '...' +
+      str.substring(str.length - addLength, str.length)
+    )
+  } else if (str.length > 20) {
+    return (
+      str.substring(0, 5) + '...' + str.substring(str.length - 5, str.length)
+    )
+  } else return str
+}
+
 export const displayDate = (date: string): string => {
   return dayjs(date).format('YYYY-MM-DD HH:mm:ss')
 }

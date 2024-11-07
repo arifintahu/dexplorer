@@ -1,5 +1,5 @@
 {
-  "plugins": ["simple-import-sort", "prettier"],
+  "plugins": ["simple-import-sort"],
   "extends": ["next/core-web-vitals", "plugin:prettier/recommended"],
   "rules": {
     "prettier/prettier": 1,
