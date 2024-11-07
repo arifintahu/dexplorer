@@ -40,9 +40,11 @@
     "react-icons": "^4.8.0",
     "react-redux": "^8.0.5",
     "typescript": "5.0.3",
+    "ws": "^8.18.0",
     "xstream": "^11.14.0"
   },
   "devDependencies": {
+    "@types/ws": "^8.5.13",
     "eslint-config-prettier": "^8.8.0",
     "eslint-plugin-prettier": "^4.2.1",
     "husky": "^8.0.3",
