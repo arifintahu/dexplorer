@@ -61,7 +61,131 @@ const RecentBlock = () => {
           </HStack>
         </HStack>
       </Box>
-      <Box px={4} pt={'30px'} pb={'14px'}></Box>
+      <Box px={4} py={'14px'}>
+        <Box className="test" position="relative">
+          <Box
+            position="absolute"
+            left="20px"
+            top="0"
+            bottom="0"
+            width="1px"
+            bg="primary-900"
+            zIndex="1"
+          />
+
+          <HStack
+            justifyContent="space-between"
+            className="test"
+            py={'14px'}
+            borderBottom={'1px'}
+            borderColor={'gray-900'}
+            ml={10}
+            position="relative"
+          >
+            <Box
+              position="absolute"
+              left="-21px"
+              top="50%"
+              transform="translateY(-50%)"
+              width="6px"
+              height="6px"
+              borderRadius="full"
+              bg="primary-500"
+              zIndex="2"
+            />
+
+            <HStack gap={3}>
+              <HStack gap={1}>
+                <Image width={5} src={images.block.src} alt="block" />
+                <Link
+                  as={NextLink}
+                  href={'/blocks'}
+                  _focus={{ boxShadow: 'none' }}
+                  display={'block'}
+                  fontSize={'14px'}
+                  color={'primary-200'}
+                >
+                  291203
+                </Link>
+              </HStack>
+            </HStack>
+            <HStack gap={1}>
+              <Link
+                as={NextLink}
+                href={'/blocks'}
+                _focus={{ boxShadow: 'none' }}
+                fontSize={'xs'}
+                color={'gray-500'}
+                textDecoration={'underline'}
+              >
+                {shortenAddress(
+                  '0x00000000000000000001e4add93ab2a51d8d405d60177fd30f791027deefaffd'
+                )}
+              </Link>
+              <Box w={1} h={1} bg={'gray-500'} borderRadius={99} />
+              <Text fontSize={'xs'} color={'gray-400'}>
+                2hr ago
+              </Text>
+            </HStack>
+          </HStack>
+
+          <HStack
+            justifyContent="space-between"
+            className="test"
+            py={'14px'}
+            borderBottom={'1px'}
+            borderColor={'gray-900'}
+            ml={10}
+            position="relative"
+          >
+            <Box
+              position="absolute"
+              left="-21px"
+              top="50%"
+              transform="translateY(-50%)"
+              width="6px"
+              height="6px"
+              borderRadius="full"
+              bg="primary-500"
+              zIndex="2"
+            />
+
+            <HStack gap={3}>
+              <HStack gap={1}>
+                <Image width={5} src={images.block.src} alt="block" />
+                <Link
+                  as={NextLink}
+                  href={'/blocks'}
+                  _focus={{ boxShadow: 'none' }}
+                  display={'block'}
+                  fontSize={'14px'}
+                  color={'primary-200'}
+                >
+                  291203
+                </Link>
+              </HStack>
+            </HStack>
+            <HStack gap={1}>
+              <Link
+                as={NextLink}
+                href={'/blocks'}
+                _focus={{ boxShadow: 'none' }}
+                fontSize={'xs'}
+                color={'gray-500'}
+                textDecoration={'underline'}
+              >
+                {shortenAddress(
+                  '0x00000000000000000001e4add93ab2a51d8d405d60177fd30f791027deefaffd'
+                )}
+              </Link>
+              <Box w={1} h={1} bg={'gray-500'} borderRadius={99} />
+              <Text fontSize={'xs'} color={'gray-400'}>
+                2hr ago
+              </Text>
+            </HStack>
+          </HStack>
+        </Box>
+      </Box>
       <Box px={4} py={5} bg="gray-1200" borderBottomRadius={12}>
         <HStack gap={2}>
           <Image w={4} src={images.stars.src} alt="" />

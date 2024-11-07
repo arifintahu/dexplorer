@@ -1,4 +1,5 @@
 import bitcoinLogo from '../../public/assets/images/bitcoin_logo.svg'
+import block from '../../public/assets/images/block.svg'
 import blockLogo from '../../public/assets/images/bx-cube.svg'
 import chainLink from '../../public/assets/images/chain_link.svg'
 import logo from '../../public/assets/images/logo.svg'
@@ -16,6 +17,7 @@ export type ImageType =
   | 'chainLink'
   | 'stars'
   | 'logoShort'
+  | 'block'
 
 export type NextImage = {
   src: string
@@ -32,4 +34,5 @@ export const images: Record<ImageType, NextImage> = {
   chainLink,
   stars,
   logoShort,
+  block,
 }
