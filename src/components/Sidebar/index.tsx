@@ -13,21 +13,11 @@ import {
   useDisclosure,
   BoxProps,
   FlexProps,
-  Button,
-  Heading,
   Image,
+  HStack,
 } from '@chakra-ui/react'
-import {
-  FiHome,
-  FiBox,
-  FiCompass,
-  FiStar,
-  FiSliders,
-  FiMenu,
-  FiLogOut,
-  FiGithub,
-  FiAlertCircle,
-} from 'react-icons/fi'
+import { MdOutlineHome } from 'react-icons/md'
+import { FiMenu } from 'react-icons/fi'
 import { IconType } from 'react-icons'
 import NextLink from 'next/link'
 import { useRouter } from 'next/router'
@@ -35,6 +25,14 @@ import { selectSubsNewBlock, selectSubsTxEvent } from '@/store/streamSlice'
 import { useSelector } from 'react-redux'
 import { LS_RPC_ADDRESS, LS_RPC_ADDRESS_LIST } from '@/utils/constant'
 import { images } from '@/utils/images'
+import { HiOutlineUsers } from 'react-icons/hi2'
+import { GiTwoCoins } from 'react-icons/gi'
+import { PiTreeStructure, PiDevToLogoFill } from 'react-icons/pi'
+import { FaGlobeAmericas } from 'react-icons/fa'
+import { IoLogoGithub } from 'react-icons/io'
+import { VscGlobe } from 'react-icons/vsc'
+
+import { AiFillExclamationCircle } from 'react-icons/ai'
 
 interface LinkItemProps {
   name: string
@@ -42,33 +40,48 @@ interface LinkItemProps {
   route: string
   isBlank?: boolean
 }
+interface RefLinkItemProps {
+  icon: IconType
+  route: string
+  isBlank?: boolean
+  iconColor?: boolean
+}
 const LinkItems: Array<LinkItemProps> = [
-  { name: 'Home', icon: FiHome, route: '/' },
-  { name: 'Blocks', icon: FiBox, route: '/blocks' },
-  { name: 'Validators', icon: FiCompass, route: '/validators' },
-  // { name: 'Proposals', icon: FiStar, route: '/proposals' },
-  // { name: 'Parameters', icon: FiSliders, route: '/parameters' },
-]
-const RefLinkItems: Array<LinkItemProps> = [
+  { name: 'Home', icon: MdOutlineHome, route: '/' },
+  { name: 'Transactions', icon: GiTwoCoins, route: '/txs' },
+  { name: 'Validators', icon: HiOutlineUsers, route: '/validators' },
+  { name: 'Aggregation', icon: PiTreeStructure, route: '/aggregation' },
+  { name: 'Signers', icon: FaGlobeAmericas, route: '/signer' },
   {
-    name: 'Github',
-    icon: FiGithub,
+    name: 'Bitcoin Playground',
+    icon: PiDevToLogoFill,
+    route: '/bitcoin-playground',
+  },
+]
+const RefLinkItems: Array<RefLinkItemProps> = [
+  {
+    icon: IoLogoGithub,
     route: 'https://github.com/surgebuild',
     isBlank: true,
   },
-  // {
-  //   name: 'Report Issues',
-  //   icon: FiAlertCircle,
-  //   route: 'https://github.com/arifintahu/dexplorer/issues',
-  //   isBlank: true,
-  // },
+  {
+    icon: VscGlobe,
+    route: 'https://surge.build/',
+    isBlank: true,
+  },
+  {
+    icon: AiFillExclamationCircle,
+    route: 'https://surge.build/',
+    isBlank: true,
+    iconColor: true,
+  },
 ]
 
 export default function Sidebar({ children }: { children: ReactNode }) {
   const { isOpen, onOpen, onClose } = useDisclosure()
 
   return (
-    <Box minH="100vh" bg={useColorModeValue('gray.100', 'gray.900')}>
+    <Box minH="100vh" bg={'dark-bg'}>
       <SidebarContent
         onClose={() => onClose}
         display={{ base: 'none', md: 'block' }}
@@ -86,11 +99,9 @@ export default function Sidebar({ children }: { children: ReactNode }) {
           <SidebarContent onClose={onClose} />
         </DrawerContent>
       </Drawer>
-      {/* mobilenav */}
+
       <MobileNav display={{ base: 'flex', md: 'none' }} onOpen={onOpen} />
-      <Box ml={{ base: 0, md: 60 }} p="4">
-        {children}
-      </Box>
+      <Box ml={{ base: 0, md: 80 }}>{children}</Box>
     </Box>
   )
 }
@@ -113,10 +124,10 @@ const SidebarContent = ({ onClose, ...rest }: SidebarProps) => {
 
   return (
     <Box
-      bg={useColorModeValue('light-container', 'dark-container')}
+      bg={'dark-bg'}
       borderRight="1px"
-      borderRightColor={useColorModeValue('gray.200', 'gray.700')}
-      w={{ base: 'full', md: 60 }}
+      borderRightColor={'border-gray-900'}
+      w={{ base: 'full', md: 80 }}
       pos="fixed"
       h="full"
       {...rest}
@@ -142,9 +153,8 @@ const SidebarContent = ({ onClose, ...rest }: SidebarProps) => {
             </NavItem>
           ))}
         </Box>
-        <Flex justifyContent="left" mb="4">
-          <Box>
-            {/* <Button
+        <Flex justifyContent="center" mb="10">
+          {/* <Button
             leftIcon={<FiLogOut />}
             colorScheme="red"
             variant="outline"
@@ -152,28 +162,17 @@ const SidebarContent = ({ onClose, ...rest }: SidebarProps) => {
           >
             Disconnect All
           </Button> */}
-            <Heading
-              mt="6"
-              p="4"
-              mx="4"
-              size={'xs'}
-              textTransform="uppercase"
-              textColor={useColorModeValue('gray.500', 'gray.100')}
-              fontWeight="medium"
-            >
-              Links
-            </Heading>
-            {RefLinkItems.map((link) => (
-              <NavItem
-                key={link.name}
+          <HStack spacing="20px">
+            {RefLinkItems.map((link, key) => (
+              <RefLinkItem
+                key={key}
                 icon={link.icon}
                 route={link.route}
                 isBlank={link.isBlank}
-              >
-                {link.name}
-              </NavItem>
+                iconColor={link.iconColor}
+              />
             ))}
-          </Box>
+          </HStack>
         </Flex>
       </Flex>
     </Box>
@@ -182,7 +181,7 @@ const SidebarContent = ({ onClose, ...rest }: SidebarProps) => {
 
 interface NavItemProps extends FlexProps {
   icon: IconType
-  children: string | number
+  children?: string | number
   route: string
   isBlank?: boolean
 }
@@ -205,41 +204,87 @@ const NavItem = ({ icon, children, route, isBlank, ...rest }: NavItemProps) => {
       style={{ textDecoration: 'none' }}
       _focus={{ boxShadow: 'none' }}
       target={isBlank ? '_blank' : '_self'}
+      mb={'3'}
+      display={'block'}
     >
       <Flex
+        className={`${isSelected ? 'primary_gradient' : ''}`}
         align="center"
-        p="4"
-        mx="4"
+        px="4"
+        py="3"
+        mx="8"
         borderRadius="lg"
         role="group"
         cursor="pointer"
-        bg={
-          isSelected
-            ? useColorModeValue('light-theme', 'dark-theme')
-            : 'transparent'
-        }
-        color={isSelected ? 'white' : useColorModeValue('black', 'white')}
+        color={isSelected ? 'white' : 'text-gray-500'}
+        fontWeight={isSelected ? 'bold' : 'medium'}
         _hover={{
-          color: isSelected
-            ? 'white'
-            : useColorModeValue('light-theme', 'dark-theme'),
+          color: isSelected ? 'white' : 'dark-theme',
         }}
         {...rest}
       >
         {icon && (
           <Icon
-            mr="4"
-            fontSize="16"
+            mr="2"
+            fontSize="22"
             _groupHover={{
-              color: isSelected
-                ? 'white'
-                : useColorModeValue('light-theme', 'dark-theme'),
+              color: isSelected ? 'white' : 'dark-theme',
             }}
             as={icon}
           />
         )}
         {children}
       </Flex>
+    </Link>
+  )
+}
+
+interface RefLinkItemProps extends FlexProps {
+  icon: IconType
+  children?: string | number
+  route: string
+  iconColor?: boolean
+  isBlank?: boolean
+}
+const RefLinkItem = ({
+  icon,
+  children,
+  route,
+  isBlank,
+  iconColor,
+  ...rest
+}: RefLinkItemProps) => {
+  const router = useRouter()
+  const [isSelected, setIsSelected] = useState(false)
+
+  useEffect(() => {
+    if (route === '/') {
+      setIsSelected(router.route === route)
+    } else {
+      setIsSelected(router.route.includes(route))
+    }
+  }, [router])
+
+  return (
+    <Link
+      as={NextLink}
+      href={route}
+      style={{ textDecoration: 'none' }}
+      _focus={{ boxShadow: 'none' }}
+      target={isBlank ? '_blank' : '_self'}
+      display={'block'}
+    >
+      {icon && (
+        <Icon
+          color={iconColor ? '#F66949' : 'text-gray-500'}
+          _hover={{
+            color: 'primary-400',
+          }}
+          cursor="pointer"
+          fontSize="22"
+          as={icon}
+        />
+      )}
     </Link>
   )
 }

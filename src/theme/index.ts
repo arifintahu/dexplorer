@@ -1,6 +1,7 @@
 import { Theme, extendTheme } from '@chakra-ui/react'
 import { colors } from './colors'
 import { components } from './components'
+import '@fontsource-variable/inter'
 
 const theme: Theme = extendTheme({
   config: {
@@ -8,8 +9,8 @@ const theme: Theme = extendTheme({
     useSystemColorMode: false,
   } as Theme['config'],
   fonts: {
-    heading: 'Inter, sans-serif',
-    body: 'Inter, sans-serif',
+    heading: 'Inter Variable, sans-serif',
+    body: 'Inter Variable, sans-serif',
     mono: 'IBM Plex Mono, monospace',
   },
   styles: {},

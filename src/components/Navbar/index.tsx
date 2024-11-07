@@ -26,6 +26,7 @@ import {
   Flex,
   Stack,
   FormControl,
+  Container,
 } from '@chakra-ui/react'
 import {
   FiRadio,
@@ -205,16 +206,18 @@ export default function Navbar() {
   return (
     <>
       <Box
-        bg={useColorModeValue('light-container', 'dark-container')}
+        bg={'dark-bg'}
         w="100%"
-        p={4}
+        py={5}
+        px={16}
         shadow={'base'}
-        borderRadius={4}
-        marginBottom={4}
+        borderBottom="1px"
+        borderBottomColor={'border-gray-900'}
         display={'flex'}
         justifyContent={'flex-end'}
       >
-        <HStack>
+        Test
+        {/* <HStack>
           <IconButton
             variant="ghost"
             aria-label="Search"
@@ -231,9 +234,9 @@ export default function Navbar() {
             icon={colorMode === 'light' ? <MoonIcon /> : <SunIcon />}
             onClick={toggleColorMode}
           />
-        </HStack>
+        </HStack> */}
       </Box>
-      <Modal isOpen={isOpen} onClose={onClose}>
+      {/* <Modal isOpen={isOpen} onClose={onClose}>
         <ModalOverlay />
         <ModalContent>
           <ModalHeader>Search</ModalHeader>
@@ -263,135 +266,7 @@ export default function Navbar() {
             </Button>
           </ModalFooter>
         </ModalContent>
-      </Modal>
-
-      <Modal isOpen={isOpenRPCs} onClose={onCloseRPCs}>
-        <ModalOverlay />
-        <ModalContent>
-          <ModalHeader>Change Connection</ModalHeader>
-          <ModalCloseButton />
-          <ModalBody>
-            <Stack
-              direction={{ base: 'column', md: 'row' }}
-              as={'form'}
-              spacing={'12px'}
-              onSubmit={submitForm}
-            >
-              <FormControl>
-                <Input
-                  variant={'solid'}
-                  borderWidth={1}
-                  color={'gray.800'}
-                  _placeholder={{
-                    color: 'gray.400',
-                  }}
-                  borderColor={useColorModeValue('gray.300', 'gray.700')}
-                  id={'newAddress'}
-                  type={'url'}
-                  required
-                  placeholder={'Connect to new RPC Address'}
-                  aria-label={'Connect to new RPC Address'}
-                  value={newAddress}
-                  disabled={state !== 'initial'}
-                  onChange={(e: ChangeEvent<HTMLInputElement>) =>
-                    setNewAddress(e.target.value)
-                  }
-                />
-              </FormControl>
-              <FormControl w={{ base: '100%', md: '40%' }}>
-                <Button
-                  backgroundColor={useColorModeValue(
-                    'light-theme',
-                    'dark-theme'
-                  )}
-                  color={'white'}
-                  _hover={{
-                    backgroundColor: useColorModeValue(
-                      'dark-theme',
-                      'light-theme'
-                    ),
-                  }}
-                  isLoading={state === 'submitting'}
-                  w="100%"
-                  type={state === 'success' ? 'button' : 'submit'}
-                >
-                  {state === 'success' ? <CheckIcon /> : 'Connect'}
-                </Button>
-              </FormControl>
-            </Stack>
-            <Text textAlign={'center'} color={error ? 'red.500' : 'gray.500'}>
-              {error ? 'Oh no, cannot connect to websocket client! 😢' : '‎'}
-            </Text>
-            <Text m={2} textAlign={'center'} fontWeight="semibold">
-              Available RPCs
-            </Text>
-            <Stack spacing={4} mb="4">
-              {rpcList.map((rpc) => (
-                <Flex
-                  w="full"
-                  border="1px"
-                  borderRadius="md"
-                  borderColor={useColorModeValue('gray.500', 'gray.100')}
-                  p={2}
-                  justifyContent="space-between"
-                  alignItems="center"
-                  key={rpc}
-                >
-                  <Box>
-                    <Text fontSize="sm" wordBreak="break-all">
-                      {rpc}
-                    </Text>
-                  </Box>
-                  {rpc !== address ? (
-                    <Stack direction="row">
-                      <IconButton
-                        onClick={() => selectChain(rpc)}
-                        backgroundColor={useColorModeValue(
-                          'light-theme',
-                          'dark-theme'
-                        )}
-                        color={'white'}
-                        _hover={{
-                          backgroundColor: useColorModeValue(
-                            'dark-theme',
-                            'light-theme'
-                          ),
-                        }}
-                        aria-label="Connect RPC"
-                        size="sm"
-                        fontSize="20"
-                        icon={<FiZap />}
-                      />
-                      <IconButton
-                        onClick={() => removeChain(rpc)}
-                        backgroundColor={useColorModeValue(
-                          'red.500',
-                          'red.400'
-                        )}
-                        color={'white'}
-                        _hover={{
-                          backgroundColor: useColorModeValue(
-                            'red.400',
-                            'red.500'
-                          ),
-                        }}
-                        aria-label="Remove RPC"
-                        size="sm"
-                        fontSize="20"
-                        icon={<FiTrash2 />}
-                      />
-                    </Stack>
-                  ) : (
-                    <Text fontSize="sm" fontWeight="semibold">
-                      Connected
-                    </Text>
-                  )}
-                </Flex>
-              ))}
-            </Stack>
-          </ModalBody>
-        </ModalContent>
-      </Modal>
+      </Modal> */}
     </>
   )
 }

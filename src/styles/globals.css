@@ -14,3 +14,7 @@ a {
     color-scheme: dark;
   }
 }
+
+.primary_gradient {
+  background: linear-gradient(90deg, #f4431c 0%, #371108 100%);
+}
