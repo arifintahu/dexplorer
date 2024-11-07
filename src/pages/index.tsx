@@ -1,16 +1,19 @@
 import '@/styles/Home.module.css'
 
+import { InfoOutlineIcon, SearchIcon } from '@chakra-ui/icons'
 import {
   Box,
   FlexProps,
   Grid,
   GridItem,
   Heading,
+  HStack,
   Icon,
   Image,
   SimpleGrid,
   Skeleton,
   Text,
+  Tooltip,
   useColorModeValue,
   VStack,
 } from '@chakra-ui/react'
@@ -46,7 +49,11 @@ export default function Home() {
       setIsLoaded(true)
     }
   }, [isLoaded, newBlock, status])
-
+  console.log(
+    status?.syncInfo.latestBlockHeight,
+    'status?.syncInfo.latestBlockHeight'
+  )
+  console.log(newBlock?.header.height, 'newBlock?.header.height')
   return (
     <>
       <Head>
@@ -86,17 +93,41 @@ export default function Home() {
                         )
                       : ''
                   }
+                  tooltipText="Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat"
                 />
               </Skeleton>
 
               <Skeleton isLoaded={isLoaded}>
                 <BoxInfo
-                  name="Latest Block Height"
+                  name="TOTAL INSCRIPTIONS"
                   value={
                     newBlock?.header.height
-                      ? newBlock?.header.height
-                      : status?.syncInfo.latestBlockHeight
+                      ? '#' + newBlock?.header.height
+                      : '#' + status?.syncInfo.latestBlockHeight
                   }
+                  tooltipText="Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat"
+                />
+              </Skeleton>
+              <Skeleton isLoaded={isLoaded}>
+                <BoxInfo
+                  name="LATEST BLOCK"
+                  value={
+                    newBlock?.header.height
+                      ? '#' + newBlock?.header.height
+                      : '#' + status?.syncInfo.latestBlockHeight
+                  }
+                  tooltipText="Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat"
+                />
+              </Skeleton>
+              <Skeleton isLoaded={isLoaded}>
+                <BoxInfo
+                  name="MAX TPS"
+                  value={
+                    newBlock?.header.height
+                      ? '#' + newBlock?.header.height
+                      : '#' + status?.syncInfo.latestBlockHeight
+                  }
+                  tooltipText="Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat"
                 />
               </Skeleton>
             </SimpleGrid>
@@ -118,20 +149,37 @@ export default function Home() {
 interface BoxInfoProps extends FlexProps {
   name: string
   value: string | number | undefined
+  tooltipText: string
 }
-const BoxInfo = ({ name, value }: BoxInfoProps) => {
+const BoxInfo = ({ name, value, tooltipText }: BoxInfoProps) => {
   return (
     <VStack
       bg={'gray-1000'}
       borderRadius={12}
       p={4}
+      pb={2}
       height="100px"
+      border={'1px'}
+      borderColor={'gray-900'}
       align={'flex-start'}
     >
-      <Heading size={'xs'} color={'text-gray-500'} mb={'14px'} fontWeight={500}>
-        {name}
-      </Heading>
-      <Text size={'sm'}>{value}</Text>
+      <HStack mb={'14px'}>
+        <Heading size={'xs'} color={'text-gray-500'} fontWeight={500}>
+          {name}
+        </Heading>
+        <Tooltip
+          label={tooltipText}
+          placement="right"
+          bg="gray.300"
+          color="black"
+        >
+          <Icon as={InfoOutlineIcon} w={'13px'} color="text-gray-500" />
+        </Tooltip>
+      </HStack>
+
+      <Text fontSize={'2xl'} color={'white'} fontWeight={500}>
+        {value}
+      </Text>
     </VStack>
   )
 }
