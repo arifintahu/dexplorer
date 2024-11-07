@@ -1,28 +1,30 @@
-import Head from 'next/head'
+import '@/styles/Home.module.css'
+
 import {
-  useColorModeValue,
-  FlexProps,
-  Heading,
-  Icon,
-  Text,
-  SimpleGrid,
   Box,
-  VStack,
-  Skeleton,
-  Image,
+  FlexProps,
   Grid,
   GridItem,
+  Heading,
+  Icon,
+  Image,
+  SimpleGrid,
+  Skeleton,
+  Text,
+  useColorModeValue,
+  VStack,
 } from '@chakra-ui/react'
-import { FiBox, FiClock, FiCpu, FiUsers } from 'react-icons/fi'
-import '@/styles/Home.module.css'
-import { IconType } from 'react-icons'
+import { StatusResponse } from '@cosmjs/tendermint-rpc'
+import Head from 'next/head'
 import { useEffect, useState } from 'react'
+import { IconType } from 'react-icons'
+import { FiBox, FiClock, FiCpu, FiUsers } from 'react-icons/fi'
 import { useSelector } from 'react-redux'
+
 import { getValidators } from '@/rpc/query'
 import { selectTmClient } from '@/store/connectSlice'
 import { selectNewBlock } from '@/store/streamSlice'
 import { displayDate } from '@/utils/helper'
-import { StatusResponse } from '@cosmjs/tendermint-rpc'
 import { images } from '@/utils/images'
 
 export default function Home() {
@@ -61,6 +63,7 @@ export default function Home() {
           w={'full'}
           left={0}
           top={0}
+          maxHeight={'430px'}
           alt="pattern"
         />
         <Box position="relative">
@@ -71,23 +74,9 @@ export default function Home() {
             <SimpleGrid minChildWidth="200px" spacing="20px">
               <Skeleton isLoaded={isLoaded}>
                 <BoxInfo
-                  bgColor="cyan.200"
-                  color="cyan.600"
-                  icon={FiBox}
-                  name="Latest Block Height"
-                  value={
-                    newBlock?.header.height
-                      ? newBlock?.header.height
-                      : status?.syncInfo.latestBlockHeight
-                  }
-                />
-              </Skeleton>
-              <Skeleton isLoaded={isLoaded}>
-                <BoxInfo
                   bgColor="green.200"
                   color="green.600"
-                  icon={FiClock}
-                  name="Latest Block Time"
+                  name="TOTAL TXNS"
                   value={
                     newBlock?.header.time
                       ? displayDate(newBlock?.header.time?.toISOString())
@@ -102,25 +91,12 @@ export default function Home() {
 
               <Skeleton isLoaded={isLoaded}>
                 <BoxInfo
-                  bgColor="orange.200"
-                  color="orange.600"
-                  icon={FiCpu}
-                  name="Network"
+                  name="Latest Block Height"
                   value={
-                    newBlock?.header.chainId
-                      ? newBlock?.header.chainId
-                      : status?.nodeInfo.network
+                    newBlock?.header.height
+                      ? newBlock?.header.height
+                      : status?.syncInfo.latestBlockHeight
                   }
-                />
-              </Skeleton>
-
-              <Skeleton isLoaded={isLoaded}>
-                <BoxInfo
-                  bgColor="purple.200"
-                  color="purple.600"
-                  icon={FiUsers}
-                  name="Validators"
-                  value={validators}
                 />
               </Skeleton>
             </SimpleGrid>
@@ -140,36 +116,22 @@ export default function Home() {
 }
 
 interface BoxInfoProps extends FlexProps {
-  bgColor: string
-  color: string
-  icon: IconType
   name: string
   value: string | number | undefined
 }
-const BoxInfo = ({ bgColor, color, icon, name, value }: BoxInfoProps) => {
+const BoxInfo = ({ name, value }: BoxInfoProps) => {
   return (
     <VStack
-      bg={useColorModeValue('light-container', 'dark-container')}
-      shadow={'base'}
-      borderRadius={4}
+      bg={'gray-1000'}
+      borderRadius={12}
       p={4}
-      height="150px"
+      height="100px"
+      align={'flex-start'}
     >
-      <Box
-        backgroundColor={bgColor}
-        padding={2}
-        height="40px"
-        width="40px"
-        borderRadius={'full'}
-        display={'flex'}
-        justifyContent={'center'}
-        alignItems={'center'}
-        mb={2}
-      >
-        <Icon fontSize="20" color={color} as={icon} />
-      </Box>
-      <Heading size={'md'}>{value}</Heading>
-      <Text size={'sm'}>{name}</Text>
+      <Heading size={'xs'} color={'text-gray-500'} mb={'14px'} fontWeight={500}>
+        {name}
+      </Heading>
+      <Text size={'sm'}>{value}</Text>
     </VStack>
   )
 }

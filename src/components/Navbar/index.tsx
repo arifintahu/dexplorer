@@ -1,44 +1,45 @@
-import { ChangeEvent, FormEvent, useEffect, useState } from 'react'
-import { useRouter } from 'next/router'
-import { useSelector } from 'react-redux'
-import { selectTmClient, selectRPCAddress } from '@/store/connectSlice'
+import { CheckIcon, MoonIcon, SunIcon } from '@chakra-ui/icons'
 import {
   Box,
+  Button,
+  Container,
+  Flex,
+  FormControl,
   Heading,
-  Text,
   HStack,
   Icon,
   IconButton,
   Input,
+  Modal,
+  ModalBody,
+  ModalCloseButton,
+  ModalContent,
+  ModalFooter,
+  ModalHeader,
+  ModalOverlay,
   Skeleton,
+  Stack,
+  Text,
   useColorMode,
-  Button,
   useColorModeValue,
   useDisclosure,
   useToast,
-  Modal,
-  ModalOverlay,
-  ModalContent,
-  ModalHeader,
-  ModalCloseButton,
-  ModalBody,
-  ModalFooter,
-  Flex,
-  Stack,
-  FormControl,
-  Container,
 } from '@chakra-ui/react'
+import { StatusResponse } from '@cosmjs/tendermint-rpc'
+import { useRouter } from 'next/router'
+import { ChangeEvent, FormEvent, useEffect, useState } from 'react'
 import {
   FiRadio,
-  FiSearch,
   FiRefreshCcw,
-  FiZap,
+  FiSearch,
   FiTrash2,
+  FiZap,
 } from 'react-icons/fi'
-import { selectNewBlock } from '@/store/streamSlice'
-import { CheckIcon, MoonIcon, SunIcon } from '@chakra-ui/icons'
-import { StatusResponse } from '@cosmjs/tendermint-rpc'
+import { useSelector } from 'react-redux'
+
 import { connectWebsocketClient, validateConnection } from '@/rpc/client'
+import { selectRPCAddress, selectTmClient } from '@/store/connectSlice'
+import { selectNewBlock } from '@/store/streamSlice'
 import { LS_RPC_ADDRESS, LS_RPC_ADDRESS_LIST } from '@/utils/constant'
 import { removeTrailingSlash } from '@/utils/helper'
 
@@ -212,7 +213,7 @@ export default function Navbar() {
         px={16}
         shadow={'base'}
         borderBottom="1px"
-        borderBottomColor={'border-gray-900'}
+        borderBottomColor={'gray-900'}
         display={'flex'}
         justifyContent={'flex-end'}
       >

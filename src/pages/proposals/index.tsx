@@ -1,27 +1,28 @@
-import Head from 'next/head'
 import {
+  Badge,
   Box,
   Divider,
-  HStack,
   Heading,
+  HStack,
   Icon,
   Link,
-  Text,
-  useToast,
-  useColorModeValue,
   Tag,
-  Badge,
+  Text,
+  useColorModeValue,
+  useToast,
 } from '@chakra-ui/react'
-import { useEffect, useState } from 'react'
-import { useSelector } from 'react-redux'
-import NextLink from 'next/link'
-import { FiChevronRight, FiHome } from 'react-icons/fi'
-import { selectTmClient } from '@/store/connectSlice'
-import { queryProposals } from '@/rpc/abci'
-import DataTable from '@/components/Datatable'
 import { createColumnHelper } from '@tanstack/react-table'
-import { getTypeMsg, displayDate } from '@/utils/helper'
+import Head from 'next/head'
+import NextLink from 'next/link'
+import { useEffect, useState } from 'react'
+import { FiChevronRight, FiHome } from 'react-icons/fi'
+import { useSelector } from 'react-redux'
+
+import DataTable from '@/components/Datatable'
+import { queryProposals } from '@/rpc/abci'
+import { selectTmClient } from '@/store/connectSlice'
 import { proposalStatus, proposalStatusList } from '@/utils/constant'
+import { displayDate, getTypeMsg } from '@/utils/helper'
 
 type Proposal = {
   id: bigint

@@ -9,14 +9,15 @@ import {
   Tooltip,
   useColorModeValue,
 } from '@chakra-ui/react'
-import { useState, useEffect } from 'react'
-import { useSelector, useDispatch } from 'react-redux'
+import { useEffect, useState } from 'react'
+import { useDispatch, useSelector } from 'react-redux'
+
+import { queryDistributionParams } from '@/rpc/abci'
 import { selectTmClient } from '@/store/connectSlice'
 import {
   selectDistributionParams,
   setDistributionParams,
 } from '@/store/paramsSlice'
-import { queryDistributionParams } from '@/rpc/abci'
 import { convertRateToPercent } from '@/utils/helper'
 
 export default function DistributionParameters() {

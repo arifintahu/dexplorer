@@ -1,30 +1,30 @@
-import { Tendermint37Client } from '@cosmjs/tendermint-rpc'
 import { QueryClient } from '@cosmjs/stargate'
+import { Tendermint37Client } from '@cosmjs/tendermint-rpc'
 import { PageRequest } from 'cosmjs-types/cosmos/base/query/v1beta1/pagination'
-import {
-  QueryValidatorsRequest,
-  QueryValidatorsResponse,
-  QueryParamsRequest as QueryStakingParamsRequest,
-  QueryParamsResponse as QueryStakingParamsResponse,
-} from 'cosmjs-types/cosmos/staking/v1beta1/query'
-import {
-  QueryParamsRequest as QueryMintParamsRequest,
-  QueryParamsResponse as QueryMintParamsResponse,
-} from 'cosmjs-types/cosmos/mint/v1beta1/query'
-import {
-  QueryProposalsRequest,
-  QueryProposalsResponse,
-  QueryParamsRequest as QueryGovParamsRequest,
-  QueryParamsResponse as QueryGovParamsResponse,
-} from 'cosmjs-types/cosmos/gov/v1/query'
 import {
   QueryParamsRequest as QueryDistributionParamsRequest,
   QueryParamsResponse as QueryDistributionParamsResponse,
 } from 'cosmjs-types/cosmos/distribution/v1beta1/query'
 import {
+  QueryParamsRequest as QueryGovParamsRequest,
+  QueryParamsResponse as QueryGovParamsResponse,
+  QueryProposalsRequest,
+  QueryProposalsResponse,
+} from 'cosmjs-types/cosmos/gov/v1/query'
+import {
+  QueryParamsRequest as QueryMintParamsRequest,
+  QueryParamsResponse as QueryMintParamsResponse,
+} from 'cosmjs-types/cosmos/mint/v1beta1/query'
+import {
   QueryParamsRequest as QuerySlashingParamsRequest,
   QueryParamsResponse as QuerySlashingParamsResponse,
 } from 'cosmjs-types/cosmos/slashing/v1beta1/query'
+import {
+  QueryParamsRequest as QueryStakingParamsRequest,
+  QueryParamsResponse as QueryStakingParamsResponse,
+  QueryValidatorsRequest,
+  QueryValidatorsResponse,
+} from 'cosmjs-types/cosmos/staking/v1beta1/query'
 
 export async function queryActiveValidators(
   tmClient: Tendermint37Client,

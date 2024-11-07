@@ -1,8 +1,9 @@
-import { configureStore, ThunkAction, Action } from '@reduxjs/toolkit'
-import { connectSlice } from './connectSlice'
-import { streamSlice } from './streamSlice'
-import { paramsSlice } from './paramsSlice'
+import { Action, configureStore, ThunkAction } from '@reduxjs/toolkit'
 import { createWrapper } from 'next-redux-wrapper'
+
+import { connectSlice } from './connectSlice'
+import { paramsSlice } from './paramsSlice'
+import { streamSlice } from './streamSlice'
 
 const makeStore = () =>
   configureStore({

@@ -1,24 +1,3 @@
-import { useState, useMemo, useEffect } from 'react'
-import {
-  Table,
-  Thead,
-  Tbody,
-  Tr,
-  Th,
-  Td,
-  chakra,
-  Flex,
-  Tooltip,
-  IconButton,
-  NumberInput,
-  NumberInputField,
-  NumberInputStepper,
-  NumberIncrementStepper,
-  NumberDecrementStepper,
-  Select,
-  Text,
-  SkeletonText,
-} from '@chakra-ui/react'
 import {
   ArrowLeftIcon,
   ArrowRightIcon,
@@ -28,14 +7,35 @@ import {
   TriangleUpIcon,
 } from '@chakra-ui/icons'
 import {
-  useReactTable,
+  chakra,
+  Flex,
+  IconButton,
+  NumberDecrementStepper,
+  NumberIncrementStepper,
+  NumberInput,
+  NumberInputField,
+  NumberInputStepper,
+  Select,
+  SkeletonText,
+  Table,
+  Tbody,
+  Td,
+  Text,
+  Th,
+  Thead,
+  Tooltip,
+  Tr,
+} from '@chakra-ui/react'
+import {
+  ColumnDef,
   flexRender,
   getCoreRowModel,
-  ColumnDef,
-  SortingState,
   getSortedRowModel,
   PaginationState,
+  SortingState,
+  useReactTable,
 } from '@tanstack/react-table'
+import { useEffect, useMemo, useState } from 'react'
 
 export type DataTableProps<Data extends object> = {
   data: Data[]

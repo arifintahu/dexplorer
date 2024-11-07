@@ -1,8 +1,8 @@
 import {
   Box,
   Divider,
-  HStack,
   Heading,
+  HStack,
   Icon,
   Link,
   Table,
@@ -17,19 +17,20 @@ import {
   useColorModeValue,
   useToast,
 } from '@chakra-ui/react'
-import { FiChevronRight, FiHome } from 'react-icons/fi'
-import NextLink from 'next/link'
-import Head from 'next/head'
-import { useRouter } from 'next/router'
-import { useEffect, useState } from 'react'
-import { useSelector } from 'react-redux'
-import { getBlock } from '@/rpc/query'
-import { selectTmClient } from '@/store/connectSlice'
-import { Block, Coin } from '@cosmjs/stargate'
-import { Tx as TxData } from 'cosmjs-types/cosmos/tx/v1beta1/tx'
 import { sha256 } from '@cosmjs/crypto'
 import { toHex } from '@cosmjs/encoding'
-import { timeFromNow, trimHash, displayDate, getTypeMsg } from '@/utils/helper'
+import { Block, Coin } from '@cosmjs/stargate'
+import { Tx as TxData } from 'cosmjs-types/cosmos/tx/v1beta1/tx'
+import Head from 'next/head'
+import NextLink from 'next/link'
+import { useRouter } from 'next/router'
+import { useEffect, useState } from 'react'
+import { FiChevronRight, FiHome } from 'react-icons/fi'
+import { useSelector } from 'react-redux'
+
+import { getBlock } from '@/rpc/query'
+import { selectTmClient } from '@/store/connectSlice'
+import { displayDate, getTypeMsg, timeFromNow, trimHash } from '@/utils/helper'
 
 export default function DetailBlock() {
   const router = useRouter()

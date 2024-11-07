@@ -1,29 +1,30 @@
-import { FormEvent, ChangeEvent, useState } from 'react'
+import { CheckIcon } from '@chakra-ui/icons'
 import {
-  Stack,
-  FormControl,
-  Input,
+  Box,
   Button,
-  useColorModeValue,
-  Heading,
-  Text,
   Container,
   Flex,
-  Box,
+  FormControl,
+  Heading,
   IconButton,
+  Input,
+  Stack,
+  Text,
+  useColorModeValue,
 } from '@chakra-ui/react'
-import { CheckIcon } from '@chakra-ui/icons'
+import Head from 'next/head'
+import { ChangeEvent, FormEvent, useState } from 'react'
+import { FiZap } from 'react-icons/fi'
 import { useDispatch } from 'react-redux'
+
+import { connectWebsocketClient, validateConnection } from '@/rpc/client'
 import {
   setConnectState,
-  setTmClient,
   setRPCAddress,
+  setTmClient,
 } from '@/store/connectSlice'
-import Head from 'next/head'
 import { LS_RPC_ADDRESS, LS_RPC_ADDRESS_LIST } from '@/utils/constant'
-import { validateConnection, connectWebsocketClient } from '@/rpc/client'
 import { removeTrailingSlash } from '@/utils/helper'
-import { FiZap } from 'react-icons/fi'
 
 const chainList = [
   {

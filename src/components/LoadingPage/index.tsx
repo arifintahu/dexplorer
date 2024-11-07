@@ -1,4 +1,4 @@
-import { useColorModeValue, Flex, Spinner } from '@chakra-ui/react'
+import { Flex, Spinner, useColorModeValue } from '@chakra-ui/react'
 import Head from 'next/head'
 
 export default function LoadingPage() {

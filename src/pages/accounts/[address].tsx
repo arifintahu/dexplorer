@@ -1,16 +1,16 @@
 import {
   Box,
   Divider,
-  HStack,
   Heading,
+  HStack,
   Icon,
   Link,
   Tab,
+  Table,
+  TableContainer,
   TabList,
   TabPanel,
   TabPanels,
-  Table,
-  TableContainer,
   Tabs,
   Tag,
   Tbody,
@@ -22,12 +22,17 @@ import {
   useColorModeValue,
   useToast,
 } from '@chakra-ui/react'
-import { FiChevronRight, FiHome } from 'react-icons/fi'
-import NextLink from 'next/link'
+import { toHex } from '@cosmjs/encoding'
+import { Account, Coin } from '@cosmjs/stargate'
+import { TxSearchResponse } from '@cosmjs/tendermint-rpc'
+import { TxBody } from 'cosmjs-types/cosmos/tx/v1beta1/tx'
 import Head from 'next/head'
+import NextLink from 'next/link'
 import { useRouter } from 'next/router'
 import { useEffect, useState } from 'react'
+import { FiChevronRight, FiHome } from 'react-icons/fi'
 import { useSelector } from 'react-redux'
+
 import {
   getAccount,
   getAllBalances,
@@ -35,11 +40,7 @@ import {
   getTxsBySender,
 } from '@/rpc/query'
 import { selectTmClient } from '@/store/connectSlice'
-import { Account, Coin } from '@cosmjs/stargate'
-import { TxSearchResponse } from '@cosmjs/tendermint-rpc'
-import { toHex } from '@cosmjs/encoding'
-import { TxBody } from 'cosmjs-types/cosmos/tx/v1beta1/tx'
-import { trimHash, getTypeMsg } from '@/utils/helper'
+import { getTypeMsg, trimHash } from '@/utils/helper'
 
 export default function DetailAccount() {
   const router = useRouter()

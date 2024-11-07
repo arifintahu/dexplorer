@@ -1,7 +1,8 @@
-import { createSlice } from '@reduxjs/toolkit'
-import { AppState } from './index'
-import { HYDRATE } from 'next-redux-wrapper'
 import { Tendermint37Client } from '@cosmjs/tendermint-rpc'
+import { createSlice } from '@reduxjs/toolkit'
+import { HYDRATE } from 'next-redux-wrapper'
+
+import { AppState } from './index'
 
 // Type for our state
 export interface ConnectState {
