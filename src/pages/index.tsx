@@ -10,6 +10,8 @@ import {
   VStack,
   Skeleton,
   Image,
+  Grid,
+  GridItem,
 } from '@chakra-ui/react'
 import { FiBox, FiClock, FiCpu, FiUsers } from 'react-icons/fi'
 import '@/styles/Home.module.css'
@@ -65,9 +67,8 @@ export default function Home() {
           <Text fontSize="40px" lineHeight="52px" fontWeight="bold">
             Surge Explorer
           </Text>
-
-          <Box mt={8}>
-            <SimpleGrid minChildWidth="200px" spacing="40px">
+          <Box mt={7} mb={8}>
+            <SimpleGrid minChildWidth="200px" spacing="20px">
               <Skeleton isLoaded={isLoaded}>
                 <BoxInfo
                   bgColor="cyan.200"
@@ -124,6 +125,14 @@ export default function Home() {
               </Skeleton>
             </SimpleGrid>
           </Box>
+          <Grid templateColumns="repeat(12, 1fr)" gap={5}>
+            <GridItem colSpan={7} h="10" bg="tomato">
+              Test
+            </GridItem>
+            <GridItem colSpan={5} h="10" bg="papayawhip">
+              Test2
+            </GridItem>
+          </Grid>
         </Box>
       </main>
     </>

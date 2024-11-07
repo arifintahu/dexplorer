@@ -126,12 +126,13 @@ const SidebarContent = ({ onClose, ...rest }: SidebarProps) => {
       <Flex flexDirection="column" h="full" justifyContent="space-between">
         <Box>
           <Flex
-            h="20"
+            h={'65px'}
+            mb="44px"
             alignItems="center"
             mx="8"
             justifyContent="space-between"
           >
-            <Image src={images.logo.src} alt="logo" />
+            <Image w={122} pt={5} src={images.logo.src} alt="logo" />
 
             <CloseButton
               display={{ base: 'flex', md: 'none' }}
