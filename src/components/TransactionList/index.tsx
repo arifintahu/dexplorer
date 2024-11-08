@@ -1,27 +1,28 @@
 import {
+  Box,
+  Button,
+  HStack,
+  Img,
+  Stack,
+  Table,
+  TableContainer,
+  Tbody,
+  Td,
+  Text,
+  Tfoot,
+  Th,
+  Thead,
+  Tr,
+  VStack,
+} from '@chakra-ui/react'
+
+import {
   capitalizeFirstLetter,
   getColor,
   getRelativeTime,
   truncate,
 } from '@/utils'
 import { images } from '@/utils/images'
-import {
-  Box,
-  Stack,
-  Text,
-  Table,
-  Thead,
-  Tbody,
-  Tfoot,
-  Tr,
-  Th,
-  Td,
-  TableContainer,
-  VStack,
-  HStack,
-  Img,
-  Button,
-} from '@chakra-ui/react'
 
 interface ITransactionList {
   title: string
@@ -30,9 +31,10 @@ interface ITransactionList {
 export default function TransactionList({ title }: ITransactionList) {
   return (
     <Box
-      py={10}
+      pt={10}
+      pb={5}
       border={'1px'}
-      borderColor={'border-gray-900'}
+      borderColor={'gray-900'}
       bg={'dark-bg'}
       borderRadius={12}
     >
@@ -46,7 +48,7 @@ export default function TransactionList({ title }: ITransactionList) {
         {title}
       </Text>
       <TableContainer>
-        <Table variant="simple">
+        <Table>
           <Thead px={6}>
             <Tr>
               <Th>Transaction Hash</Th>
@@ -55,10 +57,16 @@ export default function TransactionList({ title }: ITransactionList) {
               <Th>To</Th>
             </Tr>
           </Thead>
-          {transactionData.map((transaction, ind) => (
-            <Tbody key={ind} px={6}>
-              <Tr>
-                <Td>
+          <Tbody>
+            {transactionData.map((transaction, ind) => (
+              <Tr
+                key={ind}
+                px={6}
+                borderBottom={'1px'}
+                borderColor={'gray-900'}
+                _last={{ borderBottom: 'none' }}
+              >
+                <Td border={'none'}>
                   <HashComponent
                     txHash={transaction.txHash}
                     blockHeight={transaction.blockHeight}
@@ -66,36 +74,41 @@ export default function TransactionList({ title }: ITransactionList) {
                     time={transaction.time}
                   />
                 </Td>
-                <Td>
+                <Td border={'none'}>
                   <Text
                     fontSize={'xs'}
                     px={2}
                     py={1}
                     color={'text-200'}
-                    bg={'border-gray-900'}
+                    bg={'gray-900'}
                     borderRadius={'full'}
                     align={'center'}
                   >
                     {transaction.action}
                   </Text>
                 </Td>
-                <Td>
-                  <Box display={'flex'} gap={4}>
+                <Td border={'none'}>
+                  <Box
+                    display={'flex'}
+                    gap={4}
+                    justifyContent={'space-between'}
+                    alignItems={'center'}
+                  >
                     <Text fontSize={'xs'} color={'text-link'}>
                       {truncate(transaction.fromAddress)}
                     </Text>
                     <Img src={images.rightArrow.src} width={4} height={4} />
                   </Box>
                 </Td>
-                <Td>
+                <Td border={'none'}>
                   {' '}
                   <Text fontSize={'xs'} color={'text-link'}>
                     {truncate(transaction.toAddress)}
                   </Text>
                 </Td>
               </Tr>
-            </Tbody>
-          ))}
+            ))}
+          </Tbody>
         </Table>
       </TableContainer>
       <Box width={'full'} px={4}>

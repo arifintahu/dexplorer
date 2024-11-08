@@ -9,6 +9,7 @@ import {
   HStack,
   Icon,
   IconButton,
+  Img,
   Input,
   Modal,
   ModalBody,
@@ -40,8 +41,12 @@ import { useSelector } from 'react-redux'
 import { connectWebsocketClient, validateConnection } from '@/rpc/client'
 import { selectRPCAddress, selectTmClient } from '@/store/connectSlice'
 import { selectNewBlock } from '@/store/streamSlice'
+import { fetchBitcoinPriceDifference } from '@/utils'
 import { LS_RPC_ADDRESS, LS_RPC_ADDRESS_LIST } from '@/utils/constant'
 import { removeTrailingSlash } from '@/utils/helper'
+import { images } from '@/utils/images'
+
+import BitcoinPriceDifference from '../BitcoinPriceWidget'
 
 const heightRegex = /^\d+$/
 const txhashRegex = /^[A-Z\d]{64}$/
@@ -210,14 +215,29 @@ export default function Navbar() {
         bg={'dark-bg'}
         w="100%"
         py={5}
-        px={16}
+        px={14}
         shadow={'base'}
         borderBottom="1px"
         borderBottomColor={'gray-900'}
         display={'flex'}
         justifyContent={'flex-end'}
+        alignItems={'center'}
       >
-        Test
+        <BitcoinPriceDifference />
+        <Box pl={5}>
+          <Text
+            fontSize={'md'}
+            fontWeight={'medium'}
+            color={'text-200'}
+            px={6}
+            py={'10px'}
+            border={'1px'}
+            borderColor={'text-200'}
+            borderRadius={'full'}
+          >
+            Surge Testnet
+          </Text>
+        </Box>
         {/* <HStack>
           <IconButton
             variant="ghost"
