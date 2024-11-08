@@ -24,7 +24,6 @@ main {
 }
 
 .home_main {
-  height: calc(100vh - 65px);
   position: relative;
   padding-top: 112px;
 }

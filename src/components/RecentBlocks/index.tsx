@@ -1,4 +1,4 @@
-import { Box, HStack, Image, Link, Text } from '@chakra-ui/react'
+import { Box, HStack, Image, Link, Text, VStack } from '@chakra-ui/react'
 import NextLink from 'next/link'
 
 import { shortenAddress } from '@/utils/helper'
@@ -15,7 +15,11 @@ export default function RecentBlocks() {
           Auto-Updates
         </Text>
       </HStack>
-      <RecentBlock />
+      <VStack gap={4} w={'100%'}>
+        <RecentBlock />
+        <RecentBlock />
+        <RecentBlock />
+      </VStack>
     </Box>
   )
 }
@@ -37,16 +41,15 @@ const RecentBlock = () => {
       timeAgo: '3hr ago',
     },
     {
-      blockId: '291204',
+      blockId: 'Test',
       address:
         '0x00000000000000000002e4add93ab2a51d8d405d60177fd30f791027deefb001',
       transactions: '2txn',
       timeAgo: '3hr ago',
     },
-    // Add as many data objects as you want here
   ]
   return (
-    <Box bg={'gray-1100'} borderRadius={12}>
+    <Box bg={'gray-1100'} borderRadius={12} w={'100%'}>
       <Box px={4} py={5} bg="gray-1200" borderTopRadius={12}>
         <HStack justifyContent="space-between">
           <HStack gap={3}>
@@ -90,13 +93,13 @@ const RecentBlock = () => {
           <Box
             position="absolute"
             left="20px"
-            top="0"
+            top="42px"
             bottom="0"
             width="1px"
             bg="primary-900"
             zIndex="1"
+            height={'68%'}
           />
-
           {dummyData.map((data, index) => (
             <HStack
               key={index}
@@ -108,19 +111,103 @@ const RecentBlock = () => {
               position="relative"
               _last={{ borderBottom: 'none' }}
             >
-              <Image
-                src={images.logoShort.src}
-                alt="Surge"
-                position="absolute"
-                left="-30px"
-                top="50%"
-                transform="translateY(-50%)"
-                zIndex={2}
-              />
+              {index === 0 && (
+                <Image
+                  src={images.logoShort.src}
+                  alt="Surge"
+                  position="absolute"
+                  left="-30px"
+                  top="50%"
+                  transform="translateY(-50%)"
+                  zIndex={2}
+                />
+              )}
               <Box
                 className="dots"
                 position="absolute"
-                left="-22px"
+                left="-22.5px"
+                top="50%"
+                transform="translateY(-50%)"
+                width="6px"
+                height="6px"
+                borderRadius="full"
+                bg="primary-500"
+                zIndex="2"
+              />
+
+              <HStack gap={3}>
+                <HStack gap={1}>
+                  <Image width={5} src={images.block.src} alt="block" />
+                  <Link
+                    as={NextLink}
+                    href={`/blocks/${data.blockId}`}
+                    _focus={{ boxShadow: 'none' }}
+                    display="block"
+                    fontSize="14px"
+                    color="primary-200"
+                  >
+                    {data.blockId}
+                  </Link>
+                </HStack>
+              </HStack>
+              <HStack gap={1}>
+                <Link
+                  as={NextLink}
+                  href={`/address/${data.address}`}
+                  _focus={{ boxShadow: 'none' }}
+                  fontSize="xs"
+                  color="gray-500"
+                  textDecoration="underline"
+                >
+                  {shortenAddress(data.address)}
+                </Link>
+                <Box w="2px" h="2px" bg="gray-500" borderRadius={99} />
+                <Text fontSize="xs" color="gray-500">
+                  {data.transactions}
+                </Text>
+                <Box w="2px" h="2px" bg="gray-500" borderRadius={99} />
+                <Text fontSize="xs" color="gray-400">
+                  {data.timeAgo}
+                </Text>
+              </HStack>
+            </HStack>
+          ))}
+        </Box>
+        <Box
+          px={3}
+          py={'10px'}
+          bg={'gray-1000'}
+          display={'inline-block'}
+          mt={2}
+          borderRadius={99}
+        >
+          <Text fontSize={'xs'} color={'text-200'} fontWeight={500}>
+            +6 Blocks
+          </Text>
+        </Box>
+        <Box position={'relative'}>
+          <Box
+            position="absolute"
+            left="20px"
+            top="4px"
+            width="1px"
+            bg="primary-900"
+            zIndex="1"
+            height={'24px'}
+          />
+          {dummyData.slice(-1).map((data, index) => (
+            <HStack
+              key={index}
+              justifyContent="space-between"
+              py="14px"
+              ml={10}
+              mt={2}
+              position="relative"
+            >
+              <Box
+                className="dots"
+                position="absolute"
+                left="-22.5px"
                 top="50%"
                 transform="translateY(-50%)"
                 width="6px"
