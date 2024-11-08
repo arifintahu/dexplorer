@@ -47,13 +47,13 @@ const LinkItems: Array<LinkItemProps> = [
   { name: 'Home', icon: MdOutlineHome, route: '/' },
   { name: 'Transactions', icon: GiTwoCoins, route: '/txs' },
   { name: 'Validators', icon: HiOutlineUsers, route: '/validators' },
-  { name: 'Aggregation', icon: PiTreeStructure, route: '/aggregation' },
+  // { name: 'Aggregation', icon: PiTreeStructure, route: '/aggregation' },
   { name: 'Signers', icon: FaGlobeAmericas, route: '/signer' },
-  {
-    name: 'Bitcoin Playground',
-    icon: PiDevToLogoFill,
-    route: '/bitcoin-playground',
-  },
+  // {
+  //   name: 'Bitcoin Playground',
+  //   icon: PiDevToLogoFill,
+  //   route: '/bitcoin-playground',
+  // },
 ]
 const RefLinkItems: Array<RefLinkItemProps> = [
   {

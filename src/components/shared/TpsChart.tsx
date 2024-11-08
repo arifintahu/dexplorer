@@ -96,7 +96,7 @@ const TransactionsChart: React.FC<TransactionsChartProps> = () => {
   }, [])
 
   return (
-    <div style={{ width: '100%', height: '180px' }}>
+    <div style={{ width: '100%', height: '150px' }}>
       <canvas ref={chartRef} style={{ width: '100%', height: '100%' }} />
     </div>
   )
