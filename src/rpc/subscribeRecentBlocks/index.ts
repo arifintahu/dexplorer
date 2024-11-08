@@ -1,41 +1,50 @@
-// Import WebSocket type from ws package for Node.js
 import WS from 'ws'
 
-// Create a type that includes only the methods we need from both WebSocket implementations
 interface CommonWebSocket {
   send(data: string): void
   close(): void
   readyState: number
 }
 
-// Define the base WebSocket type that works for both browser and Node.js
 type WebSocketType = CommonWebSocket & (WebSocket | WS)
 
-type BlockHeaderEvent = {
+export type BlockHeaderEvent = {
   result?: {
     data?: {
       value?: {
-        header?: {
-          height: string
-          chain_id: string
-          time: string
-          data_hash: string
-          proposer_address: string
-          last_block_id?: {
-            hash: string
-          }
-        }
+        header?: BlockHeader
       }
     }
   }
 }
 
+export interface BlockHeader {
+  version: { block: string }
+  chain_id: string
+  height: string
+  time: string
+  last_block_id: {
+    hash: string
+    parts: {
+      total: number
+      hash: string
+    }
+  }
+  last_commit_hash: string
+  data_hash: string
+  validators_hash: string
+  next_validators_hash: string
+  consensus_hash: string
+  app_hash: string
+  last_results_hash: string
+  evidence_hash: string
+  proposer_address: string
+}
+
 const createWebSocketConnection = (url: string): WebSocketType => {
-  // Check if we're in a browser environment
   if (typeof window !== 'undefined' && window.WebSocket) {
     return new window.WebSocket(url) as WebSocketType
   } else {
-    // Node.js environment
     const WebSocket = require('ws')
     return new WebSocket(url) as WebSocketType
   }
@@ -53,79 +62,61 @@ const subscribeToBlockHeaders = (ws: WebSocketType): void => {
   ws.send(JSON.stringify(subscriptionMessage))
 }
 
-const handleMessage = (event: MessageEvent | WS.Data): void => {
+const handleMessage = (
+  event: MessageEvent | WS.Data,
+  onData: (header: BlockHeader) => void
+): void => {
   try {
-    // Handle both browser MessageEvent and Node.js WebSocket data
     const data = event instanceof MessageEvent ? event.data : event
     const parsedEvent = JSON.parse(
       typeof data === 'string' ? data : data.toString()
     ) as BlockHeaderEvent
 
-    console.log('\n=== New Block Header Event ===')
-    console.log(JSON.stringify(parsedEvent, null, 2))
-
-    if (parsedEvent.result?.data?.value?.header) {
-      const header = parsedEvent.result.data.value.header
-      console.log('\n=== Block Header Details ===')
-      console.log(`Height: ${header.height}`)
-      console.log(`Chain ID: ${header.chain_id}`)
-      console.log(`Time: ${header.time}`)
-      console.log(`Proposer Address: ${header.proposer_address}`)
-      console.log(`Last Block ID: ${header.last_block_id?.hash}`)
-      console.log(`Block Hash: ${header.last_block_id?.hash}`)
-      console.log(`Data Hash: ${header?.data_hash}`)
+    const header = parsedEvent.result?.data?.value?.header
+    if (header) {
+      onData(header)
     }
   } catch (error) {
     console.error('Error parsing message:', error)
   }
 }
 
-const setupWebSocketListeners = (ws: WebSocketType): void => {
+const setupWebSocketListeners = (
+  ws: WebSocketType,
+  onData: (header: BlockHeader) => void
+): void => {
   const browserWS = ws as WebSocket
   const nodeWS = ws as WS
 
-  // Browser environment
   if (typeof window !== 'undefined' && window.WebSocket) {
     browserWS.onopen = () => {
       console.log('Connected to WebSocket')
       subscribeToBlockHeaders(ws)
     }
-
-    browserWS.onmessage = (event: MessageEvent) => handleMessage(event)
-
-    browserWS.onerror = (error: Event) => {
+    browserWS.onmessage = (event: MessageEvent) => handleMessage(event, onData)
+    browserWS.onerror = (error: Event) =>
       console.error('WebSocket error:', error)
-    }
-
-    browserWS.onclose = () => {
-      console.log('WebSocket connection closed')
-    }
+    browserWS.onclose = () => console.log('WebSocket connection closed')
   } else {
-    // Node.js environment
     nodeWS.on('open', () => {
       console.log('Connected to WebSocket')
       subscribeToBlockHeaders(ws)
     })
-
-    nodeWS.on('message', (data: WS.Data) => handleMessage(data))
-
-    nodeWS.on('error', (error: Error) => {
+    nodeWS.on('message', (data: WS.Data) => handleMessage(data, onData))
+    nodeWS.on('error', (error: Error) =>
       console.error('WebSocket error:', error)
-    })
-
-    nodeWS.on('close', () => {
-      console.log('WebSocket connection closed')
-    })
+    )
+    nodeWS.on('close', () => console.log('WebSocket connection closed'))
   }
 }
 
 export const startBlockMonitor = (
-  wsUrl: string = 'ws://146.190.149.75:26657/websocket'
+  wsUrl: string = 'ws://146.190.149.75:26657/websocket',
+  onData: (header: BlockHeader) => void
 ): (() => void) => {
   const ws = createWebSocketConnection(wsUrl)
-  setupWebSocketListeners(ws)
+  setupWebSocketListeners(ws, onData)
 
-  // Return cleanup function
   return () => {
     if (ws.readyState === WebSocket.OPEN) {
       ws.close()

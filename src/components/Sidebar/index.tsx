@@ -141,14 +141,6 @@ const SidebarContent = ({ onClose, ...rest }: SidebarProps) => {
           ))}
         </Box>
         <Flex justifyContent="center" mb="10">
-          {/* <Button
-            leftIcon={<FiLogOut />}
-            colorScheme="red"
-            variant="outline"
-            onClick={handleDisconnect}
-          >
-            Disconnect All
-          </Button> */}
           <HStack spacing="20px">
             {RefLinkItems.map((link, key) => (
               <RefLinkItem

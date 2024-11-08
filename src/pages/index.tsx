@@ -76,11 +76,7 @@ export default function Home() {
       setIsLoaded(true)
     }
   }, [isLoaded, newBlock, status])
-  console.log(
-    status?.syncInfo.latestBlockHeight,
-    'status?.syncInfo.latestBlockHeight'
-  )
-  console.log(newBlock?.header.height, 'newBlock?.header.height')
+
   return (
     <>
       <Head>

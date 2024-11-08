@@ -1,10 +1,34 @@
-import { Box, HStack, Image, Link, Text, VStack } from '@chakra-ui/react'
+import {
+  Box,
+  Button,
+  HStack,
+  Image,
+  Link,
+  Skeleton,
+  Text,
+  VStack,
+} from '@chakra-ui/react'
 import NextLink from 'next/link'
+import { useEffect, useState } from 'react'
 
+import startBlockMonitor, { BlockHeader } from '@/rpc/subscribeRecentBlocks'
 import { shortenAddress } from '@/utils/helper'
 import { images } from '@/utils/images'
 
 export default function RecentBlocks() {
+  const [blockHeaders, setBlockHeaders] = useState<BlockHeader[]>([])
+  const [isLoading, setIsLoading] = useState(true)
+
+  useEffect(() => {
+    const onData = (data: any) => {
+      setBlockHeaders((prevHeaders) => [data, ...prevHeaders].slice(0, 3))
+      setIsLoading(false)
+    }
+    const cleanup = startBlockMonitor(undefined, onData)
+
+    return cleanup
+  }, [])
+  console.log(blockHeaders, 'blockHeaders')
   return (
     <Box>
       <HStack justifyContent={'space-between'} mb={3}>
@@ -15,11 +39,29 @@ export default function RecentBlocks() {
           Auto-Updates
         </Text>
       </HStack>
-      <VStack gap={4} w={'100%'}>
-        <RecentBlock />
-        <RecentBlock />
-        <RecentBlock />
+      <VStack gap={4} w={'100%'} mb={'38px'}>
+        <Skeleton w={'100%'} isLoaded={!isLoading}>
+          <RecentBlock />
+        </Skeleton>
       </VStack>
+      {!isLoading && (
+        <Box width={'full'}>
+          <Button
+            border={'1px'}
+            borderColor={'primary-500'}
+            width={'100%'}
+            alignSelf={'center'}
+            bg={'dark-bg'}
+            color={'primary-500'}
+            borderRadius={'12px'}
+            _hover={{
+              bg: '#010101',
+            }}
+          >
+            See All Blocks
+          </Button>
+        </Box>
+      )}
     </Box>
   )
 }
@@ -81,7 +123,7 @@ const RecentBlock = () => {
                 '0x00000000000000000001e4add93ab2a51d8d405d60177fd30f791027deefaffd'
               )}
             </Link>
-            <Box w={'2px'} h={'2px'} bg={'gray-500'} borderRadius={99} />
+            <Dot />
             <Text fontSize={'xs'} color={'gray-400'}>
               2hr ago
             </Text>
@@ -243,11 +285,11 @@ const RecentBlock = () => {
                 >
                   {shortenAddress(data.address)}
                 </Link>
-                <Box w="2px" h="2px" bg="gray-500" borderRadius={99} />
+                <Dot />
                 <Text fontSize="xs" color="gray-500">
                   {data.transactions}
                 </Text>
-                <Box w="2px" h="2px" bg="gray-500" borderRadius={99} />
+                <Dot />
                 <Text fontSize="xs" color="gray-400">
                   {data.timeAgo}
                 </Text>
@@ -276,4 +318,7 @@ const RecentBlock = () => {
       </Box>
     </Box>
   )
+}
+const Dot = () => {
+  return <Box w="2px" h="2px" bg="gray-500" borderRadius={99} />
 }
