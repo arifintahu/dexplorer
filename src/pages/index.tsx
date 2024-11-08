@@ -158,7 +158,7 @@ export default function Home() {
           </Box>
           <Grid templateColumns="repeat(12, 1fr)" gap={5} pb={10}>
             <GridItem colSpan={7}>
-              <TransactionList title="Transactions" />
+              <TransactionList title="Transactions" showAll={false} />
             </GridItem>
             <GridItem
               colSpan={5}

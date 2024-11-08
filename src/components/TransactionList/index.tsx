@@ -26,13 +26,14 @@ import { images } from '@/utils/images'
 
 interface ITransactionList {
   title: string
+  showAll: boolean
 }
 
-export default function TransactionList({ title }: ITransactionList) {
+export default function TransactionList({ title, showAll }: ITransactionList) {
   return (
     <Box
       pt={10}
-      pb={5}
+      pb={showAll ? 1 : 5}
       border={'1px'}
       borderColor={'gray-900'}
       bg={'dark-bg'}
@@ -51,10 +52,11 @@ export default function TransactionList({ title }: ITransactionList) {
         <Table>
           <Thead px={6}>
             <Tr>
-              <Th>Transaction Hash</Th>
-              <Th>Function</Th>
-              <Th>From</Th>
-              <Th>To</Th>
+              <Th width={'25%'}>Transaction Hash</Th>
+              <Th width={'25%'}>Function</Th>
+              <Th width={'10%'}>From</Th>
+              <Th width={'15%'}>To</Th>
+              {showAll && <Th width={'15%'}>Fees</Th>}
             </Tr>
           </Thead>
           <Tbody>
@@ -83,11 +85,12 @@ export default function TransactionList({ title }: ITransactionList) {
                     bg={'gray-900'}
                     borderRadius={'full'}
                     align={'center'}
+                    maxW={'200px'}
                   >
                     {transaction.action}
                   </Text>
                 </Td>
-                <Td border={'none'}>
+                <Td border={'none'} pr={1}>
                   <Box
                     display={'flex'}
                     gap={4}
@@ -106,28 +109,44 @@ export default function TransactionList({ title }: ITransactionList) {
                     {truncate(transaction.toAddress)}
                   </Text>
                 </Td>
+                {showAll && (
+                  <Td border={'none'}>
+                    <VStack gap={1} alignItems={'start'}>
+                      <Text
+                        className="label_regular"
+                        color={'text-50'}
+                      >{`${transaction.fees}`}</Text>
+                      <Text
+                        className="label_medium"
+                        color={'text-500'}
+                      >{`${transaction.feeValue}`}</Text>
+                    </VStack>
+                  </Td>
+                )}
               </Tr>
             ))}
           </Tbody>
         </Table>
       </TableContainer>
-      <Box width={'full'} px={4}>
-        <Button
-          border={'1px'}
-          borderColor={'primary-500'}
-          width={'100%'}
-          alignSelf={'center'}
-          mt={4}
-          bg={'dark-bg'}
-          color={'primary-500'}
-          borderRadius={'12px'}
-          _hover={{
-            bg: '#010101',
-          }}
-        >
-          See all transactions
-        </Button>
-      </Box>
+      {!showAll && (
+        <Box width={'full'} px={4}>
+          <Button
+            border={'1px'}
+            borderColor={'primary-500'}
+            width={'100%'}
+            alignSelf={'center'}
+            mt={4}
+            bg={'dark-bg'}
+            color={'primary-500'}
+            borderRadius={'12px'}
+            _hover={{
+              bg: '#010101',
+            }}
+          >
+            See all transactions
+          </Button>
+        </Box>
+      )}
     </Box>
   )
 }
@@ -202,6 +221,8 @@ const transactionData = [
     action: 'Router Swap',
     fromAddress: '0x1234567890abcdef1234567890abcdef12345678',
     toAddress: '0xabcdef1234567890abcdef1234567890abcdef12',
+    fees: '123 sats/byte',
+    feeValue: '$1.03',
   },
   {
     txHash: '0xabcdef1234567890abcdef1234567890abcdef12',
@@ -211,6 +232,8 @@ const transactionData = [
     action: 'Token Transfer',
     fromAddress: '0xabcdef1234567890abcdef1234567890abcdef12',
     toAddress: '0x7890abcdef1234567890abcdef1234567890abcd',
+    fees: '123 sats/byte',
+    feeValue: '$1.03',
   },
   {
     txHash: '0x7890abcdef1234567890abcdef1234567890abcd',
@@ -220,5 +243,7 @@ const transactionData = [
     action: 'Contract Call',
     fromAddress: '0x7890abcdef1234567890abcdef1234567890abcd',
     toAddress: '0xabcdef1234567890abcdef1234567890abcdef12',
+    fees: '123 sats/byte',
+    feeValue: '$1.03',
   },
 ]

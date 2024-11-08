@@ -20,6 +20,7 @@ export const colors: Colors = {
   'text-danger': '#DE9804',
   'text-error': '#EF4444',
   'text-50': '#F0F1F2',
+  'text-500': '#6B7280',
   'text-link': '#0EA5E9',
   'gray-1100': '#2A313A4D',
   'gray-1200': '#2A313A33',

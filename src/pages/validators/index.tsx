@@ -1,155 +1,52 @@
-import {
-  Box,
-  Divider,
-  Heading,
-  HStack,
-  Icon,
-  Link,
-  Text,
-  useColorModeValue,
-  useToast,
-} from '@chakra-ui/react'
-import { createColumnHelper } from '@tanstack/react-table'
-import Head from 'next/head'
-import NextLink from 'next/link'
+import { Box, Grid, GridItem, Img, Skeleton, Text } from '@chakra-ui/react'
+import { StatusResponse } from '@cosmjs/tendermint-rpc'
 import { useEffect, useState } from 'react'
-import { FiChevronRight, FiHome } from 'react-icons/fi'
 import { useSelector } from 'react-redux'
 
-import DataTable from '@/components/Datatable'
-import { queryActiveValidators } from '@/rpc/abci'
-import { selectTmClient } from '@/store/connectSlice'
-import { convertRateToPercent, convertVotingPower } from '@/utils/helper'
-
-type ValidatorData = {
-  validator: string
-  status: string
-  votingPower: string
-  commission: string
-}
-
-const columnHelper = createColumnHelper<ValidatorData>()
-
-const columns = [
-  columnHelper.accessor('validator', {
-    cell: (info) => info.getValue(),
-    header: 'Validator',
-  }),
-  columnHelper.accessor('status', {
-    cell: (info) => info.getValue(),
-    header: 'Status',
-  }),
-  columnHelper.accessor('votingPower', {
-    cell: (info) => info.getValue(),
-    header: 'Voting Power',
-    meta: {
-      isNumeric: true,
-    },
-  }),
-  columnHelper.accessor('commission', {
-    cell: (info) => info.getValue(),
-    header: 'Commission',
-    meta: {
-      isNumeric: true,
-    },
-  }),
-]
+import { BoxInfo } from '@/components/shared/BoxInfo'
+import GradientBackground from '@/components/shared/GradientBackground'
+import ValidatorsList from '@/components/ValidatorsList'
+import { selectNewBlock } from '@/store/streamSlice'
 
 export default function Validators() {
-  const tmClient = useSelector(selectTmClient)
-  const [page, setPage] = useState(0)
-  const [perPage, setPerPage] = useState(10)
-  const [total, setTotal] = useState(0)
-  const [data, setData] = useState<ValidatorData[]>([])
-  const [isLoading, setIsLoading] = useState(true)
-  const toast = useToast()
-
+  const [isLoaded, setIsLoaded] = useState(false)
+  const newBlock = useSelector(selectNewBlock)
+  const [status, setStatus] = useState<StatusResponse | null>()
   useEffect(() => {
-    if (tmClient) {
-      setIsLoading(true)
-      queryActiveValidators(tmClient, page, perPage)
-        .then((response) => {
-          setTotal(Number(response.pagination?.total))
-          const validatorData: ValidatorData[] = response.validators.map(
-            (val) => {
-              return {
-                validator: val.description?.moniker ?? '',
-                status: val.status === 3 ? 'Active' : '',
-                votingPower: convertVotingPower(val.tokens),
-                commission: convertRateToPercent(
-                  val.commission?.commissionRates?.rate
-                ),
-              }
-            }
-          )
-          setData(validatorData)
-          setIsLoading(false)
-        })
-        .catch(() => {
-          toast({
-            title: 'Failed to fetch datatable',
-            description: '',
-            status: 'error',
-            duration: 5000,
-            isClosable: true,
-          })
-        })
+    if ((!isLoaded && newBlock) || (!isLoaded && status)) {
+      setIsLoaded(true)
     }
-  }, [tmClient, page, perPage])
-
-  const onChangePagination = (value: {
-    pageIndex: number
-    pageSize: number
-  }) => {
-    setPage(value.pageIndex)
-    setPerPage(value.pageSize)
-  }
+  }, [isLoaded, newBlock, status])
 
   return (
-    <>
-      <Head>
-        <title>Blocks | Dexplorer</title>
-        <meta name="description" content="Blocks | Dexplorer" />
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <link rel="icon" href="/favicon.ico" />
-      </Head>
-      <main>
-        <HStack h="24px">
-          <Heading size={'md'}>Validators</Heading>
-          <Divider borderColor={'gray'} size="10px" orientation="vertical" />
-          <Link
-            as={NextLink}
-            href={'/'}
-            style={{ textDecoration: 'none' }}
-            _focus={{ boxShadow: 'none' }}
-            display="flex"
-            justifyContent="center"
-          >
-            <Icon
-              fontSize="16"
-              color={useColorModeValue('light-theme', 'dark-theme')}
-              as={FiHome}
+    <GradientBackground title="Validators">
+      <Grid templateColumns="repeat(12, 1fr)" gap={5} mb={9}>
+        <GridItem colSpan={3} display={'flex'} flexDirection={'column'} gap={5}>
+          <Skeleton isLoaded={isLoaded}>
+            <BoxInfo
+              bgColor="green.200"
+              color="green.600"
+              name="TOTAL VALIDATORS"
+              value={4}
+              tooltipText="Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat"
             />
-          </Link>
-          <Icon fontSize="16" as={FiChevronRight} />
-          <Text>Validators</Text>
-        </HStack>
-        <Box
-          mt={8}
-          bg={useColorModeValue('light-container', 'dark-container')}
-          shadow={'base'}
-          borderRadius={4}
-          p={4}
-        >
-          <DataTable
-            columns={columns}
-            data={data}
-            total={total}
-            isLoading={isLoading}
-            onChangePagination={onChangePagination}
-          />
-        </Box>
-      </main>
-    </>
+          </Skeleton>
+          <Skeleton isLoaded={isLoaded}>
+            <BoxInfo
+              name="ACTIVE VALIDATORS"
+              value={4}
+              tooltipText="Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat"
+            />
+          </Skeleton>
+        </GridItem>
+        <GridItem
+          colSpan={9}
+          bg={'gray-900'}
+          opacity={'35%'}
+          borderRadius={'8px'}
+        ></GridItem>
+      </Grid>
+      <ValidatorsList title="All Validators" />
+    </GradientBackground>
   )
 }

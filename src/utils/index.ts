@@ -1,4 +1,4 @@
-export const getColor = (status: string) => {
+export const getColor = (status: string | number) => {
   switch (status) {
     case 'success':
       return 'text-success'
@@ -6,6 +6,10 @@ export const getColor = (status: string) => {
       return 'text-danger'
     case 'error':
       return 'text-error'
+    case 0:
+      return 'text-error'
+    case 1:
+      return 'text-success'
     default:
       return 'gray.500' // Default color if status is unknown
   }
