@@ -73,7 +73,12 @@ export default function Home() {
           alt="pattern"
         />
         <Box position="relative">
-          <Text fontSize="40px" lineHeight="52px" fontWeight="bold">
+          <Text
+            fontSize="40px"
+            lineHeight="52px"
+            color={'white'}
+            fontWeight="bold"
+          >
             Surge Explorer
           </Text>
           <Box mt={7} mb={8}>
