@@ -22,12 +22,12 @@ import { useEffect, useState } from 'react'
 import { useSelector } from 'react-redux'
 
 import RecentBlocks from '@/components/RecentBlocks'
+import TransactionList from '@/components/TransactionList'
 import { getValidators } from '@/rpc/query'
 import { selectTmClient } from '@/store/connectSlice'
 import { selectNewBlock } from '@/store/streamSlice'
 import { displayDate } from '@/utils/helper'
 import { images } from '@/utils/images'
-import TransactionList from '@/components/TransactionList'
 
 export default function Home() {
   const tmClient = useSelector(selectTmClient)
@@ -131,7 +131,7 @@ export default function Home() {
               </Skeleton>
             </SimpleGrid>
           </Box>
-          <Grid templateColumns="repeat(12, 1fr)" gap={5}>
+          <Grid templateColumns="repeat(12, 1fr)" gap={5} pb={10}>
             <GridItem colSpan={7}>
               <TransactionList title="Transactions" />
             </GridItem>
