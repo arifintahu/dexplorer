@@ -5,6 +5,7 @@ import chainLink from '../../public/assets/images/chain_link.svg'
 import logo from '../../public/assets/images/logo.svg'
 import logoShort from '../../public/assets/images/logo_short.svg'
 import pattern from '../../public/assets/images/pattern.png'
+import primaryGradient from '../../public/assets/images/primary_gradient.png'
 import rightArrow from '../../public/assets/images/right-arrow.svg'
 import stars from '../../public/assets/images/stars.svg'
 
@@ -17,6 +18,7 @@ export type ImageType =
   | 'chainLink'
   | 'stars'
   | 'logoShort'
+  | 'primaryGradient'
   | 'block'
 
 export type NextImage = {
@@ -35,4 +37,5 @@ export const images: Record<ImageType, NextImage> = {
   stars,
   logoShort,
   block,
+  primaryGradient,
 }
