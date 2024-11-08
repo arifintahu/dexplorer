@@ -22,6 +22,7 @@ import { useEffect, useState } from 'react'
 import { useSelector } from 'react-redux'
 
 import RecentBlocks from '@/components/RecentBlocks'
+import { BoxInfo } from '@/components/shared/BoxInfo'
 import TransactionList from '@/components/TransactionList'
 import {
   getTotalInscriptions,
@@ -179,43 +180,5 @@ export default function Home() {
         </Box>
       </main>
     </>
-  )
-}
-
-interface BoxInfoProps extends FlexProps {
-  name: string
-  value: string | number | undefined
-  tooltipText: string
-}
-const BoxInfo = ({ name, value, tooltipText }: BoxInfoProps) => {
-  return (
-    <VStack
-      bg={'gray-1000'}
-      borderRadius={12}
-      p={4}
-      pb={2}
-      height="100px"
-      border={'1px'}
-      borderColor={'gray-900'}
-      align={'flex-start'}
-    >
-      <HStack mb={'14px'}>
-        <Heading size={'xs'} color={'gray-500'} fontWeight={500}>
-          {name}
-        </Heading>
-        <Tooltip
-          label={tooltipText}
-          placement="right"
-          bg="gray.300"
-          color="black"
-        >
-          <Icon as={InfoOutlineIcon} w={'13px'} color="gray-500" />
-        </Tooltip>
-      </HStack>
-
-      <Text fontSize={'2xl'} color={'white'} fontWeight={500}>
-        {value}
-      </Text>
-    </VStack>
   )
 }

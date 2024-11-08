@@ -98,7 +98,7 @@ export default function Sidebar({ children }: { children: ReactNode }) {
       </Drawer>
 
       <MobileNav display={{ base: 'flex', md: 'none' }} onOpen={onOpen} />
-      <Box ml={{ base: 0, md: 80 }}>{children}</Box>
+      <Box ml={{ base: 0, md: '280px' }}>{children}</Box>
     </Box>
   )
 }
@@ -113,7 +113,7 @@ const SidebarContent = ({ onClose, ...rest }: SidebarProps) => {
       bg={'dark-bg'}
       borderRight="1px"
       borderRightColor={'gray-900'}
-      w={{ base: 'full', md: 80 }}
+      w={{ base: 'full', md: '280px' }}
       pos="fixed"
       h="full"
       {...rest}
