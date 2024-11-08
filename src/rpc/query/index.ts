@@ -78,3 +78,39 @@ export async function getTxsBySender(
     per_page: perPage,
   })
 }
+
+export async function getTotalInscriptions() {
+  try {
+    const response = await fetch(
+      'https://api.devnet.surge.dev/surge/zk/bitcoindata'
+    )
+
+    if (!response.ok) {
+      return 0
+    }
+
+    const data = await response.json()
+    return data.bitcoindata.length
+  } catch (error) {
+    console.error('Error fetching bitcoindata:', error)
+    return 0
+  }
+}
+
+export async function getTxsByRestApi(restEndpoint: string, searchParams: any) {
+  try {
+    const response = await fetch(
+      `${restEndpoint}/cosmos/tx/v1beta1/txs?${new URLSearchParams(
+        searchParams
+      )}`
+    )
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`)
+    }
+    const data = await response.json()
+    return data.tx_responses
+  } catch (error) {
+    console.error('Error fetching transactions:', error)
+    return []
+  }
+}

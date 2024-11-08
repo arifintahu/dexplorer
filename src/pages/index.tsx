@@ -23,7 +23,11 @@ import { useSelector } from 'react-redux'
 
 import RecentBlocks from '@/components/RecentBlocks'
 import TransactionList from '@/components/TransactionList'
-import { getValidators } from '@/rpc/query'
+import {
+  getTotalInscriptions,
+  getTxsByRestApi,
+  getValidators,
+} from '@/rpc/query'
 import { selectTmClient } from '@/store/connectSlice'
 import { selectNewBlock } from '@/store/streamSlice'
 import { displayDate } from '@/utils/helper'
@@ -35,6 +39,7 @@ export default function Home() {
   const [validators, setValidators] = useState<number>()
   const [isLoaded, setIsLoaded] = useState(false)
   const [status, setStatus] = useState<StatusResponse | null>()
+  const [totalInscription, setTotalInscription] = useState<number>(0)
 
   useEffect(() => {
     if (tmClient) {
@@ -42,6 +47,28 @@ export default function Home() {
       getValidators(tmClient).then((response) => setValidators(response.total))
     }
   }, [tmClient])
+
+  // Function to handle the interval call
+  async function checkBitcoinData() {
+    const length = await getTotalInscriptions()
+    setTotalInscription(length)
+  }
+
+  useEffect(() => {
+    const intervalId = setInterval(checkBitcoinData, 5000)
+    // Example usage:
+    const restEndpoint = 'https://rpc.devnet.surge.dev'
+
+    // Query parameters
+    const params = {
+      events: "message.sender='sender_address'",
+      'pagination.limit': '100',
+      order_by: 'ORDER_BY_DESC',
+    }
+
+    const transactions = getTxsByRestApi(restEndpoint, params)
+    console.log('Transactions:', transactions)
+  }, [])
 
   useEffect(() => {
     if ((!isLoaded && newBlock) || (!isLoaded && status)) {
@@ -104,11 +131,7 @@ export default function Home() {
               <Skeleton isLoaded={isLoaded}>
                 <BoxInfo
                   name="TOTAL INSCRIPTIONS"
-                  value={
-                    newBlock?.header.height
-                      ? '#' + newBlock?.header.height
-                      : '#' + status?.syncInfo.latestBlockHeight
-                  }
+                  value={totalInscription}
                   tooltipText="Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat"
                 />
               </Skeleton>
