@@ -99,7 +99,8 @@ export default function Home() {
 
   // Function to handle the interval call
   async function checkBitcoinData() {
-    const length = await getTotalInscriptions()
+    const data = await getTotalInscriptions()
+    const length = data?.bitcoindata?.length ?? 0
     setTotalInscription(length)
   }
 
