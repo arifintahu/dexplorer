@@ -27,16 +27,12 @@ export default function Validators() {
               bgColor="green.200"
               color="green.600"
               name="TOTAL VALIDATORS"
-              value={4}
-              tooltipText="Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat"
+              value={3}
+              tooltipText=""
             />
           </Skeleton>
           <Skeleton isLoaded={isLoaded}>
-            <BoxInfo
-              name="ACTIVE VALIDATORS"
-              value={4}
-              tooltipText="Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat"
-            />
+            <BoxInfo name="ACTIVE VALIDATORS" value={3} tooltipText="" />
           </Skeleton>
         </GridItem>
         <GridItem

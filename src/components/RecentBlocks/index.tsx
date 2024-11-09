@@ -36,7 +36,7 @@ export default function RecentBlocks() {
           Recent Blocks
         </Text>
         <Text fontSize={'xs'} color={'gray-400'} pr={2} fontWeight={500}>
-          Auto-Updates
+          Auto Updates
         </Text>
       </HStack>
       <VStack gap={4} w={'100%'} mb={'38px'}>

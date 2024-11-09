@@ -28,16 +28,12 @@ export default function Signers() {
               bgColor="green.200"
               color="green.600"
               name="TOTAL SIGNERS"
-              value={4}
-              tooltipText="Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat"
+              value={3}
+              tooltipText=""
             />
           </Skeleton>
           <Skeleton isLoaded={isLoaded}>
-            <BoxInfo
-              name="ACTIVE SIGNERS"
-              value={4}
-              tooltipText="Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat"
-            />
+            <BoxInfo name="ACTIVE SIGNERS" value={2} tooltipText="" />
           </Skeleton>
         </GridItem>
         <GridItem

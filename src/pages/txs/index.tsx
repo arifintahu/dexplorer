@@ -50,7 +50,7 @@ export default function Transactions() {
                   ? displayDate(status?.syncInfo.latestBlockTime.toISOString())
                   : ''
               }
-              tooltipText="Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat"
+              tooltipText=""
             />
           </Skeleton>
           <Skeleton isLoaded={isLoaded}>
@@ -61,7 +61,7 @@ export default function Transactions() {
                   ? '#' + newBlock?.header.height
                   : '#' + status?.syncInfo.latestBlockHeight
               }
-              tooltipText="Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat"
+              tooltipText=""
             />
           </Skeleton>
         </GridItem>

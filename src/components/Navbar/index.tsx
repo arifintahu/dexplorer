@@ -235,7 +235,7 @@ export default function Navbar() {
             borderColor={'text-200'}
             borderRadius={'full'}
           >
-            Surge Testnet
+            Alpha Testnet
           </Text>
         </Box>
         {/* <HStack>

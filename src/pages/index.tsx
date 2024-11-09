@@ -121,7 +121,7 @@ export default function Home() {
                         )
                       : ''
                   }
-                  tooltipText="Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat"
+                  tooltipText=""
                 />
               </Skeleton>
 
@@ -129,7 +129,7 @@ export default function Home() {
                 <BoxInfo
                   name="TOTAL INSCRIPTIONS"
                   value={totalInscription}
-                  tooltipText="Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat"
+                  tooltipText=""
                 />
               </Skeleton>
               <Skeleton isLoaded={isLoaded}>
@@ -140,7 +140,7 @@ export default function Home() {
                       ? '#' + newBlock?.header.height
                       : '#' + status?.syncInfo.latestBlockHeight
                   }
-                  tooltipText="Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat"
+                  tooltipText=""
                 />
               </Skeleton>
               <Skeleton isLoaded={isLoaded}>
@@ -151,7 +151,7 @@ export default function Home() {
                       ? '#' + newBlock?.header.height
                       : '#' + status?.syncInfo.latestBlockHeight
                   }
-                  tooltipText="Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat"
+                  tooltipText=""
                 />
               </Skeleton>
             </SimpleGrid>

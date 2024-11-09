@@ -103,62 +103,20 @@ export default function SignersList({ title }: ISignersList) {
 const signerKeyData = [
   {
     signerKey: '0xA1B2C3D4E5F67890ABCDEF1234567890ABCDEF01',
-    entityName: 'Validator Alpha',
+    entityName: 'Signer 1',
     status: 1,
-    votingPower: 12.5,
+    votingPower: 40,
   },
   {
     signerKey: '0xB2C3D4E5F67890ABCDEF1234567890ABCDEF02A1',
-    entityName: 'Validator Beta',
+    entityName: 'Signer 2',
     status: 1,
-    votingPower: 8.3,
+    votingPower: 40,
   },
   {
     signerKey: '0xC3D4E5F67890ABCDEF1234567890ABCDEF03B2',
-    entityName: 'Validator Gamma',
+    entityName: 'Signer Gamma',
     status: 0,
-    votingPower: 15.7,
-  },
-  {
-    signerKey: '0xD4E5F67890ABCDEF1234567890ABCDEF04C3',
-    entityName: 'Validator Delta',
-    status: 1,
-    votingPower: 20.1,
-  },
-  {
-    signerKey: '0xE5F67890ABCDEF1234567890ABCDEF05D4',
-    entityName: 'Validator Epsilon',
-    status: 1,
-    votingPower: 5.4,
-  },
-  {
-    signerKey: '0xF67890ABCDEF1234567890ABCDEF06E5',
-    entityName: 'Validator Zeta',
-    status: 0,
-    votingPower: 10.2,
-  },
-  {
-    signerKey: '0x67890ABCDEF1234567890ABCDEF07F6',
-    entityName: 'Validator Eta',
-    status: 1,
-    votingPower: 7.8,
-  },
-  {
-    signerKey: '0x7890ABCDEF1234567890ABCDEF08G7',
-    entityName: 'Validator Theta',
-    status: 1,
-    votingPower: 13.5,
-  },
-  {
-    signerKey: '0x890ABCDEF1234567890ABCDEF09H8',
-    entityName: 'Validator Iota',
-    status: 1,
-    votingPower: 6.9,
-  },
-  {
-    signerKey: '0x90ABCDEF1234567890ABCDEF10I9',
-    entityName: 'Validator Kappa',
-    status: 1,
-    votingPower: 18.4,
+    votingPower: 20,
   },
 ]

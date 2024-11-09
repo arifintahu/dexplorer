@@ -85,7 +85,7 @@ export const convertRateToPercent = (rate: string | undefined): string => {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   })
-  return `${commission}%`
+  return `${commission}`
 }
 
 export const displayCoin = (deposit: Coin) => {

@@ -24,7 +24,7 @@ import { FaGlobeAmericas } from 'react-icons/fa'
 import { FiMenu } from 'react-icons/fi'
 import { GiTwoCoins } from 'react-icons/gi'
 import { HiOutlineUsers } from 'react-icons/hi2'
-import { IoLogoGithub } from 'react-icons/io'
+import { IoLogoGithub, IoLogoTwitter } from 'react-icons/io'
 import { MdOutlineHome } from 'react-icons/md'
 import { PiDevToLogoFill, PiTreeStructure } from 'react-icons/pi'
 import { VscGlobe } from 'react-icons/vsc'
@@ -67,10 +67,9 @@ const RefLinkItems: Array<RefLinkItemProps> = [
     isBlank: true,
   },
   {
-    icon: AiFillExclamationCircle,
-    route: 'https://surge.build/',
+    icon: IoLogoTwitter,
+    route: 'https://x.com/SurgeBuild',
     isBlank: true,
-    iconColor: true,
   },
 ]
 

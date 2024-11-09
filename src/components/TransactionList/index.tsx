@@ -15,6 +15,7 @@ import {
   Tr,
   VStack,
 } from '@chakra-ui/react'
+import router from 'next/router'
 
 import {
   capitalizeFirstLetter,
@@ -141,6 +142,9 @@ export default function TransactionList({ title, showAll }: ITransactionList) {
             borderRadius={'12px'}
             _hover={{
               bg: '#010101',
+            }}
+            onClick={() => {
+              router.push('/txs')
             }}
           >
             See all transactions

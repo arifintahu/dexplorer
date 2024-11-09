@@ -90,7 +90,7 @@ export default function ValidatorsList({ title }: IValidatorsList) {
                 <Td
                   border={'none'}
                   className="body2_regular"
-                >{`${validator.commission}%`}</Td>
+                >{`${validator.commission}`}</Td>
               </Tr>
             ))}
           </Tbody>
@@ -102,35 +102,27 @@ export default function ValidatorsList({ title }: IValidatorsList) {
 
 const validators = [
   {
-    name: 'Foundation',
+    name: 'Foundation 1',
     status: 1,
     active: true,
     address: '0xC09368ACD3024C7E293395ABC123456789ABCDEF',
-    votingPower: 23.89,
-    commission: '23.89%',
+    votingPower: 60,
+    commission: '60%',
   },
   {
-    name: 'Chorus',
+    name: 'Foundation 2',
     status: 1,
     active: true,
-    address: '0xC09368ACD3024C7E293395ABC123456789ABCDEF',
-    votingPower: 23.89,
-    commission: '23.89%',
+    address: '0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266',
+    votingPower: 30,
+    commission: '30%',
   },
   {
-    name: 'Radius',
-    status: 0,
-    active: false,
-    address: '0xC09368ACD3024C7E293395ABC123456789ABCDEF',
-    votingPower: 23.89,
-    commission: '23.89%',
-  },
-  {
-    name: 'Magma',
+    name: 'Foundation 3',
     status: 1,
     active: true,
-    address: '0xC09368ACD3024C7E293395ABC123456789ABCDEF',
-    votingPower: 23.89,
-    commission: '23.89%',
+    address: '0x06e70f295B6337c213DDe82D13cc198027687A7B',
+    votingPower: 10,
+    commission: '10%',
   },
 ]
