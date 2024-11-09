@@ -1,6 +1,5 @@
 import '@/styles/Home.module.css'
 
-import { InfoOutlineIcon, SearchIcon } from '@chakra-ui/icons'
 import {
   Box,
   FlexProps,
@@ -37,6 +36,7 @@ import { displayDate } from '@/utils/helper'
 import { images } from '@/utils/images'
 
 interface Tx {
+  hash: any
   TxEvent: TxEvent
   Timestamp: Date
 }
@@ -67,7 +67,6 @@ export default function Home() {
   }, [txEvent])
 
   const updateTxs = (txEvent: TxEvent) => {
-    console.log({ txEvent })
     if (!txEvent.result.data) {
       return
     }
@@ -86,7 +85,12 @@ export default function Home() {
         txEvent.height >= txs[0].TxEvent.height &&
         txEvent.hash != txs[0].TxEvent.hash
       ) {
-        setTxs((prevTx) => [tx, ...prevTx.slice(0, MAX_ROWS - 1)])
+        const updatedTx = [tx, ...txs.slice(0, MAX_ROWS - 1)].filter(
+          (transaction, index, self) =>
+            index === self.findIndex((t) => t.hash === transaction.hash)
+        )
+        console.log('updatedTx', updatedTx)
+        setTxs(updatedTx)
       }
     } else {
       setTxs([tx])
@@ -108,12 +112,6 @@ export default function Home() {
       setIsLoaded(true)
     }
   }, [isLoaded, newBlock, status])
-
-  console.log({ txs })
-
-  if (txs.length) {
-    debugger
-  }
 
   return (
     <>
@@ -184,7 +182,11 @@ export default function Home() {
           </Box>
           <Grid templateColumns="repeat(12, 1fr)" gap={5} pb={10}>
             <GridItem colSpan={7}>
-              <TransactionList title="Transactions" showAll={false} txs={txs} />
+              <TransactionList
+                title="Transactions"
+                showAll={false}
+                txs={txs?.length ? txs : []}
+              />
             </GridItem>
             <GridItem
               colSpan={5}

@@ -12,7 +12,9 @@ import {
   Tooltip,
   VStack,
 } from '@chakra-ui/react'
-import { StatusResponse } from '@cosmjs/tendermint-rpc'
+import { toHex } from '@cosmjs/encoding'
+import { StatusResponse, TxEvent } from '@cosmjs/tendermint-rpc'
+import { TxBody } from 'cosmjs-types/cosmos/tx/v1beta1/tx'
 import { useEffect, useState } from 'react'
 import { useSelector } from 'react-redux'
 
@@ -20,11 +22,13 @@ import { BoxInfo } from '@/components/shared/BoxInfo'
 import GradientBackground from '@/components/shared/GradientBackground'
 import TransactionsChart from '@/components/shared/TpsChart'
 import TransactionList from '@/components/TransactionList'
-import { selectNewBlock } from '@/store/streamSlice'
+import { selectNewBlock, selectTxEvent } from '@/store/streamSlice'
 import { displayDate } from '@/utils/helper'
 import { images } from '@/utils/images'
 
 export default function Transactions() {
+  const txEvent = useSelector(selectTxEvent)
+
   const [isLoaded, setIsLoaded] = useState(false)
   const newBlock = useSelector(selectNewBlock)
   const [status, setStatus] = useState<StatusResponse | null>()
@@ -33,6 +37,52 @@ export default function Transactions() {
       setIsLoaded(true)
     }
   }, [isLoaded, newBlock, status])
+
+  interface Tx {
+    hash: any
+    TxEvent: TxEvent
+    Timestamp: Date
+  }
+
+  const MAX_ROWS = 20
+
+  const [txs, setTxs] = useState<Tx[]>([])
+
+  useEffect(() => {
+    if (txEvent) {
+      updateTxs(txEvent)
+    }
+  }, [txEvent])
+
+  const updateTxs = (txEvent: TxEvent) => {
+    if (!txEvent.result.data) {
+      return
+    }
+
+    const data = TxBody.decode(txEvent.result.data)
+
+    const tx = {
+      TxEvent: txEvent,
+      Timestamp: new Date(),
+      data: data,
+      height: txEvent.height,
+      hash: toHex(txEvent.hash).toUpperCase(),
+    }
+    if (txs.length) {
+      if (
+        txEvent.height >= txs[0].TxEvent.height &&
+        txEvent.hash != txs[0].TxEvent.hash
+      ) {
+        const updatedTx = [tx, ...txs.slice(0, MAX_ROWS - 1)].filter(
+          (transaction, index, self) =>
+            index === self.findIndex((t) => t.hash === transaction.hash)
+        )
+        setTxs(updatedTx)
+      }
+    } else {
+      setTxs([tx])
+    }
+  }
 
   return (
     <GradientBackground title="Transactions">
@@ -86,7 +136,11 @@ export default function Transactions() {
           </Box>
         </GridItem>
       </Grid>
-      <TransactionList title="All Transactions" showAll={true} txs={[]} />
+      <TransactionList
+        title="All Transactions"
+        showAll={true}
+        txs={txs?.length ? txs : []}
+      />
     </GradientBackground>
   )
 }

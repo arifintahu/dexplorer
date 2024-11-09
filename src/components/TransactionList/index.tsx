@@ -6,6 +6,9 @@ import {
   Stack,
   Table,
   TableContainer,
+  Tag,
+  TagLabel,
+  TagLeftIcon,
   Tbody,
   Td,
   Text,
@@ -16,6 +19,14 @@ import {
   VStack,
 } from '@chakra-ui/react'
 import router from 'next/router'
+import {
+  JSXElementConstructor,
+  Key,
+  ReactElement,
+  ReactFragment,
+  ReactPortal,
+} from 'react'
+import { FiCheck, FiX } from 'react-icons/fi'
 
 import {
   capitalizeFirstLetter,
@@ -23,6 +34,7 @@ import {
   getRelativeTime,
   truncate,
 } from '@/utils'
+import { timeFromNow } from '@/utils/helper'
 import { images } from '@/utils/images'
 
 interface ITransactionList {
@@ -59,31 +71,51 @@ export default function TransactionList({
           <Thead px={6}>
             <Tr>
               <Th width={'25%'}>Transaction Hash</Th>
-              <Th width={'25%'}>Function</Th>
-              <Th width={'10%'}>From</Th>
-              <Th width={'15%'}>To</Th>
-              {showAll && <Th width={'15%'}>Fees</Th>}
+              <Th width={'25%'}>Result</Th>
+              <Th width={'10%'}>Height</Th>
+              <Th width={'15%'}>Time</Th>
+              {/* {showAll && <Th width={'15%'}>Fees</Th>} */}
             </Tr>
           </Thead>
           <Tbody>
-            {transactionData.map((transaction, ind) => (
-              <Tr
-                key={ind}
-                px={6}
-                borderBottom={'1px'}
-                borderColor={'gray-900'}
-                _last={{ borderBottom: 'none' }}
-              >
-                <Td border={'none'}>
-                  <HashComponent
+            {txs.map(
+              (
+                transaction: {
+                  hash: string
+                  TxEvent: { result: { code: number } }
+                  height:
+                    | string
+                    | number
+                    | boolean
+                    | ReactElement<any, string | JSXElementConstructor<any>>
+                    | ReactFragment
+                    | ReactPortal
+                    | null
+                    | undefined
+                  Timestamp: { toISOString: () => string }
+                  fees: any
+                  feeValue: any
+                },
+                ind: Key | null | undefined
+              ) => (
+                <Tr
+                  key={ind}
+                  px={6}
+                  borderBottom={'1px'}
+                  borderColor={'gray-900'}
+                  _last={{ borderBottom: 'none' }}
+                >
+                  <Td border={'none'}>
+                    {/* <HashComponent
                     txHash={transaction.txHash}
                     blockHeight={transaction.blockHeight}
                     txStatus={transaction.txStatus}
                     time={transaction.time}
-                  />
-                </Td>
-                <Td border={'none'}>
-                  <Text
+                  /> */}
+                    # {truncate(transaction.hash, 6)}
+                  </Td>
+                  <Td border={'none'}>
+                    {/* <Text
                     fontSize={'xs'}
                     px={2}
                     py={1}
@@ -94,43 +126,57 @@ export default function TransactionList({
                     maxW={'200px'}
                   >
                     {transaction.action}
-                  </Text>
-                </Td>
-                <Td border={'none'} pr={1}>
-                  <Box
-                    display={'flex'}
-                    gap={4}
-                    justifyContent={'space-between'}
-                    alignItems={'center'}
-                  >
-                    <Text fontSize={'xs'} color={'text-link'}>
-                      {truncate(transaction.fromAddress)}
-                    </Text>
-                    <Img src={images.rightArrow.src} width={4} height={4} />
-                  </Box>
-                </Td>
-                <Td border={'none'}>
-                  {' '}
-                  <Text fontSize={'xs'} color={'text-link'}>
-                    {truncate(transaction.toAddress)}
-                  </Text>
-                </Td>
-                {showAll && (
-                  <Td border={'none'}>
-                    <VStack gap={1} alignItems={'start'}>
-                      <Text
-                        className="label_regular"
-                        color={'text-50'}
-                      >{`${transaction.fees}`}</Text>
-                      <Text
-                        className="label_medium"
-                        color={'text-500'}
-                      >{`${transaction.feeValue}`}</Text>
-                    </VStack>
+                  </Text> */}
+                    {transaction.TxEvent.result.code == 0 ? (
+                      <Tag variant="subtle" colorScheme="green">
+                        <TagLeftIcon as={FiCheck} />
+                        <TagLabel>Success</TagLabel>
+                      </Tag>
+                    ) : (
+                      <Tag variant="subtle" colorScheme="red">
+                        <TagLeftIcon as={FiX} />
+                        <TagLabel>Error</TagLabel>
+                      </Tag>
+                    )}
                   </Td>
-                )}
-              </Tr>
-            ))}
+                  <Td border={'none'} pr={1}>
+                    <Box
+                      display={'flex'}
+                      gap={4}
+                      justifyContent={'space-between'}
+                      alignItems={'center'}
+                    >
+                      <Text fontSize={'xs'} color={'text-link'}>
+                        {/* {truncate(transaction.fromAddress)} */}
+                        {transaction.height}
+                      </Text>
+                      {/* <Img src={images.rightArrow.src} width={4} height={4} /> */}
+                    </Box>
+                  </Td>
+                  <Td border={'none'}>
+                    {' '}
+                    <Text fontSize={'xs'} color={'text-link'}>
+                      {/* {truncate(transaction.toAddress)} */}
+                      {timeFromNow(transaction.Timestamp.toISOString())}
+                    </Text>
+                  </Td>
+                  {/* {showAll && (
+                    <Td border={'none'}>
+                      <VStack gap={1} alignItems={'start'}>
+                        <Text
+                          className="label_regular"
+                          color={'text-50'}
+                        >{`${transaction.fees}`}</Text>
+                        <Text
+                          className="label_medium"
+                          color={'text-500'}
+                        >{`${transaction.feeValue}`}</Text>
+                      </VStack>
+                    </Td>
+                  )} */}
+                </Tr>
+              )
+            )}
           </Tbody>
         </Table>
       </TableContainer>
