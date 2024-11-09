@@ -28,9 +28,14 @@ import { images } from '@/utils/images'
 interface ITransactionList {
   title: string
   showAll: boolean
+  txs: any
 }
 
-export default function TransactionList({ title, showAll }: ITransactionList) {
+export default function TransactionList({
+  title,
+  showAll,
+  txs,
+}: ITransactionList) {
   return (
     <Box
       pt={10}

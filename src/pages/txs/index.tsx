@@ -43,25 +43,15 @@ export default function Transactions() {
               bgColor="green.200"
               color="green.600"
               name="TOTAL TXNS"
-              value={
-                newBlock?.header.time
-                  ? displayDate(newBlock?.header.time?.toISOString())
-                  : status?.syncInfo.latestBlockTime
-                  ? displayDate(status?.syncInfo.latestBlockTime.toISOString())
-                  : ''
-              }
-              tooltipText=""
+              value={'#100000'}
+              tooltipText="Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat"
             />
           </Skeleton>
           <Skeleton isLoaded={isLoaded}>
             <BoxInfo
               name="MAX TPS"
-              value={
-                newBlock?.header.height
-                  ? '#' + newBlock?.header.height
-                  : '#' + status?.syncInfo.latestBlockHeight
-              }
-              tooltipText=""
+              value={'#1849'}
+              tooltipText="Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat"
             />
           </Skeleton>
         </GridItem>
@@ -96,7 +86,7 @@ export default function Transactions() {
           </Box>
         </GridItem>
       </Grid>
-      <TransactionList title="All Transactions" showAll={true} />
+      <TransactionList title="All Transactions" showAll={true} txs={[]} />
     </GradientBackground>
   )
 }
