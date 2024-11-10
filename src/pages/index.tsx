@@ -87,7 +87,7 @@ export default function Home() {
       ) {
         const updatedTx = [tx, ...txs.slice(0, MAX_ROWS - 1)].filter(
           (transaction, index, self) =>
-            index === self.findIndex((t) => t.hash === transaction.hash)
+            index === self.findIndex((tran) => tran.hash === transaction.hash)
         )
         console.log('updatedTx', updatedTx)
         setTxs(updatedTx)

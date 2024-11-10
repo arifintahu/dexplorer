@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 import { InfoOutlineIcon } from '@chakra-ui/icons'
 import {
   Box,
@@ -75,7 +76,8 @@ export default function Transactions() {
       ) {
         const updatedTx = [tx, ...txs.slice(0, MAX_ROWS - 1)].filter(
           (transaction, index, self) =>
-            index === self.findIndex((t) => t.hash === transaction.hash)
+            index ===
+            self.findIndex((transx) => transx.hash === transaction.hash)
         )
         setTxs(updatedTx)
       }
