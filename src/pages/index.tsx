@@ -100,7 +100,8 @@ export default function Home() {
   // Function to handle the interval call
   async function checkBitcoinData() {
     const data = await getTotalInscriptions()
-    const length = data?.bitcoindata?.length ?? 0
+
+    const length = data?.pagination?.total ?? 0
     setTotalInscription(length)
   }
 
@@ -182,7 +183,7 @@ export default function Home() {
             </SimpleGrid>
           </Box>
           <Grid templateColumns="repeat(12, 1fr)" gap={5} pb={10}>
-            <GridItem colSpan={7}>
+            <GridItem colSpan={{ sm: 12, md: 7 }}>
               <TransactionList
                 title="Transactions"
                 showAll={false}
@@ -190,7 +191,7 @@ export default function Home() {
               />
             </GridItem>
             <GridItem
-              colSpan={5}
+              colSpan={{ sm: 12, md: 5 }}
               bg="dark-bg"
               px={7}
               pt={10}

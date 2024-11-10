@@ -11,6 +11,7 @@ import {
 import NextLink from 'next/link'
 import { useEffect, useState } from 'react'
 
+import { getTotalInscriptions } from '@/rpc/query'
 import startBlockMonitor, { BlockHeader } from '@/rpc/subscribeRecentBlocks'
 import { shortenAddress } from '@/utils/helper'
 import { images } from '@/utils/images'
@@ -18,6 +19,19 @@ import { images } from '@/utils/images'
 export default function RecentBlocks() {
   const [blockHeaders, setBlockHeaders] = useState<BlockHeader[]>([])
   const [isLoading, setIsLoading] = useState(true)
+  const [inscriptionData, setInscriptionData] = useState([])
+
+  async function checkBitcoinData() {
+    const data = await getTotalInscriptions()
+    const bitcoinData = data?.bitcoindata
+    setInscriptionData(bitcoinData.reverse().slice(0, -1)) // removing one element that has wrong values for now in the chain FIX THIS LATER
+  }
+
+  useEffect(() => {
+    const intervalId = setInterval(checkBitcoinData, 15000)
+    // checkBitcoinData();
+    return () => clearInterval(intervalId)
+  }, [])
 
   useEffect(() => {
     const onData = (data: any) => {
@@ -41,7 +55,11 @@ export default function RecentBlocks() {
       </HStack>
       <VStack gap={4} w={'100%'} mb={'38px'}>
         <Skeleton w={'100%'} isLoaded={!isLoading}>
-          <RecentBlock />
+          {inscriptionData.map((item: any) => (
+            <div key={item.revealTx || item.startBlock}>
+              {item?.revealTx ? <RecentBlock bitcoinData={item} /> : <></>}
+            </div>
+          ))}
         </Skeleton>
       </VStack>
       {!isLoading && (
@@ -66,32 +84,37 @@ export default function RecentBlocks() {
   )
 }
 
-const RecentBlock = () => {
-  const dummyData = [
+const RecentBlock = ({ bitcoinData }: any) => {
+  const dummyData: any = [
     {
-      blockId: '291203',
-      address:
-        '0x00000000000000000001e4add93ab2a51d8d405d60177fd30f791027deefaffd',
-      transactions: '1txn',
-      timeAgo: '2hr ago',
+      blockId: bitcoinData.startBlock,
+      address: '',
+      // transactions: '1txn',
+      // timeAgo: '2hr ago',
     },
     {
-      blockId: '291204',
-      address:
-        '0x00000000000000000002e4add93ab2a51d8d405d60177fd30f791027deefb001',
-      transactions: '2txn',
-      timeAgo: '3hr ago',
+      blockId: bitcoinData.endBlock,
+      address: '',
+      // transactions: '1txn',
+      // timeAgo: '2hr ago',
     },
-    {
-      blockId: 'Test',
-      address:
-        '0x00000000000000000002e4add93ab2a51d8d405d60177fd30f791027deefb001',
-      transactions: '2txn',
-      timeAgo: '3hr ago',
-    },
+    // {
+    //   blockId: '291204',
+    //   address:
+    //     '0x00000000000000000002e4add93ab2a51d8d405d60177fd30f791027deefb001',
+    //   transactions: '2txn',
+    //   timeAgo: '3hr ago',
+    // },
+    // {
+    //   blockId: 'Test',
+    //   address:
+    //     '0x00000000000000000002e4add93ab2a51d8d405d60177fd30f791027deefb001',
+    //   transactions: '2txn',
+    //   timeAgo: '3hr ago',
+    // },
   ]
   return (
-    <Box bg={'gray-1100'} borderRadius={12} w={'100%'}>
+    <Box bg={'gray-1100'} borderRadius={12} w={'100%'} marginBottom={4}>
       <Box px={4} py={5} bg="gray-1200" borderTopRadius={12}>
         <HStack justifyContent="space-between">
           <HStack gap={3}>
@@ -100,13 +123,14 @@ const RecentBlock = () => {
               <Image width={5} src={images.bitcoinLogo.src} alt="bitcoin" />
               <Link
                 as={NextLink}
-                href={'/blocks'}
+                target="_blank"
+                href={`https://signet.surge.dev/tx/${bitcoinData.revealTx}`}
                 _focus={{ boxShadow: 'none' }}
                 display={'block'}
                 fontSize={'14px'}
                 color={'yellow-100'}
               >
-                #291203
+                {shortenAddress(bitcoinData?.revealTx) ?? ''}
               </Link>
             </HStack>
           </HStack>
@@ -119,13 +143,13 @@ const RecentBlock = () => {
               color={'gray-500'}
               textDecoration={'underline'}
             >
-              {shortenAddress(
+              {/* {shortenAddress(
                 '0x00000000000000000001e4add93ab2a51d8d405d60177fd30f791027deefaffd'
-              )}
+              )} */}
             </Link>
             <Dot />
             <Text fontSize={'xs'} color={'gray-400'}>
-              2hr ago
+              {/* 2hr ago */}
             </Text>
           </HStack>
         </HStack>
@@ -142,7 +166,7 @@ const RecentBlock = () => {
             zIndex="1"
             height={'68%'}
           />
-          {dummyData.map((data, index) => (
+          {dummyData.slice(0, -1).map((data: any, index: number) => (
             <HStack
               key={index}
               justifyContent="space-between"
@@ -205,11 +229,11 @@ const RecentBlock = () => {
                 </Link>
                 <Box w="2px" h="2px" bg="gray-500" borderRadius={99} />
                 <Text fontSize="xs" color="gray-500">
-                  {data.transactions}
+                  {data?.transactions ?? ''}
                 </Text>
                 <Box w="2px" h="2px" bg="gray-500" borderRadius={99} />
                 <Text fontSize="xs" color="gray-400">
-                  {data.timeAgo}
+                  {data?.timeAgo || ''}
                 </Text>
               </HStack>
             </HStack>
@@ -224,7 +248,7 @@ const RecentBlock = () => {
           borderRadius={99}
         >
           <Text fontSize={'xs'} color={'text-200'} fontWeight={500}>
-            +6 Blocks
+            +9 Blocks
           </Text>
         </Box>
         <Box position={'relative'}>
@@ -237,7 +261,7 @@ const RecentBlock = () => {
             zIndex="1"
             height={'24px'}
           />
-          {dummyData.slice(-1).map((data, index) => (
+          {dummyData.slice(-1).map((data: any, index: number) => (
             <HStack
               key={index}
               justifyContent="space-between"
@@ -298,7 +322,7 @@ const RecentBlock = () => {
           ))}
         </Box>
       </Box>
-      <Box px={4} py={5} bg="gray-1200" borderBottomRadius={12}>
+      {/* <Box px={4} py={5} bg="gray-1200" borderBottomRadius={12}>
         <HStack gap={2}>
           <Image w={4} src={images.stars.src} alt="" />
           <HStack>
@@ -315,7 +339,7 @@ const RecentBlock = () => {
             </Text>
           </HStack>
         </HStack>
-      </Box>
+      </Box> */}
     </Box>
   )
 }
