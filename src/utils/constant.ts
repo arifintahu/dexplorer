@@ -8,6 +8,8 @@ export const GOV_PARAMS_TYPE = {
   TALLY: 'tallying',
 }
 
+export const MAX_ROWS = 20
+
 export type proposalStatus = {
   id: number
   status: string

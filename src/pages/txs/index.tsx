@@ -7,9 +7,7 @@ import {
   Heading,
   HStack,
   Icon,
-  Img,
   Skeleton,
-  Text,
   Tooltip,
   VStack,
 } from '@chakra-ui/react'
@@ -24,36 +22,20 @@ import GradientBackground from '@/components/shared/GradientBackground'
 import TransactionsChart from '@/components/shared/TpsChart'
 import TransactionList from '@/components/TransactionList'
 import { selectNewBlock, selectTxEvent } from '@/store/streamSlice'
-import { displayDate } from '@/utils/helper'
-import { images } from '@/utils/images'
+import { MAX_ROWS } from '@/utils/constant'
+
+interface Tx {
+  hash: any
+  TxEvent: TxEvent
+  Timestamp: Date
+}
 
 export default function Transactions() {
   const txEvent = useSelector(selectTxEvent)
-
   const [isLoaded, setIsLoaded] = useState(false)
   const newBlock = useSelector(selectNewBlock)
   const [status, setStatus] = useState<StatusResponse | null>()
-  useEffect(() => {
-    if ((!isLoaded && newBlock) || (!isLoaded && status)) {
-      setIsLoaded(true)
-    }
-  }, [isLoaded, newBlock, status])
-
-  interface Tx {
-    hash: any
-    TxEvent: TxEvent
-    Timestamp: Date
-  }
-
-  const MAX_ROWS = 20
-
   const [txs, setTxs] = useState<Tx[]>([])
-
-  useEffect(() => {
-    if (txEvent) {
-      updateTxs(txEvent)
-    }
-  }, [txEvent])
 
   const updateTxs = (txEvent: TxEvent) => {
     if (!txEvent.result.data) {
@@ -86,11 +68,28 @@ export default function Transactions() {
     }
   }
 
+  useEffect(() => {
+    if ((!isLoaded && newBlock) || (!isLoaded && status)) {
+      setIsLoaded(true)
+    }
+  }, [isLoaded, newBlock, status])
+
+  useEffect(() => {
+    if (txEvent) {
+      updateTxs(txEvent)
+    }
+  }, [txEvent])
+
   return (
     <GradientBackground title="Transactions">
       <Grid templateColumns="repeat(12, 1fr)" gap={5} mb={9}>
-        <GridItem colSpan={3} display={'flex'} flexDirection={'column'} gap={5}>
-          <Skeleton isLoaded={isLoaded}>
+        <GridItem
+          colSpan={{ base: 12, md: 3 }}
+          display={'flex'}
+          flexDirection={{ base: 'row', md: 'column' }}
+          gap={5}
+        >
+          <Skeleton isLoaded={isLoaded} width={{ base: '50%', md: '100%' }}>
             <BoxInfo
               bgColor="green.200"
               color="green.600"
@@ -105,7 +104,7 @@ export default function Transactions() {
               tooltipText="Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat"
             />
           </Skeleton>
-          <Skeleton isLoaded={isLoaded}>
+          <Skeleton isLoaded={isLoaded} width={{ base: '50%', md: '100%' }}>
             <BoxInfo
               name="MAX TPS"
               value={'#1849'}
@@ -113,7 +112,7 @@ export default function Transactions() {
             />
           </Skeleton>
         </GridItem>
-        <GridItem colSpan={9}>
+        <GridItem colSpan={{ base: 12, md: 9 }}>
           <Box>
             <VStack
               bg={'gray-1000'}

@@ -21,22 +21,34 @@ export default function Validators() {
   return (
     <GradientBackground title="Validators">
       <Grid templateColumns="repeat(12, 1fr)" gap={5} mb={9}>
-        <GridItem colSpan={3} display={'flex'} flexDirection={'column'} gap={5}>
-          <Skeleton isLoaded={isLoaded}>
+        <GridItem
+          colSpan={{ base: 12, md: 3 }}
+          display={'flex'}
+          flexDirection={{ base: 'row', md: 'column' }}
+          gap={5}
+        >
+          <Skeleton isLoaded={isLoaded} width={{ base: '50%', md: '100%' }}>
             <BoxInfo
               bgColor="green.200"
               color="green.600"
               name="TOTAL VALIDATORS"
               value={3}
               tooltipText=""
+              height={{ base: '120px', md: '100px' }}
             />
           </Skeleton>
-          <Skeleton isLoaded={isLoaded}>
-            <BoxInfo name="ACTIVE VALIDATORS" value={3} tooltipText="" />
+          <Skeleton isLoaded={isLoaded} width={{ base: '50%', md: '100%' }}>
+            <BoxInfo
+              name="ACTIVE VALIDATORS"
+              value={3}
+              tooltipText=""
+              height={{ base: '120px', md: '100px' }}
+            />
           </Skeleton>
         </GridItem>
+
         <GridItem
-          colSpan={9}
+          colSpan={{ base: 12, md: 9 }}
           bg={'gray-900'}
           opacity={'35%'}
           borderRadius={'8px'}
