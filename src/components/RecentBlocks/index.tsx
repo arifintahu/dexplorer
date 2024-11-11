@@ -9,7 +9,8 @@ import {
   VStack,
 } from '@chakra-ui/react'
 import NextLink from 'next/link'
-import { useEffect, useState } from 'react'
+import router from 'next/router'
+import { useEffect, useMemo, useState } from 'react'
 
 import { getTotalInscriptions } from '@/rpc/query'
 import { BlockHeader } from '@/rpc/subscribeRecentBlocks'
@@ -33,6 +34,15 @@ export default function RecentBlocks() {
     return () => clearInterval(intervalId)
   }, [])
 
+  const recentBlocks = useMemo(() => {
+    if (inscriptionData.length > 0) {
+      const filteredBlocks = inscriptionData.filter(
+        (item: any) => item.revealTx !== ''
+      )
+      return filteredBlocks
+    }
+  }, [inscriptionData])
+
   return (
     <Box>
       <HStack justifyContent={'space-between'} mb={3}>
@@ -45,9 +55,9 @@ export default function RecentBlocks() {
       </HStack>
       <VStack gap={4} w={'100%'} mb={{ base: '18px', md: '38px' }}>
         <Skeleton w={'100%'} isLoaded={!isLoading}>
-          {inscriptionData.map((item: any) => (
+          {recentBlocks?.map((item: any) => (
             <div key={item.revealTx || item.startBlock}>
-              {item?.revealTx ? <RecentBlock bitcoinData={item} /> : <></>}
+              <RecentBlock bitcoinData={item} />
             </div>
           ))}
         </Skeleton>
@@ -65,6 +75,9 @@ export default function RecentBlocks() {
             _hover={{
               bg: '#010101',
             }}
+            onClick={() => {
+              router.push('/blocks')
+            }}
           >
             See All Blocks
           </Button>
@@ -75,34 +88,15 @@ export default function RecentBlocks() {
 }
 
 const RecentBlock = ({ bitcoinData }: any) => {
-  const dummyData: any = [
-    {
-      blockId: bitcoinData.startBlock,
+  const blockRange = Array.from(
+    { length: bitcoinData.endBlock - bitcoinData.startBlock + 1 },
+    (_, i) => ({
+      blockId: (parseInt(bitcoinData.startBlock) + i).toString(),
       address: '',
-      // transactions: '1txn',
-      // timeAgo: '2hr ago',
-    },
-    {
-      blockId: bitcoinData.endBlock,
-      address: '',
-      // transactions: '1txn',
-      // timeAgo: '2hr ago',
-    },
-    // {
-    //   blockId: '291204',
-    //   address:
-    //     '0x00000000000000000002e4add93ab2a51d8d405d60177fd30f791027deefb001',
-    //   transactions: '2txn',
-    //   timeAgo: '3hr ago',
-    // },
-    // {
-    //   blockId: 'Test',
-    //   address:
-    //     '0x00000000000000000002e4add93ab2a51d8d405d60177fd30f791027deefb001',
-    //   transactions: '2txn',
-    //   timeAgo: '3hr ago',
-    // },
-  ]
+    })
+  )
+  const firstThreeBlocks = blockRange.slice(0, 3)
+  const lastBlock = blockRange.slice(-1)
   return (
     <Box bg={'gray-1100'} borderRadius={12} w={'100%'} marginBottom={4}>
       <Box px={4} py={5} bg="gray-1200" borderTopRadius={12}>
@@ -156,7 +150,7 @@ const RecentBlock = ({ bitcoinData }: any) => {
             zIndex="1"
             height={'68%'}
           />
-          {dummyData.slice(0, -1).map((data: any, index: number) => (
+          {firstThreeBlocks.map((data: any, index: number) => (
             <HStack
               key={index}
               justifyContent="space-between"
@@ -238,7 +232,7 @@ const RecentBlock = ({ bitcoinData }: any) => {
           borderRadius={99}
         >
           <Text fontSize={'xs'} color={'text-200'} fontWeight={500}>
-            +9 Blocks
+            +{blockRange.length - 4} Block
           </Text>
         </Box>
         <Box position={'relative'}>
@@ -251,7 +245,7 @@ const RecentBlock = ({ bitcoinData }: any) => {
             zIndex="1"
             height={'24px'}
           />
-          {dummyData.slice(-1).map((data: any, index: number) => (
+          {lastBlock.map((data: any, index: number) => (
             <HStack
               key={index}
               justifyContent="space-between"

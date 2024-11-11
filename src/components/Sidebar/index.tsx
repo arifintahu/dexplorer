@@ -47,13 +47,7 @@ const LinkItems: Array<LinkItemProps> = [
   { name: 'Home', icon: MdOutlineHome, route: '/' },
   { name: 'Transactions', icon: GiTwoCoins, route: '/txs' },
   { name: 'Validators', icon: HiOutlineUsers, route: '/validators' },
-  // { name: 'Aggregation', icon: PiTreeStructure, route: '/aggregation' },
   { name: 'Signers', icon: FaGlobeAmericas, route: '/signer' },
-  // {
-  //   name: 'Bitcoin Playground',
-  //   icon: PiDevToLogoFill,
-  //   route: '/bitcoin-playground',
-  // },
 ]
 const RefLinkItems: Array<RefLinkItemProps> = [
   {
@@ -134,7 +128,12 @@ const SidebarContent = ({ onClose, ...rest }: SidebarProps) => {
             />
           </Flex>
           {LinkItems.map((link) => (
-            <NavItem key={link.name} icon={link.icon} route={link.route}>
+            <NavItem
+              key={link.name}
+              icon={link.icon}
+              route={link.route}
+              onClose={onClose}
+            >
               {link.name}
             </NavItem>
           ))}
@@ -148,6 +147,7 @@ const SidebarContent = ({ onClose, ...rest }: SidebarProps) => {
                 route={link.route}
                 isBlank={link.isBlank}
                 iconColor={link.iconColor}
+                onClose={onClose} // Pass onClose to RefLinkItem
               />
             ))}
           </HStack>
@@ -162,8 +162,16 @@ interface NavItemProps extends FlexProps {
   children?: string | number
   route: string
   isBlank?: boolean
+  onClose?: () => void // Add onClose prop
 }
-const NavItem = ({ icon, children, route, isBlank, ...rest }: NavItemProps) => {
+const NavItem = ({
+  icon,
+  children,
+  route,
+  isBlank,
+  onClose,
+  ...rest
+}: NavItemProps) => {
   const router = useRouter()
   const [isSelected, setIsSelected] = useState(false)
 
@@ -175,6 +183,12 @@ const NavItem = ({ icon, children, route, isBlank, ...rest }: NavItemProps) => {
     }
   }, [router])
 
+  const handleClick = () => {
+    if (onClose) {
+      onClose() // Close the mobile menu when a link is clicked
+    }
+  }
+
   return (
     <Link
       as={NextLink}
@@ -184,6 +198,7 @@ const NavItem = ({ icon, children, route, isBlank, ...rest }: NavItemProps) => {
       target={isBlank ? '_blank' : '_self'}
       mb={'3'}
       display={'block'}
+      onClick={handleClick} // Add onClick handler
     >
       <Flex
         className={`${isSelected ? 'primary_gradient' : ''}`}
@@ -223,8 +238,21 @@ interface RefLinkItemProps extends FlexProps {
   route: string
   iconColor?: boolean
   isBlank?: boolean
+  onClose?: () => void // Add onClose prop
 }
-const RefLinkItem = ({ icon, route, isBlank, iconColor }: RefLinkItemProps) => {
+const RefLinkItem = ({
+  icon,
+  route,
+  isBlank,
+  iconColor,
+  onClose,
+}: RefLinkItemProps) => {
+  const handleClick = () => {
+    if (onClose) {
+      onClose() // Close the mobile menu when a link is clicked
+    }
+  }
+
   return (
     <Link
       as={NextLink}
@@ -233,6 +261,7 @@ const RefLinkItem = ({ icon, route, isBlank, iconColor }: RefLinkItemProps) => {
       _focus={{ boxShadow: 'none' }}
       target={isBlank ? '_blank' : '_self'}
       display={'block'}
+      onClick={handleClick} // Add onClick handler
     >
       {icon && (
         <Icon
