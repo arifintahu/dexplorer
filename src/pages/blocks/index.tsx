@@ -120,7 +120,7 @@ export default function Blocks() {
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      <main>
+      <main className="block_main">
         <HStack h="24px">
           <Heading size={'md'}>Blocks</Heading>
           <Divider borderColor={'gray'} size="10px" orientation="vertical" />
@@ -143,7 +143,9 @@ export default function Blocks() {
         </HStack>
         <Box
           mt={8}
-          bg={useColorModeValue('light-container', 'dark-container')}
+          // bg={useColorModeValue('light-container', 'dark-container')}
+          bg={'dark-bg'}
+          border={'1px'}
           shadow={'base'}
           borderRadius={4}
           p={4}
@@ -151,13 +153,19 @@ export default function Blocks() {
           <Tabs variant="unstyled">
             <TabList>
               <Tab
-                _selected={{ color: 'white', bg: 'cyan.400' }}
+                _selected={{
+                  color: 'white',
+                  bg: useColorModeValue('light-theme', 'dark-theme'),
+                }}
                 borderRadius={5}
               >
                 Blocks
               </Tab>
               <Tab
-                _selected={{ color: 'white', bg: 'cyan.400' }}
+                _selected={{
+                  color: 'white',
+                  bg: useColorModeValue('light-theme', 'dark-theme'),
+                }}
                 borderRadius={5}
               >
                 Transactions
@@ -165,92 +173,120 @@ export default function Blocks() {
             </TabList>
             <TabPanels>
               <TabPanel>
-                <TableContainer>
-                  <Table variant="simple">
-                    <Thead>
-                      <Tr>
-                        <Th>Height</Th>
-                        <Th>App Hash</Th>
-                        <Th>Txs</Th>
-                        <Th>Time</Th>
-                      </Tr>
-                    </Thead>
-                    <Tbody>
-                      {blocks.map((block) => (
-                        <Tr key={block.header.height}>
-                          <Td>
-                            <Link
-                              as={NextLink}
-                              href={'/blocks/' + block.header.height}
-                              style={{ textDecoration: 'none' }}
-                              _focus={{ boxShadow: 'none' }}
-                            >
-                              <Text color={'cyan.400'}>
-                                {block.header.height}
-                              </Text>
-                            </Link>
-                          </Td>
-                          <Td noOfLines={1}>{toHex(block.header.appHash)}</Td>
-                          <Td>{block.txs.length}</Td>
-                          <Td>
-                            {timeFromNow(block.header.time.toISOString())}
-                          </Td>
+                <Box
+                  mt={8}
+                  bg={'dark-bg'}
+                  borderRadius={4}
+                  border={'1px'}
+                  borderColor={'gray-900'}
+                >
+                  <TableContainer>
+                    <Table variant="simple">
+                      <Thead>
+                        <Tr>
+                          <Th>
+                            <b>Height</b>
+                          </Th>
+                          <Th>App Hash</Th>
+                          <Th>Txs</Th>
+                          <Th>Time</Th>
                         </Tr>
-                      ))}
-                    </Tbody>
-                  </Table>
-                </TableContainer>
+                      </Thead>
+                      <Tbody>
+                        {blocks.map((block) => (
+                          <Tr key={block.header.height}>
+                            <Td>
+                              <Link
+                                as={NextLink}
+                                href={'/blocks/' + block.header.height}
+                                style={{ textDecoration: 'none' }}
+                                _focus={{ boxShadow: 'none' }}
+                              >
+                                <Text
+                                  color={useColorModeValue(
+                                    'light-theme',
+                                    'dark-theme'
+                                  )}
+                                >
+                                  {block.header.height}
+                                </Text>
+                              </Link>
+                            </Td>
+                            <Td noOfLines={1}>{toHex(block.header.appHash)}</Td>
+                            <Td>{block.txs.length}</Td>
+                            <Td>
+                              {timeFromNow(block.header.time.toISOString())}
+                            </Td>
+                          </Tr>
+                        ))}
+                      </Tbody>
+                    </Table>
+                  </TableContainer>
+                </Box>
               </TabPanel>
               <TabPanel>
-                <TableContainer>
-                  <Table variant="simple">
-                    <Thead>
-                      <Tr>
-                        <Th>Tx Hash</Th>
-                        <Th>Result</Th>
-                        <Th>Messages</Th>
-                        <Th>Height</Th>
-                        <Th>Time</Th>
-                      </Tr>
-                    </Thead>
-                    <Tbody>
-                      {txs.map((tx) => (
-                        <Tr key={toHex(tx.TxEvent.hash)}>
-                          <Td>
-                            <Link
-                              as={NextLink}
-                              href={
-                                '/txs/' + toHex(tx.TxEvent.hash).toUpperCase()
-                              }
-                              style={{ textDecoration: 'none' }}
-                              _focus={{ boxShadow: 'none' }}
-                            >
-                              <Text color={'cyan.400'}>
-                                {trimHash(tx.TxEvent.hash)}
-                              </Text>
-                            </Link>
-                          </Td>
-                          <Td>
-                            {tx.TxEvent.result.code == 0 ? (
-                              <Tag variant="subtle" colorScheme="green">
-                                <TagLeftIcon as={FiCheck} />
-                                <TagLabel>Success</TagLabel>
-                              </Tag>
-                            ) : (
-                              <Tag variant="subtle" colorScheme="red">
-                                <TagLeftIcon as={FiX} />
-                                <TagLabel>Error</TagLabel>
-                              </Tag>
-                            )}
-                          </Td>
-                          <Td>{renderMessages(tx.TxEvent.result.data)}</Td>
-                          <Td>{tx.TxEvent.height}</Td>
-                          <Td>{timeFromNow(tx.Timestamp.toISOString())}</Td>
+                <Box
+                  mt={8}
+                  bg={'dark-bg'}
+                  borderRadius={4}
+                  border={'1px'}
+                  borderColor={'gray-900'}
+                >
+                  <TableContainer>
+                    <Table variant="simple">
+                      <Thead>
+                        <Tr>
+                          <Th>Tx Hash</Th>
+                          <Th>Result</Th>
+                          <Th>Messages</Th>
+                          <Th>Height</Th>
+                          <Th>Time</Th>
                         </Tr>
-                      ))}
-                    </Tbody>
-                  </Table>
-                </TableContainer>
+                      </Thead>
+                      <Tbody>
+                        {txs.map((tx) => (
+                          <Tr key={toHex(tx.TxEvent.hash)}>
+                            <Td>
+                              <Link
+                                as={NextLink}
+                                href={
+                                  '/txs/' + toHex(tx.TxEvent.hash).toUpperCase()
+                                }
+                                style={{ textDecoration: 'none' }}
+                                _focus={{ boxShadow: 'none' }}
+                              >
+                                <Text
+                                  color={useColorModeValue(
+                                    'light-theme',
+                                    'dark-theme'
+                                  )}
+                                >
+                                  {trimHash(tx.TxEvent.hash)}
+                                </Text>
+                              </Link>
+                            </Td>
+                            <Td>
+                              {tx.TxEvent.result.code == 0 ? (
+                                <Tag variant="subtle" colorScheme="green">
+                                  <TagLeftIcon as={FiCheck} />
+                                  <TagLabel>Success</TagLabel>
+                                </Tag>
+                              ) : (
+                                <Tag variant="subtle" colorScheme="red">
+                                  <TagLeftIcon as={FiX} />
+                                  <TagLabel>Error</TagLabel>
+                                </Tag>
+                              )}
+                            </Td>
+                            <Td>{renderMessages(tx.TxEvent.result.data)}</Td>
+                            <Td>{tx.TxEvent.height}</Td>
+                            <Td>{timeFromNow(tx.Timestamp.toISOString())}</Td>
+                          </Tr>
+                        ))}
+                      </Tbody>
+                    </Table>
+                  </TableContainer>
+                </Box>
               </TabPanel>
             </TabPanels>
           </Tabs>

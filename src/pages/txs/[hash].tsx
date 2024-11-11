@@ -147,7 +147,7 @@ export default function DetailBlock() {
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      <main>
+      <main className="block_main">
         <HStack h="24px">
           <Heading size={'md'}>Transaction</Heading>
           <Divider borderColor={'gray'} size="10px" orientation="vertical" />
@@ -172,7 +172,7 @@ export default function DetailBlock() {
             style={{ textDecoration: 'none' }}
             _focus={{ boxShadow: 'none' }}
           >
-            <Text color={'cyan.400'}>Blocks</Text>
+            <Text color={'light-theme'}>Blocks</Text>
           </Link>
           <Icon fontSize="16" as={FiChevronRight} />
           <Text>Tx</Text>
