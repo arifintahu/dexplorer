@@ -95,7 +95,13 @@ export default function Transactions() {
               bgColor="green.200"
               color="green.600"
               name="TOTAL TXNS"
-              value={'#100000'}
+              value={
+                newBlock?.header.height
+                  ? '#' + newBlock?.header.height * 2
+                  : (('#' +
+                      status?.syncInfo
+                        .latestBlockHeight) as unknown as number) * 2
+              }
               tooltipText="Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat"
             />
           </Skeleton>
