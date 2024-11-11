@@ -9,13 +9,15 @@ import {
   VStack,
 } from '@chakra-ui/react'
 import NextLink from 'next/link'
-import router from 'next/router'
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useState } from 'react'
 
 import { getTotalInscriptions } from '@/rpc/query'
+import { BlockHeader } from '@/rpc/subscribeRecentBlocks'
 import { shortenAddress } from '@/utils/helper'
 import { images } from '@/utils/images'
+
 export default function RecentBlocks() {
+  const [blockHeaders, setBlockHeaders] = useState<BlockHeader[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [inscriptionData, setInscriptionData] = useState([])
 
@@ -28,18 +30,8 @@ export default function RecentBlocks() {
 
   useEffect(() => {
     const intervalId = setInterval(checkBitcoinData, 15000)
-    // checkBitcoinData();
     return () => clearInterval(intervalId)
   }, [])
-
-  const recentBlocks = useMemo(() => {
-    if (inscriptionData.length > 0) {
-      const filteredBlocks = inscriptionData.filter(
-        (item: any) => item.revealTx !== ''
-      )
-      return filteredBlocks
-    }
-  }, [inscriptionData])
 
   return (
     <Box>
@@ -53,9 +45,9 @@ export default function RecentBlocks() {
       </HStack>
       <VStack gap={4} w={'100%'} mb={'38px'}>
         <Skeleton w={'100%'} isLoaded={!isLoading}>
-          {recentBlocks?.map((item: any) => (
+          {inscriptionData.map((item: any) => (
             <div key={item.revealTx || item.startBlock}>
-              <RecentBlock bitcoinData={item} />
+              {item?.revealTx ? <RecentBlock bitcoinData={item} /> : <></>}
             </div>
           ))}
         </Skeleton>
@@ -73,9 +65,6 @@ export default function RecentBlocks() {
             _hover={{
               bg: '#010101',
             }}
-            onClick={() => {
-              router.push('/blocks')
-            }}
           >
             See All Blocks
           </Button>
@@ -86,16 +75,34 @@ export default function RecentBlocks() {
 }
 
 const RecentBlock = ({ bitcoinData }: any) => {
-  const blockRange = Array.from(
-    { length: bitcoinData.endBlock - bitcoinData.startBlock + 1 },
-    (_, i) => ({
-      blockId: (parseInt(bitcoinData.startBlock) + i).toString(),
+  const dummyData: any = [
+    {
+      blockId: bitcoinData.startBlock,
       address: '',
-    })
-  )
-  const firstThreeBlocks = blockRange.slice(0, 3)
-  const lastBlock = blockRange.slice(-1)
-
+      // transactions: '1txn',
+      // timeAgo: '2hr ago',
+    },
+    {
+      blockId: bitcoinData.endBlock,
+      address: '',
+      // transactions: '1txn',
+      // timeAgo: '2hr ago',
+    },
+    // {
+    //   blockId: '291204',
+    //   address:
+    //     '0x00000000000000000002e4add93ab2a51d8d405d60177fd30f791027deefb001',
+    //   transactions: '2txn',
+    //   timeAgo: '3hr ago',
+    // },
+    // {
+    //   blockId: 'Test',
+    //   address:
+    //     '0x00000000000000000002e4add93ab2a51d8d405d60177fd30f791027deefb001',
+    //   transactions: '2txn',
+    //   timeAgo: '3hr ago',
+    // },
+  ]
   return (
     <Box bg={'gray-1100'} borderRadius={12} w={'100%'} marginBottom={4}>
       <Box px={4} py={5} bg="gray-1200" borderTopRadius={12}>
@@ -149,7 +156,7 @@ const RecentBlock = ({ bitcoinData }: any) => {
             zIndex="1"
             height={'68%'}
           />
-          {firstThreeBlocks.map((data: any, index: number) => (
+          {dummyData.slice(0, -1).map((data: any, index: number) => (
             <HStack
               key={index}
               justifyContent="space-between"
@@ -231,7 +238,7 @@ const RecentBlock = ({ bitcoinData }: any) => {
           borderRadius={99}
         >
           <Text fontSize={'xs'} color={'text-200'} fontWeight={500}>
-            +{blockRange.length - 4} Blocks
+            +9 Blocks
           </Text>
         </Box>
         <Box position={'relative'}>
@@ -244,7 +251,7 @@ const RecentBlock = ({ bitcoinData }: any) => {
             zIndex="1"
             height={'24px'}
           />
-          {lastBlock.map((data: any, index: number) => (
+          {dummyData.slice(-1).map((data: any, index: number) => (
             <HStack
               key={index}
               justifyContent="space-between"
