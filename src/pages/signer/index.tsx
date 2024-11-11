@@ -22,8 +22,13 @@ export default function Signers() {
   return (
     <GradientBackground title="Signers">
       <Grid templateColumns="repeat(12, 1fr)" gap={5} mb={9}>
-        <GridItem colSpan={3} display={'flex'} flexDirection={'column'} gap={5}>
-          <Skeleton isLoaded={isLoaded}>
+        <GridItem
+          colSpan={{ base: 12, md: 3 }}
+          display={'flex'}
+          flexDirection={{ base: 'row', md: 'column' }}
+          gap={5}
+        >
+          <Skeleton isLoaded={isLoaded} width={{ base: '50%', md: '100%' }}>
             <BoxInfo
               bgColor="green.200"
               color="green.600"
@@ -32,12 +37,12 @@ export default function Signers() {
               tooltipText=""
             />
           </Skeleton>
-          <Skeleton isLoaded={isLoaded}>
+          <Skeleton isLoaded={isLoaded} width={{ base: '50%', md: '100%' }}>
             <BoxInfo name="ACTIVE SIGNERS" value={2} tooltipText="" />
           </Skeleton>
         </GridItem>
         <GridItem
-          colSpan={9}
+          colSpan={{ base: 12, md: 9 }}
           bg={'gray-900'}
           opacity={'35%'}
           borderRadius={'8px'}

@@ -12,7 +12,12 @@ export default function GradientBackground({
   title,
 }: IGradientBackground) {
   return (
-    <Box px={14} pt={'114px'} position={'relative'} zIndex={0}>
+    <Box
+      px={{ base: 4, md: 14 }}
+      pt={{ base: '32px', md: '114px' }}
+      position={'relative'}
+      zIndex={0}
+    >
       <Img
         src={images.primaryGradient.src}
         w={'100%'}

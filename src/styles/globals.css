@@ -15,6 +15,49 @@ a {
   }
 }
 
+/* ::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(45deg, #000000, #ff4500, #ff6347);
+  transition: all 0.1s ease-in-out;
+  border-radius: 6px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  transition: all 0.1s ease-in-out;
+  background: linear-gradient(45deg, #ff6347, #ff4500, #000000);
+}
+
+scrollbar-color: #000000 #f1f1f1;
+scrollbar-width: thin;
+
+body {
+  -ms-overflow-style: scrollbar;
+}
+
+body::-ms-scrollbar {
+  width: 6px;
+}
+
+body::-ms-scrollbar-track {
+  background: #f1f1f1;
+}
+
+body::-ms-scrollbar-thumb {
+  background: linear-gradient(45deg, #000000, #ff4500, #ff6347);
+  border-radius: 6px;
+}
+
+body::-ms-scrollbar-thumb:hover {
+  background: linear-gradient(45deg, #ff6347, #ff4500, #000000);
+} */
+
 .primary_gradient {
   background: linear-gradient(90deg, #f4431c 0%, #371108 100%);
 }
