@@ -3,7 +3,6 @@ import {
   Button,
   HStack,
   Img,
-  Stack,
   Table,
   TableContainer,
   Tag,
@@ -12,7 +11,6 @@ import {
   Tbody,
   Td,
   Text,
-  Tfoot,
   Th,
   Thead,
   Tr,
@@ -74,113 +72,82 @@ export default function TransactionList({
               <Th width={'25%'}>Result</Th>
               <Th width={'10%'}>Height</Th>
               <Th width={'15%'}>Time</Th>
-              {/* {showAll && <Th width={'15%'}>Fees</Th>} */}
             </Tr>
           </Thead>
           <Tbody>
-            {txs.map(
-              (
-                transaction: {
-                  hash: string
-                  TxEvent: { result: { code: number } }
-                  height:
-                    | string
-                    | number
-                    | boolean
-                    | ReactElement<any, string | JSXElementConstructor<any>>
-                    | ReactFragment
-                    | ReactPortal
-                    | null
-                    | undefined
-                  Timestamp: { toISOString: () => string }
-                  fees: any
-                  feeValue: any
-                },
-                ind: Key | null | undefined
-              ) => (
-                <Tr
-                  key={ind}
-                  px={6}
-                  borderBottom={'1px'}
-                  borderColor={'gray-900'}
-                  _last={{ borderBottom: 'none' }}
-                >
-                  <Td border={'none'}>
-                    {/* <HashComponent
-                    txHash={transaction.txHash}
-                    blockHeight={transaction.blockHeight}
-                    txStatus={transaction.txStatus}
-                    time={transaction.time}
-                  /> */}
-                    # {truncate(transaction.hash, 6)}
-                  </Td>
-                  <Td border={'none'}>
-                    {/* <Text
-                    fontSize={'xs'}
-                    px={2}
-                    py={1}
-                    color={'text-200'}
-                    bg={'gray-900'}
-                    borderRadius={'full'}
-                    align={'center'}
-                    maxW={'200px'}
+            {txs.length > 0 ? (
+              txs.map(
+                (
+                  transaction: {
+                    hash: string
+                    TxEvent: { result: { code: number } }
+                    height:
+                      | string
+                      | number
+                      | boolean
+                      | ReactElement<any, string | JSXElementConstructor<any>>
+                      | ReactFragment
+                      | ReactPortal
+                      | null
+                      | undefined
+                    Timestamp: { toISOString: () => string }
+                    fees: any
+                    feeValue: any
+                  },
+                  ind: Key | null | undefined
+                ) => (
+                  <Tr
+                    key={ind}
+                    px={6}
+                    borderBottom={'1px'}
+                    borderColor={'gray-900'}
+                    _last={{ borderBottom: 'none' }}
                   >
-                    {transaction.action}
-                  </Text> */}
-                    {transaction.TxEvent.result.code == 0 ? (
-                      <Tag variant="subtle" colorScheme="green">
-                        <TagLeftIcon as={FiCheck} />
-                        <TagLabel>Success</TagLabel>
-                      </Tag>
-                    ) : (
-                      <Tag variant="subtle" colorScheme="red">
-                        <TagLeftIcon as={FiX} />
-                        <TagLabel>Error</TagLabel>
-                      </Tag>
-                    )}
-                  </Td>
-                  <Td border={'none'} pr={1}>
-                    <Box
-                      display={'flex'}
-                      gap={4}
-                      justifyContent={'space-between'}
-                      alignItems={'center'}
-                    >
-                      <Text fontSize={'xs'} color={'text-link'}>
-                        {/* {truncate(transaction.fromAddress)} */}
-                        {transaction.height}
-                      </Text>
-                      {/* <Img src={images.rightArrow.src} width={4} height={4} /> */}
-                    </Box>
-                  </Td>
-                  <Td border={'none'}>
-                    {' '}
-                    <Text fontSize={'xs'} color={'text-link'}>
-                      {/* {truncate(transaction.toAddress)} */}
-                      {timeFromNow(transaction.Timestamp.toISOString())}
-                    </Text>
-                  </Td>
-                  {/* {showAll && (
+                    <Td border={'none'}># {truncate(transaction.hash, 6)}</Td>
                     <Td border={'none'}>
-                      <VStack gap={1} alignItems={'start'}>
-                        <Text
-                          className="label_regular"
-                          color={'text-50'}
-                        >{`${transaction.fees}`}</Text>
-                        <Text
-                          className="label_medium"
-                          color={'text-500'}
-                        >{`${transaction.feeValue}`}</Text>
-                      </VStack>
+                      {transaction.TxEvent.result.code == 0 ? (
+                        <Tag variant="subtle" colorScheme="green">
+                          <TagLeftIcon as={FiCheck} />
+                          <TagLabel>Success</TagLabel>
+                        </Tag>
+                      ) : (
+                        <Tag variant="subtle" colorScheme="red">
+                          <TagLeftIcon as={FiX} />
+                          <TagLabel>Error</TagLabel>
+                        </Tag>
+                      )}
                     </Td>
-                  )} */}
-                </Tr>
+                    <Td border={'none'} pr={1}>
+                      <Box
+                        display={'flex'}
+                        gap={4}
+                        justifyContent={'space-between'}
+                        alignItems={'center'}
+                      >
+                        <Text fontSize={'xs'} color={'text-link'}>
+                          {transaction.height}
+                        </Text>
+                      </Box>
+                    </Td>
+                    <Td border={'none'}>
+                      <Text fontSize={'xs'} color={'text-link'}>
+                        {timeFromNow(transaction.Timestamp.toISOString())}
+                      </Text>
+                    </Td>
+                  </Tr>
+                )
               )
+            ) : (
+              <Tr>
+                <Td border={'none'} colSpan={4} textAlign="center" pt={8}>
+                  No transactions available!!!
+                </Td>
+              </Tr>
             )}
           </Tbody>
         </Table>
       </TableContainer>
-      {!showAll && (
+      {!showAll && txs?.length > 0 && (
         <Box width={'full'} px={4}>
           <Button
             border={'1px'}
