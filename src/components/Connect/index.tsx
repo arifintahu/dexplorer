@@ -29,7 +29,7 @@ import { removeTrailingSlash } from '@/utils/helper'
 const chainList = [
   {
     name: 'Surge',
-    rpc: 'https://devnet.surge.dev/rpc',
+    rpc: 'https://rpc.devnet.surge.dev',
   },
 ]
 

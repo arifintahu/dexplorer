@@ -2,7 +2,6 @@ export const LS_RPC_ADDRESS = 'RPC_ADDRESS'
 export const LS_RPC_ADDRESS_LIST = 'RPC_ADDRESS_LIST'
 export const RPC_ADDRESS = process.env.NEXT_PUBLIC_RPC_ADDRESS
 export const RPC_NAME = process.env.NEXT_PUBLIC_RPC_NAME
-console.log(RPC_ADDRESS, 'RPC_ADDRESS')
 export const GOV_PARAMS_TYPE = {
   VOTING: 'voting',
   DEPOSIT: 'deposit',
