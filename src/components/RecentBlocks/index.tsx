@@ -38,7 +38,7 @@ export default function RecentBlocks() {
       const filteredBlocks = inscriptionData.filter(
         (item: any) => item.revealTx !== ''
       )
-      return filteredBlocks
+      return filteredBlocks.slice(0, 3)
     }
   }, [inscriptionData])
 
