@@ -64,7 +64,7 @@ export default function TransactionList({
       >
         {title}
       </Text>
-      <TableContainer>
+      <TableContainer display={'block'}>
         <Table>
           <Thead px={6}>
             <Tr>

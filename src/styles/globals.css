@@ -52,3 +52,9 @@ main {
   line-height: 16.34px;
   text-align: left;
 }
+
+@media (max-width: 768px) {
+  .home_main {
+    padding: 52px 16px 16px;
+  }
+}

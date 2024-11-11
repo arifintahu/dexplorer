@@ -36,14 +36,14 @@ export default function RecentBlocks() {
   return (
     <Box>
       <HStack justifyContent={'space-between'} mb={3}>
-        <Text fontSize={'2xl'} color={'gray-50'}>
+        <Text fontWeight={'500'} fontSize={'16px'} lineHeight={'25px'}>
           Recent Blocks
         </Text>
         <Text fontSize={'xs'} color={'gray-400'} pr={2} fontWeight={500}>
           Auto Updates
         </Text>
       </HStack>
-      <VStack gap={4} w={'100%'} mb={'38px'}>
+      <VStack gap={4} w={'100%'} mb={{ base: '18px', md: '38px' }}>
         <Skeleton w={'100%'} isLoaded={!isLoading}>
           {inscriptionData.map((item: any) => (
             <div key={item.revealTx || item.startBlock}>

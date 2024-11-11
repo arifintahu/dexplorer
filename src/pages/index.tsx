@@ -189,7 +189,7 @@ export default function Home() {
             </SimpleGrid>
           </Box>
           <Grid templateColumns="repeat(12, 1fr)" gap={5} pb={10}>
-            <GridItem colSpan={{ sm: 12, md: 7 }}>
+            <GridItem colSpan={{ base: 12, md: 7 }}>
               <TransactionList
                 title="Transactions"
                 showAll={false}
@@ -197,9 +197,9 @@ export default function Home() {
               />
             </GridItem>
             <GridItem
-              colSpan={{ sm: 12, md: 5 }}
+              colSpan={{ base: 12, md: 5 }}
               bg="dark-bg"
-              px={7}
+              px={{ base: 5, md: 7 }}
               pt={10}
               pb={6}
               borderRadius={12}

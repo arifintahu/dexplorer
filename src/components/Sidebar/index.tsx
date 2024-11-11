@@ -11,7 +11,6 @@ import {
   IconButton,
   Image,
   Link,
-  Text,
   useColorModeValue,
   useDisclosure,
 } from '@chakra-ui/react'
@@ -19,7 +18,6 @@ import NextLink from 'next/link'
 import { useRouter } from 'next/router'
 import React, { ReactNode, useEffect, useState } from 'react'
 import { IconType } from 'react-icons'
-import { AiFillExclamationCircle } from 'react-icons/ai'
 import { FaGlobeAmericas } from 'react-icons/fa'
 import { FiMenu } from 'react-icons/fi'
 import { GiTwoCoins } from 'react-icons/gi'
@@ -30,6 +28,8 @@ import { PiDevToLogoFill, PiTreeStructure } from 'react-icons/pi'
 import { VscGlobe } from 'react-icons/vsc'
 
 import { images } from '@/utils/images'
+
+import Navbar from '../Navbar'
 
 interface LinkItemProps {
   name: string
@@ -224,13 +224,7 @@ interface RefLinkItemProps extends FlexProps {
   iconColor?: boolean
   isBlank?: boolean
 }
-const RefLinkItem = ({
-  icon,
-  children,
-  route,
-  isBlank,
-  iconColor,
-}: RefLinkItemProps) => {
+const RefLinkItem = ({ icon, route, isBlank, iconColor }: RefLinkItemProps) => {
   return (
     <Link
       as={NextLink}
@@ -265,7 +259,7 @@ const MobileNav = ({ onOpen, ...rest }: MobileProps) => {
       px={{ base: 4, md: 24 }}
       height="20"
       alignItems="center"
-      bg={useColorModeValue('light-container', 'dark-container')}
+      bg={'dark-bg'}
       borderBottomWidth="1px"
       borderBottomColor={useColorModeValue('gray.200', 'gray.700')}
       justifyContent="flex-start"
@@ -278,9 +272,7 @@ const MobileNav = ({ onOpen, ...rest }: MobileProps) => {
         icon={<FiMenu />}
       />
 
-      <Text fontSize="2xl" ml="8" fontFamily="monospace" fontWeight="bold">
-        Surge Explorer
-      </Text>
+      <Navbar />
     </Flex>
   )
 }

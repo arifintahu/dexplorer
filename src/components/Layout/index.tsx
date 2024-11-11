@@ -1,3 +1,4 @@
+import { Box } from '@chakra-ui/react'
 import { NewBlockEvent } from '@cosmjs/tendermint-rpc'
 import { TxEvent } from '@cosmjs/tendermint-rpc/build/tendermint37'
 import { NextRouter, useRouter } from 'next/router'
@@ -148,7 +149,9 @@ export default function Layout({ children }: { children: ReactNode }) {
       {isLoading ? <LoadingPage /> : <></>}
       {connectState && !isLoading ? (
         <Sidebar>
-          <Navbar />
+          <Box display={{ base: 'none', md: 'block' }}>
+            <Navbar />
+          </Box>
           {children}
         </Sidebar>
       ) : (
