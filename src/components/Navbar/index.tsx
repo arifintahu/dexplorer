@@ -10,8 +10,8 @@ export default function Navbar() {
       py={{ base: 1, md: 5 }}
       px={{ base: 1, md: 14 }}
       shadow={'base'}
-      borderBottom={{ base: 0, md: '1px' }}
-      borderBottomColor={'gray-900'}
+      borderBottom={{ base: '0px', md: '1px' }}
+      borderBottomColor={{ base: 'gray-900', md: 'gray-900' }}
       display={'flex'}
       justifyContent={'flex-end'}
       alignItems={'center'}

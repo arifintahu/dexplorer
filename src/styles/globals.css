@@ -70,6 +70,10 @@ main {
   position: relative;
   padding-top: 112px;
 }
+.block_main {
+  position: relative;
+  padding-top: 52px;
+}
 
 .label_regular {
   font-weight: 400;
@@ -98,6 +102,12 @@ main {
 
 @media (max-width: 768px) {
   .home_main {
+    padding: 52px 16px 16px;
+  }
+  .block_main {
+    padding: 52px 16px 16px;
+  }
+  main {
     padding: 52px 16px 16px;
   }
 }

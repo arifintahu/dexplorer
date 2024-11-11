@@ -129,7 +129,7 @@ export default function DetailBlock() {
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      <main>
+      <main className="block_main">
         <HStack h="24px">
           <Heading size={'md'}>Block</Heading>
           <Divider borderColor={'gray'} size="10px" orientation="vertical" />
@@ -163,16 +163,16 @@ export default function DetailBlock() {
         </HStack>
         <Box
           mt={8}
-          bg={useColorModeValue('light-container', 'dark-container')}
-          shadow={'base'}
+          bg={'dark-bg'}
+          border={'1px'}
+          borderColor={'gray-900'}
           borderRadius={4}
-          p={4}
         >
-          <Heading size={'md'} mb={4}>
+          <Heading size={'md'} p={4}>
             Header
           </Heading>
-          <Divider borderColor={'gray'} mb={4} />
-          <TableContainer>
+          <Divider borderColor={'gray-900'} />
+          <TableContainer p={4}>
             <Table variant="unstyled" size={'sm'}>
               <Tbody>
                 <Tr>
@@ -218,15 +218,15 @@ export default function DetailBlock() {
 
         <Box
           mt={8}
-          bg={useColorModeValue('light-container', 'dark-container')}
-          shadow={'base'}
+          bg={'dark-bg'}
           borderRadius={4}
-          p={4}
+          border={'1px'}
+          borderColor={'gray-900'}
         >
-          <Heading size={'md'} mb={4}>
+          <Heading size={'md'} p={4}>
             Transactions
           </Heading>
-          <Divider borderColor={'gray'} mb={4} />
+          <Divider borderColor={'gray-900'} mb={4} />
           <TableContainer>
             <Table variant="simple">
               <Thead>
@@ -239,28 +239,36 @@ export default function DetailBlock() {
                 </Tr>
               </Thead>
               <Tbody>
-                {txs.map((tx) => (
-                  <Tr key={toHex(tx.hash)}>
-                    <Td>
-                      <Link
-                        as={NextLink}
-                        href={'/txs/' + toHex(tx.hash).toUpperCase()}
-                        style={{ textDecoration: 'none' }}
-                        _focus={{ boxShadow: 'none' }}
-                      >
-                        <Text color={'cyan.400'}>{trimHash(tx.hash)}</Text>
-                      </Link>
-                    </Td>
-                    <Td>{renderMessages(tx.data.body?.messages)}</Td>
-                    <Td>{getFee(tx.data.authInfo?.fee?.amount)}</Td>
-                    <Td>{height}</Td>
-                    <Td>
-                      {block?.header.time
-                        ? timeFromNow(block?.header.time)
-                        : ''}
+                {txs.length > 0 ? (
+                  txs.map((tx) => (
+                    <Tr key={toHex(tx.hash)}>
+                      <Td>
+                        <Link
+                          as={NextLink}
+                          href={'/txs/' + toHex(tx.hash).toUpperCase()}
+                          style={{ textDecoration: 'none' }}
+                          _focus={{ boxShadow: 'none' }}
+                        >
+                          <Text color={'cyan.400'}>{trimHash(tx.hash)}</Text>
+                        </Link>
+                      </Td>
+                      <Td>{renderMessages(tx.data.body?.messages)}</Td>
+                      <Td>{getFee(tx.data.authInfo?.fee?.amount)}</Td>
+                      <Td>{height}</Td>
+                      <Td>
+                        {block?.header.time
+                          ? timeFromNow(block?.header.time)
+                          : ''}
+                      </Td>
+                    </Tr>
+                  ))
+                ) : (
+                  <Tr>
+                    <Td border={'none'} colSpan={5} textAlign="center" py={8}>
+                      <Text>No transactions available!!!</Text>
                     </Td>
                   </Tr>
-                ))}
+                )}
               </Tbody>
             </Table>
           </TableContainer>

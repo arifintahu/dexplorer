@@ -18,7 +18,6 @@ import { shortenAddress } from '@/utils/helper'
 import { images } from '@/utils/images'
 
 export default function RecentBlocks() {
-  const [blockHeaders, setBlockHeaders] = useState<BlockHeader[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [inscriptionData, setInscriptionData] = useState([])
 
