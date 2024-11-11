@@ -3,6 +3,7 @@ import {
   Button,
   HStack,
   Img,
+  Link,
   Table,
   TableContainer,
   Tag,
@@ -16,6 +17,8 @@ import {
   Tr,
   VStack,
 } from '@chakra-ui/react'
+import { toHex } from '@cosmjs/encoding'
+import NextLink from 'next/link'
 import router from 'next/router'
 import {
   JSXElementConstructor,
@@ -103,7 +106,16 @@ export default function TransactionList({
                     borderColor={'gray-900'}
                     _last={{ borderBottom: 'none' }}
                   >
-                    <Td border={'none'}># {truncate(transaction.hash, 6)}</Td>
+                    <Td border={'none'}>
+                      <Link
+                        as={NextLink}
+                        href={'/txs/' + transaction.hash}
+                        style={{ textDecoration: 'none' }}
+                        _focus={{ boxShadow: 'none' }}
+                      >
+                        # {truncate(transaction.hash, 6)}
+                      </Link>
+                    </Td>
                     <Td border={'none'}>
                       {transaction.TxEvent.result.code == 0 ? (
                         <Tag variant="subtle" colorScheme="green">
@@ -125,7 +137,14 @@ export default function TransactionList({
                         alignItems={'center'}
                       >
                         <Text fontSize={'xs'} color={'text-link'}>
-                          {transaction.height}
+                          <Link
+                            as={NextLink}
+                            href={'/blocks/' + transaction.height}
+                            style={{ textDecoration: 'none' }}
+                            _focus={{ boxShadow: 'none' }}
+                          >
+                            {transaction.height}
+                          </Link>
                         </Text>
                       </Box>
                     </Td>
