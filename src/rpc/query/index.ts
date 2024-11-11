@@ -90,7 +90,7 @@ export async function getTotalInscriptions() {
     }
 
     const data = await response.json()
-    return data.bitcoindata.length
+    return data
   } catch (error) {
     console.error('Error fetching bitcoindata:', error)
     return 0

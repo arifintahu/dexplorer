@@ -1,6 +1,5 @@
 import '@/styles/Home.module.css'
 
-import { InfoOutlineIcon, SearchIcon } from '@chakra-ui/icons'
 import {
   Box,
   FlexProps,
@@ -16,7 +15,9 @@ import {
   Tooltip,
   VStack,
 } from '@chakra-ui/react'
-import { StatusResponse } from '@cosmjs/tendermint-rpc'
+import { toHex } from '@cosmjs/encoding'
+import { StatusResponse, TxEvent } from '@cosmjs/tendermint-rpc'
+import { TxBody } from 'cosmjs-types/cosmos/tx/v1beta1/tx'
 import Head from 'next/head'
 import { useEffect, useState } from 'react'
 import { useSelector } from 'react-redux'
@@ -30,17 +31,27 @@ import {
   getValidators,
 } from '@/rpc/query'
 import { selectTmClient } from '@/store/connectSlice'
-import { selectNewBlock } from '@/store/streamSlice'
+import { selectNewBlock, selectTxEvent } from '@/store/streamSlice'
 import { displayDate } from '@/utils/helper'
 import { images } from '@/utils/images'
+
+interface Tx {
+  hash: any
+  TxEvent: TxEvent
+  Timestamp: Date
+}
+
+const MAX_ROWS = 20
 
 export default function Home() {
   const tmClient = useSelector(selectTmClient)
   const newBlock = useSelector(selectNewBlock)
+  const txEvent = useSelector(selectTxEvent)
   const [validators, setValidators] = useState<number>()
   const [isLoaded, setIsLoaded] = useState(false)
   const [status, setStatus] = useState<StatusResponse | null>()
   const [totalInscription, setTotalInscription] = useState<number>(0)
+  const [txs, setTxs] = useState<Tx[]>([])
 
   useEffect(() => {
     if (tmClient) {
@@ -49,26 +60,53 @@ export default function Home() {
     }
   }, [tmClient])
 
+  useEffect(() => {
+    if (txEvent) {
+      updateTxs(txEvent)
+    }
+  }, [txEvent])
+
+  const updateTxs = (txEvent: TxEvent) => {
+    if (!txEvent.result.data) {
+      return
+    }
+
+    const data = TxBody.decode(txEvent.result.data)
+
+    const tx = {
+      TxEvent: txEvent,
+      Timestamp: new Date(),
+      data: data,
+      height: txEvent.height,
+      hash: toHex(txEvent.hash).toUpperCase(),
+    }
+    if (txs.length) {
+      if (
+        txEvent.height >= txs[0].TxEvent.height &&
+        txEvent.hash != txs[0].TxEvent.hash
+      ) {
+        const updatedTx = [tx, ...txs.slice(0, MAX_ROWS - 1)].filter(
+          (transaction, index, self) =>
+            index === self.findIndex((tran) => tran.hash === transaction.hash)
+        )
+        console.log('updatedTx', updatedTx)
+        setTxs(updatedTx)
+      }
+    } else {
+      setTxs([tx])
+    }
+  }
+
   // Function to handle the interval call
   async function checkBitcoinData() {
-    const length = await getTotalInscriptions()
+    const data = await getTotalInscriptions()
+
+    const length = data?.pagination?.total ?? 0
     setTotalInscription(length)
   }
 
   useEffect(() => {
     const intervalId = setInterval(checkBitcoinData, 5000)
-    // Example usage:
-    const restEndpoint = 'https://rpc.devnet.surge.dev'
-
-    // Query parameters
-    const params = {
-      events: "message.sender='sender_address'",
-      'pagination.limit': '100',
-      order_by: 'ORDER_BY_DESC',
-    }
-
-    const transactions = getTxsByRestApi(restEndpoint, params)
-    console.log('Transactions:', transactions)
   }, [])
 
   useEffect(() => {
@@ -112,24 +150,16 @@ export default function Home() {
                   bgColor="green.200"
                   color="green.600"
                   name="TOTAL TXNS"
-                  value={
-                    newBlock?.header.time
-                      ? displayDate(newBlock?.header.time?.toISOString())
-                      : status?.syncInfo.latestBlockTime
-                      ? displayDate(
-                          status?.syncInfo.latestBlockTime.toISOString()
-                        )
-                      : ''
-                  }
-                  tooltipText=""
+                  value={'#100000'}
+                  tooltipText="Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat"
                 />
               </Skeleton>
 
               <Skeleton isLoaded={isLoaded}>
                 <BoxInfo
                   name="TOTAL INSCRIPTIONS"
-                  value={totalInscription}
-                  tooltipText=""
+                  value={'#' + totalInscription}
+                  tooltipText="Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat"
                 />
               </Skeleton>
               <Skeleton isLoaded={isLoaded}>
@@ -146,22 +176,22 @@ export default function Home() {
               <Skeleton isLoaded={isLoaded}>
                 <BoxInfo
                   name="MAX TPS"
-                  value={
-                    newBlock?.header.height
-                      ? '#' + newBlock?.header.height
-                      : '#' + status?.syncInfo.latestBlockHeight
-                  }
-                  tooltipText=""
+                  value={'#1849'}
+                  tooltipText="Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat"
                 />
               </Skeleton>
             </SimpleGrid>
           </Box>
           <Grid templateColumns="repeat(12, 1fr)" gap={5} pb={10}>
-            <GridItem colSpan={7}>
-              <TransactionList title="Transactions" showAll={false} />
+            <GridItem colSpan={{ sm: 12, md: 7 }}>
+              <TransactionList
+                title="Transactions"
+                showAll={false}
+                txs={txs?.length ? txs : []}
+              />
             </GridItem>
             <GridItem
-              colSpan={5}
+              colSpan={{ sm: 12, md: 5 }}
               bg="dark-bg"
               px={7}
               pt={10}
