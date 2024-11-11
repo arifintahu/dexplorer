@@ -96,11 +96,12 @@ export default function Transactions() {
               color="green.600"
               name="TOTAL TXNS"
               value={
-                newBlock?.header.height
-                  ? '#' + newBlock?.header.height * 2
-                  : (('#' +
-                      status?.syncInfo
-                        .latestBlockHeight) as unknown as number) * 2
+                '-'
+                // newBlock?.header.height
+                //   ? '#' + newBlock?.header.height * 2
+                //   : (('#' +
+                //       status?.syncInfo
+                //         .latestBlockHeight) as unknown as number) * 2
               }
               tooltipText="Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat"
             />
@@ -108,7 +109,7 @@ export default function Transactions() {
           <Skeleton isLoaded={isLoaded}>
             <BoxInfo
               name="MAX TPS"
-              value={'#1849'}
+              value={'-'}
               tooltipText="Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat"
             />
           </Skeleton>
