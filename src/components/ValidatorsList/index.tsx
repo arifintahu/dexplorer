@@ -40,19 +40,24 @@ export default function ValidatorsList({ title }: IValidatorsList) {
         <Table>
           <Thead px={6}>
             <Tr>
-              <Th color={'text-500'} width={'20%'} className="label_regular">
+              <Th
+                borderColor={'gray-900'}
+                color={'text-500'}
+                width={'20%'}
+                className="label_regular"
+              >
                 Validators
               </Th>
-              <Th color={'text-500'} width={'20%'}>
+              <Th borderColor={'gray-900'} color={'text-500'} width={'20%'}>
                 Status
               </Th>
-              <Th color={'text-500'} width={'20%'}>
+              <Th borderColor={'gray-900'} color={'text-500'} width={'20%'}>
                 Address Associated
               </Th>
-              <Th color={'text-500'} width={'15%'}>
+              <Th borderColor={'gray-900'} color={'text-500'} width={'15%'}>
                 Voting Power
               </Th>
-              <Th color={'text-500'} width={'15%'}>
+              <Th borderColor={'gray-900'} color={'text-500'} width={'15%'}>
                 Commission
               </Th>
             </Tr>

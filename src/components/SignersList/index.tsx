@@ -46,16 +46,26 @@ export default function SignersList({ title }: ISignersList) {
         <Table>
           <Thead px={6}>
             <Tr>
-              <Th color={'text-500'} width={'20%'} className="label_regular">
+              <Th
+                borderColor={'gray-900'}
+                color={'text-500'}
+                width={'20%'}
+                className="label_regular"
+              >
                 Signer Key
               </Th>
-              <Th color={'text-500'} width={'20%'} className="label_regular">
+              <Th
+                borderColor={'gray-900'}
+                color={'text-500'}
+                width={'20%'}
+                className="label_regular"
+              >
                 Status
               </Th>
-              <Th color={'text-500'} width={'20%'}>
+              <Th borderColor={'gray-900'} color={'text-500'} width={'20%'}>
                 Entity
               </Th>
-              <Th color={'text-500'} width={'15%'}>
+              <Th borderColor={'gray-900'} color={'text-500'} width={'15%'}>
                 Voting Power
               </Th>
             </Tr>

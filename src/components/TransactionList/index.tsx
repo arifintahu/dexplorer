@@ -72,16 +72,16 @@ export default function TransactionList({
         <Table>
           <Thead px={6}>
             <Tr>
-              <Th color={'text-500'} width={'25%'}>
+              <Th borderColor={'gray-900'} color={'text-500'} width={'25%'}>
                 Transaction Hash
               </Th>
-              <Th color={'text-500'} width={'25%'}>
+              <Th borderColor={'gray-900'} color={'text-500'} width={'25%'}>
                 Result
               </Th>
-              <Th color={'text-500'} width={'10%'}>
+              <Th borderColor={'gray-900'} color={'text-500'} width={'10%'}>
                 Height
               </Th>
-              <Th color={'text-500'} width={'15%'}>
+              <Th borderColor={'gray-900'} color={'text-500'} width={'15%'}>
                 Time
               </Th>
             </Tr>

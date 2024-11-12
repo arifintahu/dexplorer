@@ -231,11 +231,21 @@ export default function DetailBlock() {
             <Table variant="simple">
               <Thead>
                 <Tr>
-                  <Th color={'text-500'}>Tx Hash</Th>
-                  <Th color={'text-500'}>Messages</Th>
-                  <Th color={'text-500'}>Fee</Th>
-                  <Th color={'text-500'}>Height</Th>
-                  <Th color={'text-500'}>Time</Th>
+                  <Th borderColor={'gray-900'} color={'text-500'}>
+                    Tx Hash
+                  </Th>
+                  <Th borderColor={'gray-900'} color={'text-500'}>
+                    Messages
+                  </Th>
+                  <Th borderColor={'gray-900'} color={'text-500'}>
+                    Fee
+                  </Th>
+                  <Th borderColor={'gray-900'} color={'text-500'}>
+                    Height
+                  </Th>
+                  <Th borderColor={'gray-900'} color={'text-500'}>
+                    Time
+                  </Th>
                 </Tr>
               </Thead>
               <Tbody>
