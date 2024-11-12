@@ -131,7 +131,9 @@ export default function DetailBlock() {
       </Head>
       <main className="block_main">
         <HStack h="24px">
-          <Heading size={'md'}>Block</Heading>
+          <Heading size={'md'} color={'text-50'}>
+            Block
+          </Heading>
           <Divider borderColor={'gray'} size="10px" orientation="vertical" />
           <Link
             as={NextLink}
@@ -147,19 +149,17 @@ export default function DetailBlock() {
               as={FiHome}
             />
           </Link>
-          <Icon fontSize="16" as={FiChevronRight} />
+          <Icon color={'text-50'} fontSize="16" as={FiChevronRight} />
           <Link
             as={NextLink}
             href={'/blocks'}
             style={{ textDecoration: 'none' }}
             _focus={{ boxShadow: 'none' }}
           >
-            <Text color={useColorModeValue('light-theme', 'dark-theme')}>
-              Blocks
-            </Text>
+            <Text color={'text-50'}>Blocks</Text>
           </Link>
-          <Icon fontSize="16" as={FiChevronRight} />
-          <Text>Block #{height}</Text>
+          <Icon color={'text-50'} fontSize="16" as={FiChevronRight} />
+          <Text color={'text-50'}>Block #{height}</Text>
         </HStack>
         <Box
           mt={8}
@@ -168,7 +168,7 @@ export default function DetailBlock() {
           borderColor={'gray-900'}
           borderRadius={4}
         >
-          <Heading size={'md'} p={4}>
+          <Heading size={'md'} p={4} color={'text-50'}>
             Header
           </Heading>
           <Divider borderColor={'gray-900'} />
@@ -176,22 +176,22 @@ export default function DetailBlock() {
             <Table variant="unstyled" size={'sm'}>
               <Tbody>
                 <Tr>
-                  <Td pl={0} width={150}>
+                  <Td pl={0} width={150} color={'text-50'}>
                     <b>Chain Id</b>
                   </Td>
-                  <Td>{block?.header.chainId}</Td>
+                  <Td color={'text-500'}>{block?.header.chainId}</Td>
                 </Tr>
                 <Tr>
-                  <Td pl={0} width={150}>
+                  <Td color={'text-50'} pl={0} width={150}>
                     <b>Height</b>
                   </Td>
-                  <Td>{block?.header.height}</Td>
+                  <Td color={'text-500'}>{block?.header.height}</Td>
                 </Tr>
                 <Tr>
-                  <Td pl={0} width={150}>
+                  <Td color={'text-50'} pl={0} width={150}>
                     <b>Block Time</b>
                   </Td>
-                  <Td>
+                  <Td color={'text-500'}>
                     {block?.header.time
                       ? `${timeFromNow(block?.header.time)} ( ${displayDate(
                           block?.header.time
@@ -200,16 +200,16 @@ export default function DetailBlock() {
                   </Td>
                 </Tr>
                 <Tr>
-                  <Td pl={0} width={150}>
+                  <Td color={'text-50'} pl={0} width={150}>
                     <b>Block Hash</b>
                   </Td>
-                  <Td>{block?.id}</Td>
+                  <Td color={'text-500'}> {block?.id}</Td>
                 </Tr>
                 <Tr>
-                  <Td pl={0} width={150}>
+                  <Td color={'text-50'} pl={0} width={150}>
                     <b>Number of Tx</b>
                   </Td>
-                  <Td>{block?.txs.length}</Td>
+                  <Td color={'text-500'}>{block?.txs.length}</Td>
                 </Tr>
               </Tbody>
             </Table>
@@ -223,7 +223,7 @@ export default function DetailBlock() {
           border={'1px'}
           borderColor={'gray-900'}
         >
-          <Heading size={'md'} p={4}>
+          <Heading size={'md'} p={4} color={'text-50'}>
             Transactions
           </Heading>
           <Divider borderColor={'gray-900'} mb={4} />
@@ -231,11 +231,11 @@ export default function DetailBlock() {
             <Table variant="simple">
               <Thead>
                 <Tr>
-                  <Th>Tx Hash</Th>
-                  <Th>Messages</Th>
-                  <Th>Fee</Th>
-                  <Th>Height</Th>
-                  <Th>Time</Th>
+                  <Th color={'text-500'}>Tx Hash</Th>
+                  <Th color={'text-500'}>Messages</Th>
+                  <Th color={'text-500'}>Fee</Th>
+                  <Th color={'text-500'}>Height</Th>
+                  <Th color={'text-500'}>Time</Th>
                 </Tr>
               </Thead>
               <Tbody>
@@ -265,7 +265,9 @@ export default function DetailBlock() {
                 ) : (
                   <Tr>
                     <Td border={'none'} colSpan={5} textAlign="center" py={8}>
-                      <Text>No transactions available!!!</Text>
+                      <Text color={'text-50'}>
+                        No transactions available!!!
+                      </Text>
                     </Td>
                   </Tr>
                 )}

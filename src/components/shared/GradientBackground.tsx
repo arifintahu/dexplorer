@@ -28,7 +28,7 @@ export default function GradientBackground({
         zIndex={1}
       />
       <Box zIndex={2} position={'relative'}>
-        <Text fontWeight={'600'} fontSize={'40px'} mb={7}>
+        <Text fontWeight={'600'} color={'white'} fontSize={'40px'} mb={7}>
           {title}
         </Text>
         {children}

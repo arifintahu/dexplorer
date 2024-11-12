@@ -64,6 +64,7 @@ export default function TransactionList({
         lineHeight={'25px'}
         mb={2}
         px={6}
+        color={'text-50'}
       >
         {title}
       </Text>
@@ -71,10 +72,18 @@ export default function TransactionList({
         <Table>
           <Thead px={6}>
             <Tr>
-              <Th width={'25%'}>Transaction Hash</Th>
-              <Th width={'25%'}>Result</Th>
-              <Th width={'10%'}>Height</Th>
-              <Th width={'15%'}>Time</Th>
+              <Th color={'text-500'} width={'25%'}>
+                Transaction Hash
+              </Th>
+              <Th color={'text-500'} width={'25%'}>
+                Result
+              </Th>
+              <Th color={'text-500'} width={'10%'}>
+                Height
+              </Th>
+              <Th color={'text-500'} width={'15%'}>
+                Time
+              </Th>
             </Tr>
           </Thead>
           <Tbody>
@@ -158,7 +167,13 @@ export default function TransactionList({
               )
             ) : (
               <Tr>
-                <Td border={'none'} colSpan={4} textAlign="center" pt={8}>
+                <Td
+                  border={'none'}
+                  color={'text-50'}
+                  colSpan={4}
+                  textAlign="center"
+                  pt={8}
+                >
                   No transactions available!!!
                 </Td>
               </Tr>

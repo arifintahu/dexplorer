@@ -45,7 +45,12 @@ export default function RecentBlocks() {
   return (
     <Box>
       <HStack justifyContent={'space-between'} mb={3}>
-        <Text fontWeight={'500'} fontSize={'16px'} lineHeight={'25px'}>
+        <Text
+          fontWeight={'500'}
+          color={'text-50'}
+          fontSize={'16px'}
+          lineHeight={'25px'}
+        >
           Recent Blocks
         </Text>
         <Text fontSize={'xs'} color={'gray-400'} pr={2} fontWeight={500}>

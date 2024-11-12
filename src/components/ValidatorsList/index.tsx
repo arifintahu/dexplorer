@@ -1,19 +1,13 @@
 import {
   Box,
-  Button,
-  HStack,
-  Img,
-  Stack,
   Table,
   TableContainer,
   Tbody,
   Td,
   Text,
-  Tfoot,
   Th,
   Thead,
   Tr,
-  VStack,
 } from '@chakra-ui/react'
 
 import { getColor, truncate } from '@/utils'
@@ -38,6 +32,7 @@ export default function ValidatorsList({ title }: IValidatorsList) {
         lineHeight={'25px'}
         mb={2}
         px={6}
+        color={'text-50'}
       >
         {title}
       </Text>
@@ -45,13 +40,21 @@ export default function ValidatorsList({ title }: IValidatorsList) {
         <Table>
           <Thead px={6}>
             <Tr>
-              <Th width={'20%'} className="label_regular">
+              <Th color={'text-500'} width={'20%'} className="label_regular">
                 Validators
               </Th>
-              <Th width={'20%'}>Status</Th>
-              <Th width={'20%'}>Address Associated</Th>
-              <Th width={'15%'}>Voting Power</Th>
-              <Th width={'15%'}>Commission</Th>
+              <Th color={'text-500'} width={'20%'}>
+                Status
+              </Th>
+              <Th color={'text-500'} width={'20%'}>
+                Address Associated
+              </Th>
+              <Th color={'text-500'} width={'15%'}>
+                Voting Power
+              </Th>
+              <Th color={'text-500'} width={'15%'}>
+                Commission
+              </Th>
             </Tr>
           </Thead>
           <Tbody>
@@ -64,7 +67,9 @@ export default function ValidatorsList({ title }: IValidatorsList) {
                 _last={{ borderBottom: 'none' }}
               >
                 <Td border={'none'}>
-                  <Text className="body2_regular">{validator.name}</Text>
+                  <Text className="body2_regular" color={'white'}>
+                    {validator.name}
+                  </Text>
                 </Td>
                 <Td border={'none'}>
                   <Text
@@ -83,13 +88,15 @@ export default function ValidatorsList({ title }: IValidatorsList) {
                 <Td
                   border={'none'}
                   className="supportText_semibold"
+                  color={'text-50'}
                 >{`# ${truncate(validator.address)}`}</Td>
-                <Td border={'none'} className="body2_regular">
+                <Td border={'none'} className="body2_regular" color={'text-50'}>
                   {validator.votingPower}
                 </Td>
                 <Td
                   border={'none'}
                   className="body2_regular"
+                  color={'text-50'}
                 >{`${validator.commission}`}</Td>
               </Tr>
             ))}

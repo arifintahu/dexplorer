@@ -78,9 +78,9 @@ export default function BitcoinPriceDifference() {
   return (
     <div>
       {loading ? (
-        <p>Loading...</p>
+        <Text color={'white'}>Loading...</Text>
       ) : error ? (
-        <p>{error}</p>
+        <Text color={'red'}>{error}</Text>
       ) : (
         <Box display={'flex'} gap={2} alignItems={'center'}>
           <Img src={images.bitcoinLogo.src} width={8} height={8} />
@@ -88,6 +88,7 @@ export default function BitcoinPriceDifference() {
             <Text
               fontSize={'sm'}
               fontWeight={'semibold'}
+              color={'text-50'}
             >{`$ ${priceData.currentPrice?.toFixed(2)}`}</Text>
             <Box display="flex" alignItems="center">
               {renderTriangleIcon(priceData.differencePercentage)}

@@ -38,6 +38,7 @@ export default function SignersList({ title }: ISignersList) {
         lineHeight={'25px'}
         mb={2}
         px={6}
+        color={'text-50'}
       >
         {title}
       </Text>
@@ -45,14 +46,18 @@ export default function SignersList({ title }: ISignersList) {
         <Table>
           <Thead px={6}>
             <Tr>
-              <Th width={'20%'} className="label_regular">
+              <Th color={'text-500'} width={'20%'} className="label_regular">
                 Signer Key
               </Th>
-              <Th width={'20%'} className="label_regular">
+              <Th color={'text-500'} width={'20%'} className="label_regular">
                 Status
               </Th>
-              <Th width={'20%'}>Entity</Th>
-              <Th width={'15%'}>Voting Power</Th>
+              <Th color={'text-500'} width={'20%'}>
+                Entity
+              </Th>
+              <Th color={'text-500'} width={'15%'}>
+                Voting Power
+              </Th>
             </Tr>
           </Thead>
           <Tbody>
@@ -65,7 +70,7 @@ export default function SignersList({ title }: ISignersList) {
                 _last={{ borderBottom: 'none' }}
               >
                 <Td border={'none'}>
-                  <Text className="body2_regular">
+                  <Text className="body2_regular" color={'text-50'}>
                     {truncate(signer.signerKey, 8)}
                   </Text>
                 </Td>
@@ -84,12 +89,13 @@ export default function SignersList({ title }: ISignersList) {
                     {signer.status == 1 ? 'Active' : 'Inactive'}
                   </Text>
                 </Td>
-                <Td border={'none'} className="body2_regular">
+                <Td border={'none'} className="body2_regular" color={'text-50'}>
                   {signer.entityName}
                 </Td>
                 <Td
                   border={'none'}
                   className="body2_regular"
+                  color={'text-50'}
                 >{`${signer.votingPower}%`}</Td>
               </Tr>
             ))}
