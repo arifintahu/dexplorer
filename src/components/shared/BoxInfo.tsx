@@ -26,11 +26,12 @@ export const BoxInfo = ({ name, value, tooltipText, height }: BoxInfoProps) => {
       border={'1px'}
       borderColor={'gray-900'}
       align={'flex-start'}
+      justifyContent={'space-between'}
     >
-      <HStack mb={'14px'}>
-        <Heading size={'xs'} color={'gray-500'} fontWeight={500}>
+      <HStack mb={{ md: '14px' }}>
+        <Text color={'gray-500'} className="body2_medium">
           {name}
-        </Heading>
+        </Text>
         <Tooltip
           label={tooltipText}
           placement="right"
@@ -41,7 +42,11 @@ export const BoxInfo = ({ name, value, tooltipText, height }: BoxInfoProps) => {
         </Tooltip>
       </HStack>
 
-      <Text fontSize={'2xl'} color={'white'} fontWeight={500}>
+      <Text
+        fontSize={{ base: 'lg', md: '2xl' }}
+        color={'white'}
+        fontWeight={500}
+      >
         {value}
       </Text>
     </VStack>

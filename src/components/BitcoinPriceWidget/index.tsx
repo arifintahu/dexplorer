@@ -69,9 +69,15 @@ export default function BitcoinPriceDifference() {
   const renderTriangleIcon = (percentage: string | null) => {
     if (!percentage) return null
     return parseFloat(percentage) >= 0 ? (
-      <TriangleUpIcon color="green.500" fontSize={'14px'} />
+      <TriangleUpIcon
+        color="green.500"
+        fontSize={{ base: '12px', md: '14px' }}
+      />
     ) : (
-      <TriangleDownIcon color="red.500" />
+      <TriangleDownIcon
+        color="red.500"
+        fontSize={{ base: '12px', md: '14px' }}
+      />
     )
   }
 
@@ -93,7 +99,7 @@ export default function BitcoinPriceDifference() {
             <Box display="flex" alignItems="center">
               {renderTriangleIcon(priceData.differencePercentage)}
               <Text
-                fontSize={'sm'}
+                fontSize={{ base: 'xs', md: 'sm' }}
                 color={getPercentageColor(priceData.differencePercentage)}
                 ml={1}
               >

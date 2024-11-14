@@ -16,7 +16,7 @@ import {
   VStack,
 } from '@chakra-ui/react'
 import { toHex } from '@cosmjs/encoding'
-import { StatusResponse, TxEvent } from '@cosmjs/tendermint-rpc'
+import { StatusResponse, TxData, TxEvent } from '@cosmjs/tendermint-rpc'
 import { TxBody } from 'cosmjs-types/cosmos/tx/v1beta1/tx'
 import Head from 'next/head'
 import { useEffect, useState } from 'react'
@@ -136,15 +136,18 @@ export default function Home() {
         />
         <Box position="relative">
           <Text
-            fontSize="40px"
+            fontSize={{ base: '28px', md: '40px' }}
             lineHeight="52px"
             color={'white'}
             fontWeight="bold"
           >
             Surge Explorer
           </Text>
-          <Box mt={7} mb={8}>
-            <SimpleGrid minChildWidth="200px" spacing="20px">
+          <Box mt={{ base: 3, md: 7 }} mb={{ base: 4, md: 8 }}>
+            <SimpleGrid
+              minChildWidth={{ base: '45%', md: '200px' }}
+              spacing={{ base: '12px', md: '20px' }}
+            >
               <Skeleton isLoaded={isLoaded}>
                 <BoxInfo
                   bgColor="green.200"

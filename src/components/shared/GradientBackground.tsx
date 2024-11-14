@@ -17,6 +17,7 @@ export default function GradientBackground({
       pt={{ base: '32px', md: '114px' }}
       position={'relative'}
       zIndex={0}
+      pb={{ base: 6 }}
     >
       <Img
         src={images.primaryGradient.src}
@@ -28,7 +29,12 @@ export default function GradientBackground({
         zIndex={1}
       />
       <Box zIndex={2} position={'relative'}>
-        <Text fontWeight={'600'} color={'white'} fontSize={'40px'} mb={7}>
+        <Text
+          fontWeight={'600'}
+          color={'white'}
+          fontSize={{ base: '2xl', md: '40px' }}
+          mb={{ base: 3, md: 7 }}
+        >
           {title}
         </Text>
         {children}

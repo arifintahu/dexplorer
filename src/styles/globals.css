@@ -93,6 +93,12 @@ main {
   text-align: left;
 }
 
+.body2_medium {
+  font-size: 14px;
+  line-height: 22.4px;
+  font-weight: 500;
+}
+
 .supportText_semibold {
   font-size: 12px;
   font-weight: 600;
@@ -109,5 +115,10 @@ main {
   }
   main {
     padding: 52px 16px 16px;
+  }
+  .body2_medium {
+    font-size: 12px;
+    line-height: 22.4px;
+    font-weight: 500;
   }
 }
