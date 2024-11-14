@@ -12,6 +12,7 @@ export const colors: Colors = {
   'gray-500': '#6B7280',
   'gray-900': '#2A313A',
   'primary-400': '#F66949',
+  'primary-700': '#AD3014',
   'gray-1000': '#2A313A66',
   'primary-500': '#F4431C',
   'text-200': '#BBBEC5',

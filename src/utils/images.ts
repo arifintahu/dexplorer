@@ -2,6 +2,8 @@ import bitcoinLogo from '../../public/assets/images/bitcoin_logo.svg'
 import block from '../../public/assets/images/block.svg'
 import blockLogo from '../../public/assets/images/bx-cube.svg'
 import chainLink from '../../public/assets/images/chain_link.svg'
+import copyIcon from '../../public/assets/images/copy_icon.svg'
+import cubeOutline from '../../public/assets/images/cube_outline.png'
 import logo from '../../public/assets/images/logo.svg'
 import logoShort from '../../public/assets/images/logo_short.svg'
 import pattern from '../../public/assets/images/pattern.png'
@@ -19,6 +21,8 @@ export type ImageType =
   | 'stars'
   | 'logoShort'
   | 'primaryGradient'
+  | 'cubeOutline'
+  | 'copyIcon'
   | 'block'
 
 export type NextImage = {
@@ -37,5 +41,7 @@ export const images: Record<ImageType, NextImage> = {
   stars,
   logoShort,
   block,
+  cubeOutline,
   primaryGradient,
+  copyIcon,
 }

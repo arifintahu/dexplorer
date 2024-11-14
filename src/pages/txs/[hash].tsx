@@ -4,6 +4,8 @@ import {
   CardBody,
   CardHeader,
   Divider,
+  Grid,
+  GridItem,
   Heading,
   HStack,
   Icon,
@@ -19,6 +21,7 @@ import {
   Tr,
   useColorModeValue,
   useToast,
+  VStack,
 } from '@chakra-ui/react'
 import { Block, Coin, IndexedTx } from '@cosmjs/stargate'
 import { Tx } from 'cosmjs-types/cosmos/tx/v1beta1/tx'
@@ -29,15 +32,29 @@ import { useEffect, useState } from 'react'
 import { FiCheck, FiChevronRight, FiHome, FiX } from 'react-icons/fi'
 import { useSelector } from 'react-redux'
 
+import CopyIcon from '@/components/shared/CopyIcon'
+import GradientBackground from '@/components/shared/GradientBackground'
 import { DecodeMsg, decodeMsg } from '@/encoding'
 import { getBlock, getTx } from '@/rpc/query'
 import { selectTmClient } from '@/store/connectSlice'
+import { truncate } from '@/utils'
 import {
   displayDate,
   getTypeMsg,
   isBech32Address,
   timeFromNow,
 } from '@/utils/helper'
+import { images } from '@/utils/images'
+
+interface TxAttribute {
+  readonly key: string
+  readonly value: string
+}
+
+interface TxEvent {
+  type: string
+  readonly attributes: readonly TxAttribute[]
+}
 
 export default function DetailBlock() {
   const router = useRouter()
@@ -79,12 +96,16 @@ export default function DetailBlock() {
     }
   }, [txData])
 
+  console.log(txData, 'data')
+
+  console.log(block, 'block data')
+
   const getFee = (fees: Coin[] | undefined) => {
     if (fees && fees.length) {
       return (
         <HStack>
           <Text>{fees[0].amount}</Text>
-          <Text textColor="cyan.800">{fees[0].denom}</Text>
+          <Text textColor="primary-700">{fees[0].denom}</Text>
         </HStack>
       )
     }
@@ -139,6 +160,47 @@ export default function DetailBlock() {
     })
   }
 
+  const getTransferDetails = (events: TxEvent[] | undefined) => {
+    if (!events?.length) {
+      return {
+        amount: '0surg',
+        sender: '',
+        recipient: '',
+      }
+    }
+
+    // Initialize with default values
+    const details = {
+      amount: '0surg',
+      sender: '',
+      recipient: '',
+    }
+
+    // Find the first transfer event with the attributes we need
+    const transferEvent = events.find((event) =>
+      event.attributes.some((attr) =>
+        ['amount', 'sender', 'recipient'].includes(attr.key)
+      )
+    )
+
+    if (transferEvent) {
+      transferEvent.attributes.forEach((attr) => {
+        if (attr.key in details) {
+          details[attr.key as keyof typeof details] = attr.value
+        }
+      })
+    }
+
+    return details
+  }
+
+  const txTransferEvent = tx?.events.filter(
+    (event) => event.type === 'transfer'
+  )
+  const { amount, sender, recipient } = getTransferDetails(txTransferEvent)
+
+  console.log(tx, 'transaction')
+
   return (
     <>
       <Head>
@@ -147,179 +209,211 @@ export default function DetailBlock() {
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      <main className="block_main">
-        <HStack h="24px">
-          <Heading size={'md'}>Transaction</Heading>
-          <Divider borderColor={'gray'} size="10px" orientation="vertical" />
-          <Link
-            as={NextLink}
-            href={'/'}
-            style={{ textDecoration: 'none' }}
-            _focus={{ boxShadow: 'none' }}
-            display="flex"
-            justifyContent="center"
-          >
-            <Icon
-              fontSize="16"
-              color={useColorModeValue('light-theme', 'dark-theme')}
-              as={FiHome}
-            />
-          </Link>
-          <Icon fontSize="16" as={FiChevronRight} />
-          <Link
-            as={NextLink}
-            href={'/blocks'}
-            style={{ textDecoration: 'none' }}
-            _focus={{ boxShadow: 'none' }}
-          >
-            <Text color={'light-theme'}>Blocks</Text>
-          </Link>
-          <Icon fontSize="16" as={FiChevronRight} />
-          <Text>Tx</Text>
-        </HStack>
-        <Box
-          mt={8}
-          bg={useColorModeValue('light-container', 'dark-container')}
-          shadow={'base'}
-          borderRadius={4}
-          p={4}
-        >
-          <Heading size={'md'} mb={4}>
-            Information
-          </Heading>
-          <Divider borderColor={'gray'} mb={4} />
-          <TableContainer>
-            <Table variant="unstyled" size={'sm'}>
-              <Tbody>
-                <Tr>
-                  <Td pl={0} width={150}>
-                    <b>Chain Id</b>
-                  </Td>
-                  <Td>{block?.header.chainId}</Td>
-                </Tr>
-                <Tr>
-                  <Td pl={0} width={150}>
-                    <b>Tx Hash</b>
-                  </Td>
-                  <Td>{tx?.hash}</Td>
-                </Tr>
-                <Tr>
-                  <Td pl={0} width={150}>
-                    <b>Status</b>
-                  </Td>
-                  <Td>
-                    {tx?.code == 0 ? (
-                      <Tag variant="subtle" colorScheme="green">
-                        <TagLeftIcon as={FiCheck} />
-                        <TagLabel>Success</TagLabel>
-                      </Tag>
-                    ) : (
-                      <Tag variant="subtle" colorScheme="red">
-                        <TagLeftIcon as={FiX} />
-                        <TagLabel>Error</TagLabel>
-                      </Tag>
-                    )}
-                  </Td>
-                </Tr>
-                <Tr>
-                  <Td pl={0} width={150}>
-                    <b>Height</b>
-                  </Td>
-                  <Td>
+      <Box>
+        <GradientBackground title="Transaction Details">
+          <Grid templateColumns="repeat(12, 1fr)" gap={5} pb={10}>
+            <GridItem colSpan={{ base: 12, md: 8 }}>
+              <Box
+                mt={8}
+                bg={'#2A313A66'}
+                shadow={'base'}
+                borderRadius={'xl'}
+                p={4}
+              >
+                <Text
+                  size={'md'}
+                  mb={4}
+                  className="body2_medium"
+                  color={'text-500'}
+                >
+                  OVERVIEW
+                </Text>
+                <TableContainer>
+                  <Table variant="unstyled" size={'sm'}>
+                    <Tbody>
+                      <Tr borderBottom="1px solid" borderColor="gray-900">
+                        <Td pl={0} width={150} pt={3} pb={4} pr={16}>
+                          <Text className="body2_regular" color={'text-500'}>
+                            Amount
+                          </Text>
+                        </Td>
+                        <Td color={'text-50'}>
+                          {getFee(txData?.authInfo?.fee?.amount)}
+                        </Td>
+                      </Tr>
+                      <Tr borderBottom="1px solid" borderColor="gray-900">
+                        <Td pl={0} width={150} pt={3} pb={4}>
+                          <Text className="body2_regular" color={'text-500'}>
+                            Sender
+                          </Text>
+                        </Td>
+                        <Td color={'text-50'}>{sender}</Td>
+                      </Tr>
+                      <Tr borderBottom="1px solid" borderColor="gray-900">
+                        <Td pl={0} width={150} pt={3} pb={4}>
+                          <Text className="body2_regular" color={'text-500'}>
+                            Recipient
+                          </Text>
+                        </Td>
+                        <Td color={'text-50'}>{recipient}</Td>
+                      </Tr>
+                      <Tr borderBottom="1px solid" borderColor="gray-900">
+                        <Td pl={0} width={150} pt={3} pb={4}>
+                          <Text className="body2_regular" color={'text-500'}>
+                            Chain Id
+                          </Text>
+                        </Td>
+                        <Td color={'text-50'}>{block?.header.chainId}</Td>
+                      </Tr>
+                      <Tr borderBottom="1px solid" borderColor="gray-900">
+                        <Td pl={0} width={150} pt={3} pb={4}>
+                          <Text className="body2_regular" color={'text-500'}>
+                            Status
+                          </Text>
+                        </Td>
+                        <Td pt={3} pb={4} color={'text-50'}>
+                          {tx?.code == 0 ? (
+                            <Tag variant="subtle" colorScheme="green">
+                              <TagLeftIcon as={FiCheck} />
+                              <TagLabel>Success</TagLabel>
+                            </Tag>
+                          ) : (
+                            <Tag variant="subtle" colorScheme="red">
+                              <TagLeftIcon as={FiX} />
+                              <TagLabel>Error</TagLabel>
+                            </Tag>
+                          )}
+                        </Td>
+                      </Tr>
+                      <Tr borderBottom="1px solid" borderColor="gray-900">
+                        <Td pl={0} width={150} pt={3} pb={4}>
+                          <Text className="body2_regular" color={'text-500'}>
+                            Tx Hash
+                          </Text>
+                        </Td>
+                        <Td pt={3} pb={4} color={'text-50'}>
+                          {tx?.hash}
+                        </Td>
+                      </Tr>
+                      <Tr borderBottom="1px solid" borderColor="gray-900">
+                        <Td pl={0} width={150} pt={3} pb={4}>
+                          <Text className="body2_regular" color={'text-500'}>
+                            Height
+                          </Text>
+                        </Td>
+                        <Td pt={3} pb={4} color={'text-50'}>
+                          <Link
+                            as={NextLink}
+                            href={'/blocks/' + tx?.height}
+                            style={{ textDecoration: 'none' }}
+                            _focus={{ boxShadow: 'none' }}
+                          >
+                            <Text>{`#${tx?.height}`}</Text>
+                          </Link>
+                        </Td>
+                      </Tr>
+                      <Tr borderBottom="1px solid" borderColor="gray-900">
+                        <Td pl={0} width={150} pt={3} pb={4}>
+                          <Text className="body2_regular" color={'text-500'}>
+                            Time
+                          </Text>
+                        </Td>
+                        <Td pt={3} pb={4} color={'text-50'}>
+                          {block?.header.time
+                            ? `${timeFromNow(
+                                block?.header.time
+                              )} ( ${displayDate(block?.header.time)} )`
+                            : ''}
+                        </Td>
+                      </Tr>
+                      <Tr borderBottom="1px solid" borderColor="gray-900">
+                        <Td pl={0} width={150} pt={3} pb={4}>
+                          <Text className="body2_regular" color={'text-500'}>
+                            {'Gas (used / wanted)'}
+                          </Text>
+                        </Td>
+                        <Td pt={3} pb={4} color={'text-50'}>
+                          {`(${tx?.gasUsed} / ${tx?.gasWanted})`}
+                        </Td>
+                      </Tr>
+                      <Tr>
+                        {' '}
+                        {/* Last row doesn't need a border */}
+                        <Td pl={0} width={150} pt={3} pb={4}>
+                          <Text className="body2_regular" color={'text-500'}>
+                            Memo
+                          </Text>
+                        </Td>
+                        <Td pt={3} pb={4} color={'text-50'}>
+                          {txData?.body?.memo}
+                        </Td>
+                      </Tr>
+                    </Tbody>
+                  </Table>
+                </TableContainer>
+              </Box>
+            </GridItem>
+            <GridItem colSpan={{ base: 12, md: 4 }}>
+              <Box
+                mt={8}
+                // bg={useColorModeValue('light-container', 'dark-container')}
+                bg={'#2A313A66'}
+                shadow={'base'}
+                borderRadius={'xl'}
+                p={4}
+              >
+                <Text
+                  size={'md'}
+                  mb={4}
+                  className="body2_medium"
+                  color={'text-500'}
+                >
+                  BITCOIN ANCHOR
+                </Text>
+                <VStack w={'100%'} justifyContent={'start'} gap={6}>
+                  <HStack w={'full'}>
+                    <Text
+                      className="body2_regular"
+                      color={'text-500'}
+                      w={'40%'}
+                    >
+                      Block Height
+                    </Text>
+
                     <Link
                       as={NextLink}
                       href={'/blocks/' + tx?.height}
                       style={{ textDecoration: 'none' }}
                       _focus={{ boxShadow: 'none' }}
+                      w={'full'}
                     >
-                      <Text color={'cyan.400'}>{tx?.height}</Text>
+                      <Text>{`#${tx?.height}`}</Text>
                     </Link>
-                  </Td>
-                </Tr>
-                <Tr>
-                  <Td pl={0} width={150}>
-                    <b>Time</b>
-                  </Td>
-                  <Td>
-                    {block?.header.time
-                      ? `${timeFromNow(block?.header.time)} ( ${displayDate(
-                          block?.header.time
-                        )} )`
-                      : ''}
-                  </Td>
-                </Tr>
-                <Tr>
-                  <Td pl={0} width={150}>
-                    <b>Fee</b>
-                  </Td>
-                  <Td>{getFee(txData?.authInfo?.fee?.amount)}</Td>
-                </Tr>
-                <Tr>
-                  <Td pl={0} width={150}>
-                    <b>Gas (used / wanted)</b>
-                  </Td>
-                  <Td>
-                    {tx?.gasUsed ? `${tx.gasUsed} / ${tx.gasWanted}` : ''}
-                  </Td>
-                </Tr>
-                <Tr>
-                  <Td pl={0} width={150}>
-                    <b>Memo</b>
-                  </Td>
-                  <Td>{txData?.body?.memo}</Td>
-                </Tr>
-              </Tbody>
-            </Table>
-          </TableContainer>
-        </Box>
-
-        <Box
-          mt={8}
-          bg={useColorModeValue('light-container', 'dark-container')}
-          shadow={'base'}
-          borderRadius={4}
-          p={4}
-        >
-          <Heading size={'md'} mb={4}>
-            Messages
-          </Heading>
-
-          {msgs.map((msg, index) => (
-            <Card variant={'outline'} key={index} mb={8}>
-              <CardHeader>
-                <Heading size="sm">{getTypeMsg(msg.typeUrl)}</Heading>
-              </CardHeader>
-              <Divider />
-              <CardBody>
-                <TableContainer>
-                  <Table variant="unstyled" size={'sm'}>
-                    <Tbody>
-                      <Tr>
-                        <Td pl={0} width={150}>
-                          <b>typeUrl</b>
-                        </Td>
-                        <Td>{msg.typeUrl}</Td>
-                      </Tr>
-                      {Object.keys(msg.data ?? {}).map((key) => (
-                        <Tr key={key}>
-                          <Td pl={0} width={150}>
-                            <b>{key}</b>
-                          </Td>
-                          <Td>
-                            {showMsgData(
-                              msg.data ? msg.data[key as keyof {}] : ''
-                            )}
-                          </Td>
-                        </Tr>
-                      ))}
-                    </Tbody>
-                  </Table>
-                </TableContainer>
-              </CardBody>
-            </Card>
-          ))}
-        </Box>
-      </main>
+                  </HStack>
+                  <HStack w={'full'} textAlign={'left'}>
+                    <Text
+                      className="body2_regular"
+                      color={'text-500'}
+                      w={'40%'}
+                    >
+                      Block Hash
+                    </Text>
+                    <HStack gap={2} w={'full'}>
+                      <Text className="body2_regular" color={'text-50'}>
+                        {truncate(block?.id ?? '')}
+                      </Text>
+                      <CopyIcon
+                        text={block?.id ?? ''}
+                        icon={images.copyIcon.src}
+                      />
+                    </HStack>
+                  </HStack>
+                </VStack>
+              </Box>
+            </GridItem>
+          </Grid>
+        </GradientBackground>
+      </Box>
     </>
   )
 }

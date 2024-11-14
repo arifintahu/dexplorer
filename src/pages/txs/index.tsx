@@ -36,7 +36,6 @@ export default function Transactions() {
   const newBlock = useSelector(selectNewBlock)
   const [status, setStatus] = useState<StatusResponse | null>()
   const [txs, setTxs] = useState<Tx[]>([])
-
   const updateTxs = (txEvent: TxEvent) => {
     if (!txEvent.result.data) {
       return

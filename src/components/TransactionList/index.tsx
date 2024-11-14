@@ -115,7 +115,7 @@ export default function TransactionList({
                     borderColor={'gray-900'}
                     _last={{ borderBottom: 'none' }}
                   >
-                    <Td border={'none'}>
+                    <Td border={'none'} fontSize={'xs'}>
                       <Link
                         as={NextLink}
                         href={'/txs/' + transaction.hash}
@@ -129,12 +129,16 @@ export default function TransactionList({
                       {transaction.TxEvent.result.code == 0 ? (
                         <Tag variant="subtle" colorScheme="green">
                           <TagLeftIcon as={FiCheck} />
-                          <TagLabel>Success</TagLabel>
+                          <TagLabel fontSize={{ base: 'xs', md: 'sm' }}>
+                            Success
+                          </TagLabel>
                         </Tag>
                       ) : (
                         <Tag variant="subtle" colorScheme="red">
                           <TagLeftIcon as={FiX} />
-                          <TagLabel>Error</TagLabel>
+                          <TagLabel fontSize={{ base: 'xs', md: 'sm' }}>
+                            Error
+                          </TagLabel>
                         </Tag>
                       )}
                     </Td>
@@ -145,7 +149,10 @@ export default function TransactionList({
                         justifyContent={'space-between'}
                         alignItems={'center'}
                       >
-                        <Text fontSize={'xs'} color={'text-link'}>
+                        <Text
+                          fontSize={{ base: 'xs', md: 'sm' }}
+                          color={'text-link'}
+                        >
                           <Link
                             as={NextLink}
                             href={'/blocks/' + transaction.height}
@@ -158,7 +165,10 @@ export default function TransactionList({
                       </Box>
                     </Td>
                     <Td border={'none'}>
-                      <Text fontSize={'xs'} color={'text-link'}>
+                      <Text
+                        fontSize={{ base: 'xs', md: 'sm' }}
+                        color={'text-link'}
+                      >
                         {timeFromNow(transaction.Timestamp.toISOString())}
                       </Text>
                     </Td>
