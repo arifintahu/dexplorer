@@ -1,6 +1,4 @@
 import { createSlice } from '@reduxjs/toolkit'
-import { AppState } from './index'
-import { HYDRATE } from 'next-redux-wrapper'
 import { Tendermint37Client } from '@cosmjs/tendermint-rpc'
 
 // Type for our state
@@ -35,24 +33,13 @@ export const connectSlice = createSlice({
       state.tmClient = action.payload
     },
   },
-
-  // Special reducer for hydrating the state. Special case for next-redux-wrapper
-  extraReducers: {
-    [HYDRATE]: (state, action) => {
-      return {
-        ...state,
-        ...action.payload.connect,
-      }
-    },
-  },
 })
 
 export const { setRPCAddress, setConnectState, setTmClient } =
   connectSlice.actions
 
-export const selectRPCAddress = (state: AppState) => state.connect.rpcAddress
-export const selectConnectState = (state: AppState) =>
-  state.connect.connectState
-export const selectTmClient = (state: AppState) => state.connect.tmClient
+export const selectRPCAddress = (state: any) => state.connect.rpcAddress
+export const selectConnectState = (state: any) => state.connect.connectState
+export const selectTmClient = (state: any) => state.connect.tmClient
 
 export default connectSlice.reducer

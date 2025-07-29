@@ -19,8 +19,10 @@ import {
 import {
   FiHome,
   FiBox,
+  FiActivity,
   FiCompass,
   FiStar,
+  FiUsers,
   FiSliders,
   FiMenu,
   FiLogOut,
@@ -43,8 +45,10 @@ interface LinkItemProps {
 const LinkItems: Array<LinkItemProps> = [
   { name: 'Home', icon: FiHome, route: '/' },
   { name: 'Blocks', icon: FiBox, route: '/blocks' },
+  { name: 'Transactions', icon: FiActivity, route: '/transactions' },
   { name: 'Validators', icon: FiCompass, route: '/validators' },
   { name: 'Proposals', icon: FiStar, route: '/proposals' },
+  { name: 'Accounts', icon: FiUsers, route: '/accounts' },
   { name: 'Parameters', icon: FiSliders, route: '/parameters' },
 ]
 const RefLinkItems: Array<LinkItemProps> = [

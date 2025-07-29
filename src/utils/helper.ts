@@ -10,11 +10,26 @@ export const timeFromNow = (date: string): string => {
   return dayjs(date).fromNow()
 }
 
-export const trimHash = (txHash: Uint8Array): string => {
-  const hash = toHex(txHash).toUpperCase()
-  const first = hash.slice(0, 5)
-  const last = hash.slice(hash.length - 5, hash.length)
-  return first + '...' + last
+export function trimHash(txHash: Uint8Array): string
+export function trimHash(txHash: string, length?: number): string
+export function trimHash(txHash: Uint8Array | string, length?: number): string {
+  let hash: string
+
+  if (txHash instanceof Uint8Array) {
+    hash = toHex(txHash).toUpperCase()
+    const first = hash.slice(0, 5)
+    const last = hash.slice(hash.length - 5, hash.length)
+    return first + '...' + last
+  } else {
+    hash = txHash
+    const trimLength = length || 8
+    if (hash.length <= trimLength * 2) {
+      return hash
+    }
+    const first = hash.slice(0, trimLength)
+    const last = hash.slice(hash.length - trimLength, hash.length)
+    return first + '...' + last
+  }
 }
 
 export const displayDate = (date: string): string => {
