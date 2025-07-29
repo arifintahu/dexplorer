@@ -31,15 +31,7 @@ function AppContent() {
     (state: RootState) => state.connect.connectState
   )
 
-  // Check for existing connection on app start
-  React.useEffect(() => {
-    const savedRpcAddress = localStorage.getItem('rpc_address')
-    if (savedRpcAddress) {
-      // Auto-reconnect logic could be added here
-      // For now, just set the RPC address but don't auto-connect
-      // Users will need to manually connect
-    }
-  }, [dispatch])
+  // Auto-reconnection is handled in the Connect component
 
   if (!isConnected) {
     return <Connect />
