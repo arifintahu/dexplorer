@@ -411,7 +411,13 @@ const TopNavigation: React.FC<TopNavigationProps> = ({ onMenuClick }) => {
                 variant="ghost"
                 size="sm"
                 title="Change RPC Connection"
-                className="text-sm"
+                className="text-sm focus:outline-none focus:ring-0 active:outline-none border-0 focus:border-0 active:border-0"
+                style={{
+                  color: colors.text.primary,
+                  outline: 'none',
+                  border: 'none',
+                  boxShadow: 'none',
+                }}
               >
                 <FiRefreshCcw className="h-4 w-4" />
                 <span className="hidden md:inline ml-1">Change</span>
@@ -445,6 +451,13 @@ const TopNavigation: React.FC<TopNavigationProps> = ({ onMenuClick }) => {
               title={`Switch to ${
                 colorScheme === 'dark' ? 'light' : 'dark'
               } mode`}
+              className="focus:outline-none focus:ring-0 active:outline-none border-0 focus:border-0 active:border-0"
+              style={{
+                outline: 'none',
+                border: 'none',
+                boxShadow: 'none',
+                color: colors.text.primary,
+              }}
             >
               {colorScheme === 'dark' ? (
                 <FiSun className="h-4 w-4" />
