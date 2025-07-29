@@ -321,7 +321,13 @@ const TopNavigation: React.FC<TopNavigationProps> = ({ onMenuClick }) => {
               onClick={onMenuClick}
               variant="ghost"
               size="sm"
-              className="lg:hidden"
+              className="lg:hidden focus:outline-none focus:ring-0 active:outline-none border-0 focus:border-0 active:border-0"
+              style={{
+                color: colors.text.primary,
+                outline: 'none',
+                border: 'none',
+                boxShadow: 'none',
+              }}
             >
               <FiMenu className="h-5 w-5" />
             </Button>
