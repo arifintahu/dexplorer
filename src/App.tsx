@@ -1,6 +1,6 @@
 import React from 'react'
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
-import { Provider, useSelector, useDispatch } from 'react-redux'
+import { Provider, useSelector } from 'react-redux'
 import { ThemeProvider } from '@/theme/ThemeProvider'
 import { store, RootState } from '@/store'
 import Layout from '@/components/Layout/Layout'
@@ -12,21 +12,12 @@ import Transactions from '@/pages/Transactions'
 import Proposals from '@/pages/Proposals'
 import Accounts from '@/pages/Accounts'
 import Parameters from '@/pages/Parameters'
-
-// Placeholder component for detail pages
-const ComingSoon: React.FC<{ title: string }> = ({ title }) => {
-  return (
-    <div className="flex items-center justify-center min-h-[400px]">
-      <div className="text-center">
-        <h2 className="text-2xl font-bold mb-2">{title}</h2>
-        <p className="text-gray-600">Coming Soon...</p>
-      </div>
-    </div>
-  )
-}
+// Import detail page components
+import BlockDetail from '@/pages/BlockDetail'
+import TransactionDetail from '@/pages/TransactionDetail'
+import AccountDetail from '@/pages/AccountDetail'
 
 function AppContent() {
-  const dispatch = useDispatch()
   const isConnected = useSelector(
     (state: RootState) => state.connect.connectState
   )
@@ -42,30 +33,13 @@ function AppContent() {
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/blocks" element={<Blocks />} />
-        <Route
-          path="/blocks/:height"
-          element={<ComingSoon title="Block Details" />}
-        />
+        <Route path="/blocks/:height" element={<BlockDetail />} />
         <Route path="/validators" element={<Validators />} />
-        <Route
-          path="/validators/:address"
-          element={<ComingSoon title="Validator Details" />}
-        />
         <Route path="/proposals" element={<Proposals />} />
-        <Route
-          path="/proposals/:id"
-          element={<ComingSoon title="Proposal Details" />}
-        />
         <Route path="/txs" element={<Transactions />} />
-        <Route
-          path="/txs/:hash"
-          element={<ComingSoon title="Transaction Details" />}
-        />
+        <Route path="/txs/:hash" element={<TransactionDetail />} />
         <Route path="/accounts" element={<Accounts />} />
-        <Route
-          path="/accounts/:address"
-          element={<ComingSoon title="Account Details" />}
-        />
+        <Route path="/accounts/:address" element={<AccountDetail />} />
         <Route path="/parameters" element={<Parameters />} />
         <Route path="/connect" element={<Connect />} />
       </Routes>

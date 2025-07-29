@@ -9,7 +9,7 @@ import {
   FiCopy,
   FiExternalLink,
 } from 'react-icons/fi'
-import { useTheme } from '@/hooks/useTheme'
+import { useTheme } from '@/theme/ThemeProvider'
 import { trimHash } from '@/utils/helper'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/Button'

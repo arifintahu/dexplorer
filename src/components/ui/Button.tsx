@@ -1,5 +1,5 @@
 import React from 'react'
-import { useTheme } from '@/hooks/useTheme'
+import { useTheme } from '@/theme/ThemeProvider'
 import { cn } from '@/lib/utils'
 
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {

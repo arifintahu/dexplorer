@@ -11,7 +11,7 @@ import {
   FiXCircle,
   FiAlertCircle,
 } from 'react-icons/fi'
-import { useTheme } from '@/hooks/useTheme'
+import { useTheme } from '@/theme/ThemeProvider'
 import { selectTmClient } from '@/store/connectSlice'
 import { queryProposals } from '@/rpc/abci'
 import { getTypeMsg, displayDate } from '@/utils/helper'

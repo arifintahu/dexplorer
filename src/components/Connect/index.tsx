@@ -1,7 +1,7 @@
 import React, { FormEvent, ChangeEvent, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { FiZap, FiCheck, FiLoader } from 'react-icons/fi'
-import { useTheme } from '@/hooks/useTheme'
+import { useTheme } from '@/theme/ThemeProvider'
 import { Button } from '@/components/ui/Button'
 import {
   setConnectState,

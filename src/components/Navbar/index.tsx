@@ -18,7 +18,7 @@ import { StatusResponse } from '@cosmjs/tendermint-rpc'
 import { connectWebsocketClient, validateConnection } from '@/rpc/client'
 import { LS_RPC_ADDRESS, LS_RPC_ADDRESS_LIST } from '@/utils/constant'
 import { removeTrailingSlash } from '@/utils/helper'
-import { useTheme } from '@/hooks/useTheme'
+import { useTheme } from '@/theme/ThemeProvider'
 import { Button } from '@/components/ui/Button'
 import { toast } from 'sonner'
 

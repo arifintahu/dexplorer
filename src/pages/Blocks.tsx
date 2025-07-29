@@ -18,7 +18,7 @@ import {
 import { toHex } from '@cosmjs/encoding'
 import { TxBody } from 'cosmjs-types/cosmos/tx/v1beta1/tx'
 import { timeFromNow, trimHash, getTypeMsg } from '@/utils/helper'
-import { useTheme } from '@/hooks/useTheme'
+import { useTheme } from '@/theme/ThemeProvider'
 import { Button } from '@/components/ui/Button'
 
 const MAX_ROWS = 50

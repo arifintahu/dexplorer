@@ -10,7 +10,7 @@ import {
   FiClock,
   FiUser,
 } from 'react-icons/fi'
-import { useTheme } from '@/hooks/useTheme'
+import { useTheme } from '@/theme/ThemeProvider'
 import { trimHash, timeFromNow, getTypeMsg } from '@/utils/helper'
 import { Button } from '@/components/ui/Button'
 import { RootState } from '@/store'
