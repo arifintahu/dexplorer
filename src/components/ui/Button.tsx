@@ -25,8 +25,12 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
   ) => {
     const { colors } = useTheme()
 
+    // Check if className contains display utilities to avoid conflicts
+    const hasDisplayClass =
+      className && /\b(hidden|block|inline|flex|grid)\b/.test(className)
+
     const baseStyles = {
-      display: 'inline-flex',
+      ...(hasDisplayClass ? {} : { display: 'inline-flex' }),
       alignItems: 'center',
       justifyContent: 'center',
       gap: '0.5rem',

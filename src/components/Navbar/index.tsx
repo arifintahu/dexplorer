@@ -1,56 +1,37 @@
 import { ChangeEvent, FormEvent, useEffect, useState } from 'react'
-import { useRouter } from 'next/router'
+import { useNavigate } from 'react-router-dom'
 import { useSelector } from 'react-redux'
 import { selectTmClient, selectRPCAddress } from '@/store/connectSlice'
-import {
-  Box,
-  Heading,
-  Text,
-  HStack,
-  Icon,
-  IconButton,
-  Input,
-  Skeleton,
-  useColorMode,
-  Button,
-  useColorModeValue,
-  useDisclosure,
-  useToast,
-  Modal,
-  ModalOverlay,
-  ModalContent,
-  ModalHeader,
-  ModalCloseButton,
-  ModalBody,
-  ModalFooter,
-  Flex,
-  Stack,
-  FormControl,
-} from '@chakra-ui/react'
 import {
   FiRadio,
   FiSearch,
   FiRefreshCcw,
   FiZap,
   FiTrash2,
+  FiMoon,
+  FiSun,
+  FiCheck,
+  FiX,
 } from 'react-icons/fi'
 import { selectNewBlock } from '@/store/streamSlice'
-import { CheckIcon, MoonIcon, SunIcon } from '@chakra-ui/icons'
 import { StatusResponse } from '@cosmjs/tendermint-rpc'
 import { connectWebsocketClient, validateConnection } from '@/rpc/client'
 import { LS_RPC_ADDRESS, LS_RPC_ADDRESS_LIST } from '@/utils/constant'
 import { removeTrailingSlash } from '@/utils/helper'
+import { useTheme } from '@/hooks/useTheme'
+import { Button } from '@/components/ui/Button'
+import { toast } from 'sonner'
 
 const heightRegex = /^\d+$/
 const txhashRegex = /^[A-Z\d]{64}$/
 const addrRegex = /^[a-z\d]+1[a-z\d]{38,58}$/
 
 export default function Navbar() {
-  const router = useRouter()
+  const navigate = useNavigate()
   const tmClient = useSelector(selectTmClient)
   const address = useSelector(selectRPCAddress)
   const newBlock = useSelector(selectNewBlock)
-  const toast = useToast()
+  const { colors, isDark, toggleTheme } = useTheme()
   const [status, setStatus] = useState<StatusResponse | null>()
 
   const [state, setState] = useState<'initial' | 'submitting' | 'success'>(
@@ -59,13 +40,8 @@ export default function Navbar() {
   const [newAddress, setNewAddress] = useState('')
   const [error, setError] = useState(false)
 
-  const { colorMode, toggleColorMode } = useColorMode()
-  const { isOpen, onOpen, onClose } = useDisclosure()
-  const {
-    isOpen: isOpenRPCs,
-    onOpen: onOpenRPCs,
-    onClose: onCloseRPCs,
-  } = useDisclosure()
+  const [isSearchOpen, setIsSearchOpen] = useState(false)
+  const [isRPCModalOpen, setIsRPCModalOpen] = useState(false)
 
   const [inputSearch, setInputSearch] = useState('')
   const [isLoadedSkeleton, setIsLoadedSkeleton] = useState(false)
@@ -89,30 +65,22 @@ export default function Navbar() {
 
   const handleSearch = () => {
     if (!inputSearch) {
-      toast({
-        title: 'Please enter a value!',
-        status: 'warning',
-        isClosable: true,
-      })
+      toast.warning('Please enter a value!')
       return
     }
 
     if (heightRegex.test(inputSearch)) {
-      router.push('/blocks/' + inputSearch)
+      navigate('/blocks/' + inputSearch)
     } else if (txhashRegex.test(inputSearch)) {
-      router.push('/txs/' + inputSearch)
+      navigate('/txs/' + inputSearch)
     } else if (addrRegex.test(inputSearch)) {
-      router.push('/accounts/' + inputSearch)
+      navigate('/accounts/' + inputSearch)
     } else {
-      toast({
-        title: 'Invalid Height, Transaction or Account Address!',
-        status: 'error',
-        isClosable: true,
-      })
+      toast.error('Invalid Height, Transaction or Account Address!')
       return
     }
     setTimeout(() => {
-      onClose()
+      setIsSearchOpen(false)
     }, 500)
   }
 
@@ -121,11 +89,7 @@ export default function Navbar() {
     const rpcAddresses = getRPCList()
     const addr = removeTrailingSlash(newAddress)
     if (rpcAddresses.includes(addr)) {
-      toast({
-        title: 'This RPC Address is already in the list!',
-        status: 'warning',
-        isClosable: true,
-      })
+      toast.warning('This RPC Address is already in the list!')
       return
     }
     await connectClient(addr)
@@ -185,7 +149,7 @@ export default function Navbar() {
     setState('initial')
     setNewAddress('')
     setError(false)
-    onOpenRPCs()
+    setIsRPCModalOpen(true)
   }
 
   const selectChain = (rpcAddress: string) => {
@@ -204,226 +168,258 @@ export default function Navbar() {
 
   return (
     <>
-      <Box
-        bg={useColorModeValue('light-container', 'dark-container')}
-        w="100%"
-        p={4}
-        shadow={'base'}
-        borderRadius={4}
-        marginBottom={4}
-        display={'flex'}
-        justifyContent={'space-between'}
+      <div
+        className="w-full p-4 shadow-md rounded-lg mb-4 flex justify-between items-center"
+        style={{ backgroundColor: colors.surface }}
       >
-        <HStack>
-          <Icon mr="4" fontSize="32" color={'green.600'} as={FiRadio} />
-          <Flex
-            flexDirection="row"
-            gap="4"
-            border="1px"
-            p="2"
-            borderRadius="md"
-            borderColor={useColorModeValue('gray.500', 'gray.100')}
+        <div className="flex items-center space-x-4">
+          <FiRadio className="text-3xl text-green-600" />
+          <div
+            className="flex items-center space-x-4 border rounded-md p-2"
+            style={{ borderColor: colors.border.primary }}
           >
-            <Box>
-              <Skeleton isLoaded={isLoadedSkeleton}>
-                <Heading size="xs">
-                  {newBlock?.header.chainId
-                    ? newBlock?.header.chainId
-                    : status?.nodeInfo.network}
-                </Heading>
-              </Skeleton>
-              <Skeleton isLoaded={isLoadedSkeleton}>
-                <Text fontSize="sm">{address}</Text>
-              </Skeleton>
-            </Box>
-            <IconButton
-              variant="solid"
-              aria-label="Change RPC"
-              size="md"
-              fontSize="20"
-              icon={<FiRefreshCcw />}
+            <div>
+              {isLoadedSkeleton ? (
+                <>
+                  <h3
+                    className="text-sm font-semibold"
+                    style={{ color: colors.text.primary }}
+                  >
+                    {newBlock?.header.chainId
+                      ? newBlock?.header.chainId
+                      : status?.nodeInfo.network}
+                  </h3>
+                  <p
+                    className="text-xs"
+                    style={{ color: colors.text.secondary }}
+                  >
+                    {address}
+                  </p>
+                </>
+              ) : (
+                <>
+                  <div
+                    className="h-4 w-24 rounded animate-pulse mb-1"
+                    style={{ backgroundColor: colors.border.primary }}
+                  ></div>
+                  <div
+                    className="h-3 w-32 rounded animate-pulse"
+                    style={{ backgroundColor: colors.border.primary }}
+                  ></div>
+                </>
+              )}
+            </div>
+            <button
               onClick={onChangeRPC}
-            />
-          </Flex>
-        </HStack>
-        <HStack>
-          <IconButton
-            variant="ghost"
+              className="p-2 rounded-md hover:opacity-80 transition-opacity"
+              style={{ backgroundColor: colors.primary, color: 'white' }}
+              aria-label="Change RPC"
+            >
+              <FiRefreshCcw className="text-lg" />
+            </button>
+          </div>
+        </div>
+        <div className="flex items-center space-x-2">
+          <button
+            onClick={() => setIsSearchOpen(true)}
+            className="p-2 rounded-md hover:opacity-80 transition-opacity"
+            style={{ color: colors.text.primary }}
             aria-label="Search"
-            size="md"
-            fontSize="20"
-            icon={<FiSearch />}
-            onClick={onOpen}
-          />
-          <IconButton
-            variant="ghost"
-            aria-label="Color mode"
-            size="md"
-            fontSize="20"
-            icon={colorMode === 'light' ? <MoonIcon /> : <SunIcon />}
-            onClick={toggleColorMode}
-          />
-        </HStack>
-      </Box>
-      <Modal isOpen={isOpen} onClose={onClose}>
-        <ModalOverlay />
-        <ModalContent>
-          <ModalHeader>Search</ModalHeader>
-          <ModalCloseButton />
-          <ModalBody>
-            <Input
-              width={400}
-              type={'text'}
-              borderColor={useColorModeValue('light-theme', 'dark-theme')}
-              placeholder="Height/Transaction/Account Address"
-              onChange={handleInputSearch}
-            />
-          </ModalBody>
-
-          <ModalFooter>
+          >
+            <FiSearch className="text-lg" />
+          </button>
+          <button
+            onClick={toggleTheme}
+            className="p-2 rounded-md hover:opacity-80 transition-opacity"
+            style={{ color: colors.text.primary }}
+            aria-label="Toggle theme"
+          >
+            {isDark ? (
+              <FiSun className="text-lg" />
+            ) : (
+              <FiMoon className="text-lg" />
+            )}
+          </button>
+        </div>
+      </div>
+      {/* Search Modal */}
+      {isSearchOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div
+            className="bg-white rounded-lg p-6 w-full max-w-md mx-4"
+            style={{ backgroundColor: colors.surface }}
+          >
+            <div className="flex justify-between items-center mb-4">
+              <h2
+                className="text-lg font-semibold"
+                style={{ color: colors.text.primary }}
+              >
+                Search
+              </h2>
+              <button
+                onClick={() => setIsSearchOpen(false)}
+                className="p-1 rounded-md hover:opacity-80 transition-opacity"
+                style={{ color: colors.text.secondary }}
+              >
+                <FiX className="text-lg" />
+              </button>
+            </div>
+            <div className="mb-4">
+              <input
+                type="text"
+                placeholder="Height/Transaction/Account Address"
+                onChange={handleInputSearch}
+                className="w-full px-4 py-3 rounded-lg border focus:outline-none focus:ring-2 focus:ring-opacity-50"
+                style={{
+                  backgroundColor: colors.background,
+                  borderColor: colors.border.primary,
+                  color: colors.text.primary,
+                }}
+              />
+            </div>
             <Button
-              bg={useColorModeValue('light-theme', 'dark-theme')}
-              _hover={{
-                opacity: 0.8,
-              }}
-              color="white"
-              w="full"
-              textTransform="uppercase"
               onClick={handleSearch}
+              variant="primary"
+              size="lg"
+              className="w-full"
             >
-              Confirm
+              CONFIRM
             </Button>
-          </ModalFooter>
-        </ModalContent>
-      </Modal>
+          </div>
+        </div>
+      )}
 
-      <Modal isOpen={isOpenRPCs} onClose={onCloseRPCs}>
-        <ModalOverlay />
-        <ModalContent>
-          <ModalHeader>Change Connection</ModalHeader>
-          <ModalCloseButton />
-          <ModalBody>
-            <Stack
-              direction={{ base: 'column', md: 'row' }}
-              as={'form'}
-              spacing={'12px'}
-              onSubmit={submitForm}
-            >
-              <FormControl>
-                <Input
-                  variant={'solid'}
-                  borderWidth={1}
-                  color={'gray.800'}
-                  _placeholder={{
-                    color: 'gray.400',
-                  }}
-                  borderColor={useColorModeValue('gray.300', 'gray.700')}
-                  id={'newAddress'}
-                  type={'url'}
+      {/* RPC Modal */}
+      {isRPCModalOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div
+            className="bg-white rounded-lg p-6 w-full max-w-2xl mx-4 max-h-[80vh] overflow-y-auto"
+            style={{ backgroundColor: colors.surface }}
+          >
+            <div className="flex justify-between items-center mb-6">
+              <h2
+                className="text-xl font-semibold"
+                style={{ color: colors.text.primary }}
+              >
+                Change Connection
+              </h2>
+              <button
+                onClick={() => setIsRPCModalOpen(false)}
+                className="p-1 rounded-md hover:opacity-80 transition-opacity"
+                style={{ color: colors.text.secondary }}
+              >
+                <FiX className="text-lg" />
+              </button>
+            </div>
+
+            {/* Add new RPC form */}
+            <form onSubmit={submitForm} className="mb-6">
+              <div className="flex gap-3">
+                <input
+                  type="url"
                   required
-                  placeholder={'Connect to new RPC Address'}
-                  aria-label={'Connect to new RPC Address'}
+                  placeholder="Connect to new RPC Address"
                   value={newAddress}
                   disabled={state !== 'initial'}
                   onChange={(e: ChangeEvent<HTMLInputElement>) =>
                     setNewAddress(e.target.value)
                   }
-                />
-              </FormControl>
-              <FormControl w={{ base: '100%', md: '40%' }}>
-                <Button
-                  backgroundColor={useColorModeValue(
-                    'light-theme',
-                    'dark-theme'
-                  )}
-                  color={'white'}
-                  _hover={{
-                    backgroundColor: useColorModeValue(
-                      'dark-theme',
-                      'light-theme'
-                    ),
+                  className="flex-1 px-4 py-3 rounded-lg border focus:outline-none focus:ring-2 focus:ring-opacity-50 disabled:opacity-50"
+                  style={{
+                    backgroundColor: colors.background,
+                    borderColor: colors.border.primary,
+                    color: colors.text.primary,
                   }}
-                  isLoading={state === 'submitting'}
-                  w="100%"
+                />
+                <Button
                   type={state === 'success' ? 'button' : 'submit'}
+                  disabled={state !== 'initial'}
+                  variant={state === 'success' ? 'success' : 'primary'}
+                  size="lg"
+                  loading={state === 'submitting'}
                 >
-                  {state === 'success' ? <CheckIcon /> : 'Connect'}
+                  {state === 'success' && <FiCheck />}
+                  {state === 'initial' && 'Connect'}
+                  {state === 'submitting' && 'Connecting...'}
+                  {state === 'success' && 'Connected'}
                 </Button>
-              </FormControl>
-            </Stack>
-            <Text textAlign={'center'} color={error ? 'red.500' : 'gray.500'}>
-              {error ? 'Oh no, cannot connect to websocket client! 😢' : '‎'}
-            </Text>
-            <Text m={2} textAlign={'center'} fontWeight="semibold">
-              Available RPCs
-            </Text>
-            <Stack spacing={4} mb="4">
-              {rpcList.map((rpc) => (
-                <Flex
-                  w="full"
-                  border="1px"
-                  borderRadius="md"
-                  borderColor={useColorModeValue('gray.500', 'gray.100')}
-                  p={2}
-                  justifyContent="space-between"
-                  alignItems="center"
-                  key={rpc}
+              </div>
+              {error && (
+                <p
+                  className="text-sm mt-2 text-center"
+                  style={{ color: colors.status.error }}
                 >
-                  <Box>
-                    <Text fontSize="sm" wordBreak="break-all">
-                      {rpc}
-                    </Text>
-                  </Box>
-                  {rpc !== address ? (
-                    <Stack direction="row">
-                      <IconButton
-                        onClick={() => selectChain(rpc)}
-                        backgroundColor={useColorModeValue(
-                          'light-theme',
-                          'dark-theme'
-                        )}
-                        color={'white'}
-                        _hover={{
-                          backgroundColor: useColorModeValue(
-                            'dark-theme',
-                            'light-theme'
-                          ),
-                        }}
-                        aria-label="Connect RPC"
-                        size="sm"
-                        fontSize="20"
-                        icon={<FiZap />}
-                      />
-                      <IconButton
-                        onClick={() => removeChain(rpc)}
-                        backgroundColor={useColorModeValue(
-                          'red.500',
-                          'red.400'
-                        )}
-                        color={'white'}
-                        _hover={{
-                          backgroundColor: useColorModeValue(
-                            'red.400',
-                            'red.500'
-                          ),
-                        }}
-                        aria-label="Remove RPC"
-                        size="sm"
-                        fontSize="20"
-                        icon={<FiTrash2 />}
-                      />
-                    </Stack>
-                  ) : (
-                    <Text fontSize="sm" fontWeight="semibold">
-                      Connected
-                    </Text>
-                  )}
-                </Flex>
-              ))}
-            </Stack>
-          </ModalBody>
-        </ModalContent>
-      </Modal>
+                  Oh no, cannot connect to websocket client! 😢
+                </p>
+              )}
+            </form>
+
+            {/* Available RPCs */}
+            <div>
+              <h3
+                className="text-center font-semibold mb-4"
+                style={{ color: colors.text.primary }}
+              >
+                Available RPCs
+              </h3>
+              <div className="space-y-3">
+                {rpcList.map((rpc) => (
+                  <div
+                    key={rpc}
+                    className="flex items-center justify-between p-3 border rounded-lg"
+                    style={{
+                      borderColor: colors.border.primary,
+                      backgroundColor: colors.background,
+                    }}
+                  >
+                    <div className="flex-1 min-w-0">
+                      <p
+                        className="text-sm break-all"
+                        style={{ color: colors.text.primary }}
+                      >
+                        {rpc}
+                      </p>
+                    </div>
+                    {rpc !== address ? (
+                      <div className="flex space-x-2 ml-3">
+                        <button
+                          onClick={() => selectChain(rpc)}
+                          className="p-2 rounded-md hover:opacity-80 transition-opacity"
+                          style={{
+                            backgroundColor: colors.primary,
+                            color: 'white',
+                          }}
+                          aria-label="Connect RPC"
+                        >
+                          <FiZap className="text-sm" />
+                        </button>
+                        <button
+                          onClick={() => removeChain(rpc)}
+                          className="p-2 rounded-md hover:opacity-80 transition-opacity"
+                          style={{
+                            backgroundColor: colors.status.error,
+                            color: 'white',
+                          }}
+                          aria-label="Remove RPC"
+                        >
+                          <FiTrash2 className="text-sm" />
+                        </button>
+                      </div>
+                    ) : (
+                      <span
+                        className="text-sm font-semibold ml-3"
+                        style={{ color: colors.status.success }}
+                      >
+                        Connected
+                      </span>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   )
 }

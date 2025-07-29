@@ -1,11 +1,14 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect, ChangeEvent, FormEvent } from 'react'
 import { useTheme } from '@/theme/ThemeProvider'
 import { useSelector, useDispatch } from 'react-redux'
 import { RootState } from '@/store'
+import { useNavigate } from 'react-router-dom'
 import {
   setConnectState,
   setTmClient,
   setRPCAddress,
+  selectTmClient,
+  selectRPCAddress,
 } from '@/store/connectSlice'
 import {
   setNewBlock,
@@ -14,6 +17,7 @@ import {
   setSubsTxEvent,
   selectSubsNewBlock,
   selectSubsTxEvent,
+  selectNewBlock,
 } from '@/store/streamSlice'
 import {
   FiSearch,
@@ -23,8 +27,19 @@ import {
   FiWifi,
   FiWifiOff,
   FiLogOut,
+  FiRefreshCcw,
+  FiZap,
+  FiTrash2,
+  FiCheck,
+  FiX,
+  FiRadio,
 } from 'react-icons/fi'
 import { Button } from '@/components/ui/Button'
+import { connectWebsocketClient, validateConnection } from '@/rpc/client'
+import { LS_RPC_ADDRESS, LS_RPC_ADDRESS_LIST } from '@/utils/constant'
+import { removeTrailingSlash } from '@/utils/helper'
+import { toast } from 'sonner'
+import { StatusResponse } from '@cosmjs/tendermint-rpc'
 
 interface TopNavigationProps {
   onMenuClick?: () => void
@@ -33,18 +48,144 @@ interface TopNavigationProps {
 const TopNavigation: React.FC<TopNavigationProps> = ({ onMenuClick }) => {
   const { colors, colorScheme, toggleColorScheme } = useTheme()
   const dispatch = useDispatch()
+  const navigate = useNavigate()
   const { connectState } = useSelector((state: RootState) => state.connect)
+  const tmClient = useSelector(selectTmClient)
+  const address = useSelector(selectRPCAddress)
+  const newBlock = useSelector(selectNewBlock)
   const subsNewBlock = useSelector(selectSubsNewBlock)
   const subsTxEvent = useSelector(selectSubsTxEvent)
   const isConnected = connectState
   const [searchQuery, setSearchQuery] = useState('')
 
+  // RPC Management State
+  const [status, setStatus] = useState<StatusResponse | null>()
+  const [state, setState] = useState<'initial' | 'submitting' | 'success'>(
+    'initial'
+  )
+  const [newAddress, setNewAddress] = useState('')
+  const [error, setError] = useState(false)
+  const [isSearchOpen, setIsSearchOpen] = useState(false)
+  const [isRPCModalOpen, setIsRPCModalOpen] = useState(false)
+  const [rpcList, setRPCList] = useState<string[]>([])
+  const [isLoadedSkeleton, setIsLoadedSkeleton] = useState(false)
+
+  // Search patterns
+  const heightRegex = /^\d+$/
+  const txhashRegex = /^[A-Z\d]{64}$/
+  const addrRegex = /^[a-z\d]+1[a-z\d]{38,58}$/
+
+  // Load RPC list from localStorage on component mount
+  useEffect(() => {
+    const savedRPCList = localStorage.getItem(LS_RPC_ADDRESS_LIST)
+    if (savedRPCList) {
+      try {
+        setRPCList(JSON.parse(savedRPCList))
+      } catch (error) {
+        console.error('Error parsing RPC list from localStorage:', error)
+      }
+    }
+  }, [])
+
+  // Update skeleton loading state
+  useEffect(() => {
+    if (newBlock) {
+      setIsLoadedSkeleton(true)
+    }
+  }, [newBlock])
+
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault()
-    if (searchQuery.trim()) {
-      // Handle search logic here
-      console.log('Searching for:', searchQuery)
+    if (!searchQuery.trim()) return
+
+    if (heightRegex.test(searchQuery)) {
+      navigate(`/blocks/${searchQuery}`)
+    } else if (txhashRegex.test(searchQuery)) {
+      navigate(`/txs/${searchQuery}`)
+    } else if (addrRegex.test(searchQuery)) {
+      navigate(`/account/${searchQuery}`)
+    } else {
+      toast.error('Invalid search query format')
     }
+    setSearchQuery('')
+    setIsSearchOpen(false)
+  }
+
+  const connectClient = async (rpcAddress: string) => {
+    setState('submitting')
+    setError(false)
+
+    try {
+      const cleanAddress = removeTrailingSlash(rpcAddress)
+      const isValid = await validateConnection(cleanAddress)
+
+      if (!isValid) {
+        setError(true)
+        setState('initial')
+        toast.error('Failed to connect to RPC endpoint')
+        return
+      }
+
+      const tmClient = await connectWebsocketClient(cleanAddress)
+
+      if (tmClient) {
+        const status = await tmClient.status()
+        dispatch(setTmClient(tmClient))
+        dispatch(setRPCAddress(cleanAddress))
+        dispatch(setConnectState(true))
+        setStatus(status)
+        setState('success')
+
+        // Save to localStorage
+        localStorage.setItem(LS_RPC_ADDRESS, cleanAddress)
+
+        // Update RPC list
+        const currentList = JSON.parse(
+          localStorage.getItem(LS_RPC_ADDRESS_LIST) || '[]'
+        )
+        if (!currentList.includes(cleanAddress)) {
+          const updatedList = [cleanAddress, ...currentList]
+          localStorage.setItem(LS_RPC_ADDRESS_LIST, JSON.stringify(updatedList))
+          setRPCList(updatedList)
+        }
+
+        toast.success('Successfully connected to RPC endpoint')
+        setIsRPCModalOpen(false)
+        setNewAddress('')
+      } else {
+        setError(true)
+        setState('initial')
+        toast.error('Failed to establish connection')
+      }
+    } catch (error) {
+      console.error('Connection error:', error)
+      setError(true)
+      setState('initial')
+      toast.error('Connection failed')
+    }
+  }
+
+  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault()
+    if (newAddress.trim()) {
+      connectClient(newAddress.trim())
+    }
+  }
+
+  const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
+    setNewAddress(e.target.value)
+    if (error) setError(false)
+  }
+
+  const selectChain = (rpcAddress: string) => {
+    connectClient(rpcAddress)
+  }
+
+  const removeChain = (rpcAddress: string) => {
+    const updatedList = rpcList.filter((addr) => addr !== rpcAddress)
+    setRPCList(updatedList)
+    localStorage.setItem(LS_RPC_ADDRESS_LIST, JSON.stringify(updatedList))
+    toast.success('RPC address removed')
   }
 
   const handleDisconnect = () => {
@@ -68,132 +209,276 @@ const TopNavigation: React.FC<TopNavigationProps> = ({ onMenuClick }) => {
     dispatch(setRPCAddress(''))
     localStorage.removeItem('rpc_address')
     localStorage.removeItem('rpc_address_list')
+    toast.success('Disconnected from RPC endpoint')
   }
 
   return (
-    <header
-      className="sticky top-0 z-30 border-b backdrop-blur-sm bg-opacity-80"
-      style={{
-        backgroundColor: `${colors.surface}cc`,
-        borderColor: colors.border.primary,
-      }}
-    >
-      <div className="flex items-center justify-between px-4 lg:px-6 py-4">
-        {/* Left Section - Mobile Menu & Search */}
-        <div className="flex items-center gap-4 flex-1">
-          {/* Mobile Menu Button */}
-          <Button
-            onClick={onMenuClick}
-            variant="ghost"
-            size="sm"
-            className="lg:hidden"
-          >
-            <FiMenu className="h-5 w-5" />
-          </Button>
-
-          {/* Search Bar */}
-          <form onSubmit={handleSearch} className="flex-1 max-w-md">
-            <div className="relative">
-              <FiSearch
-                className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4"
-                style={{ color: colors.text.tertiary }}
-              />
-              <input
-                type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search transactions, blocks, addresses..."
-                className="w-full pl-10 pr-4 py-2.5 rounded-lg border transition-all duration-200 focus:outline-none focus:ring-2 text-sm"
-                style={
-                  {
-                    backgroundColor: colors.background,
-                    borderColor: colors.border.secondary,
-                    color: colors.text.primary,
-                    '--tw-ring-color': `${colors.primary}40`,
-                  } as React.CSSProperties
-                }
-                onFocus={(e) => {
-                  e.currentTarget.style.borderColor = colors.primary
-                }}
-                onBlur={(e) => {
-                  e.currentTarget.style.borderColor = colors.border.secondary
-                }}
-              />
-            </div>
-          </form>
-        </div>
-
-        {/* Right Section - Connection Status & Theme Toggle */}
-        <div className="flex items-center gap-3">
-          {/* Connection Status */}
-          <div className="flex items-center gap-2">
-            <div
-              className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200"
-              style={{
-                backgroundColor: isConnected
-                  ? `${colors.status.success}15`
-                  : `${colors.status.error}15`,
-                color: isConnected
-                  ? colors.status.success
-                  : colors.status.error,
-                border: `1px solid ${
-                  isConnected
-                    ? `${colors.status.success}30`
-                    : `${colors.status.error}30`
-                }`,
-              }}
+    <>
+      <header
+        className="sticky top-0 z-30 border-b backdrop-blur-sm bg-opacity-80"
+        style={{
+          backgroundColor: `${colors.surface}cc`,
+          borderColor: colors.border.primary,
+        }}
+      >
+        <div className="flex items-center justify-between px-4 lg:px-6 py-4">
+          {/* Left Section - Mobile Menu & Search */}
+          <div className="flex items-center gap-4 flex-1">
+            {/* Mobile Menu Button */}
+            <Button
+              onClick={onMenuClick}
+              variant="ghost"
+              size="sm"
+              className="lg:hidden"
             >
-              {isConnected ? (
-                <>
-                  <div className="relative">
-                    <FiWifi className="h-4 w-4" />
-                    <div
-                      className="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full animate-pulse"
-                      style={{ backgroundColor: colors.status.success }}
-                    ></div>
-                  </div>
-                  <span className="hidden sm:inline">Connected</span>
-                </>
-              ) : (
-                <>
-                  <FiWifiOff className="h-4 w-4" />
-                  <span className="hidden sm:inline">Disconnected</span>
-                </>
+              <FiMenu className="h-5 w-5" />
+            </Button>
+
+            {/* Search Bar */}
+            <form onSubmit={handleSearch} className="flex-1 max-w-md">
+              <div className="relative">
+                <FiSearch
+                  className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4"
+                  style={{ color: colors.text.tertiary }}
+                />
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="Search transactions, blocks, addresses..."
+                  className="w-full pl-10 pr-4 py-2.5 rounded-lg border transition-all duration-200 focus:outline-none focus:ring-2 text-sm"
+                  style={
+                    {
+                      backgroundColor: colors.background,
+                      borderColor: colors.border.secondary,
+                      color: colors.text.primary,
+                      '--tw-ring-color': `${colors.primary}40`,
+                    } as React.CSSProperties
+                  }
+                  onFocus={(e) => {
+                    e.currentTarget.style.borderColor = colors.primary
+                  }}
+                  onBlur={(e) => {
+                    e.currentTarget.style.borderColor = colors.border.secondary
+                  }}
+                />
+              </div>
+            </form>
+          </div>
+
+          {/* Right Section - Connection Status & Theme Toggle */}
+          <div className="flex items-center gap-3">
+            {/* Connection Status */}
+            <div className="flex items-center gap-2">
+              <div
+                className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200"
+                style={{
+                  backgroundColor: isConnected
+                    ? `${colors.status.success}15`
+                    : `${colors.status.error}15`,
+                  color: isConnected
+                    ? colors.status.success
+                    : colors.status.error,
+                  border: `1px solid ${
+                    isConnected
+                      ? `${colors.status.success}30`
+                      : `${colors.status.error}30`
+                  }`,
+                }}
+              >
+                {isConnected ? (
+                  <>
+                    <div className="relative">
+                      <FiWifi className="h-4 w-4" />
+                      <div
+                        className="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full animate-pulse"
+                        style={{ backgroundColor: colors.status.success }}
+                      ></div>
+                    </div>
+                    <div className="hidden sm:flex sm:flex-col sm:items-start">
+                      <span className="text-xs font-medium">Connected to:</span>
+                      <span
+                        className="text-xs truncate max-w-32"
+                        title={address}
+                      >
+                        {address ? new URL(address).hostname : 'Unknown'}
+                      </span>
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <FiWifiOff className="h-4 w-4" />
+                    <span className="hidden sm:inline">Disconnected</span>
+                  </>
+                )}
+              </div>
+
+              {/* Change Connection Button */}
+              <Button
+                onClick={() => setIsRPCModalOpen(true)}
+                variant="ghost"
+                size="sm"
+                title="Change RPC Connection"
+                className="text-sm"
+              >
+                <FiRefreshCcw className="h-4 w-4" />
+                <span className="hidden md:inline ml-1">Change</span>
+              </Button>
+
+              {/* Disconnect Button */}
+              {isConnected && (
+                <Button
+                  onClick={handleDisconnect}
+                  variant="ghost"
+                  size="sm"
+                  title="Disconnect from RPC"
+                  style={{ color: colors.status.error }}
+                >
+                  <FiLogOut className="h-4 w-4" />
+                </Button>
               )}
             </div>
 
-            {/* Disconnect Button */}
-            {isConnected && (
+            {/* Theme Toggle */}
+            <Button
+              onClick={toggleColorScheme}
+              variant="ghost"
+              size="sm"
+              title={`Switch to ${
+                colorScheme === 'dark' ? 'light' : 'dark'
+              } mode`}
+            >
+              {colorScheme === 'dark' ? (
+                <FiSun className="h-4 w-4" />
+              ) : (
+                <FiMoon className="h-4 w-4" />
+              )}
+            </Button>
+          </div>
+        </div>
+      </header>
+
+      {/* RPC Connection Modal */}
+      {isRPCModalOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div
+            className="bg-white rounded-lg shadow-lg w-full max-w-md mx-4 p-6"
+            style={{
+              backgroundColor: colors.background,
+              color: colors.text.primary,
+            }}
+          >
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold">RPC Connection</h3>
               <Button
-                onClick={handleDisconnect}
                 variant="ghost"
                 size="sm"
-                title="Disconnect from RPC"
-                style={{ color: colors.status.error }}
+                onClick={() => setIsRPCModalOpen(false)}
               >
-                <FiLogOut className="h-4 w-4" />
+                <FiX className="h-4 w-4" />
               </Button>
+            </div>
+
+            {/* Add New RPC Form */}
+            <form onSubmit={handleSubmit} className="mb-6">
+              <div className="mb-4">
+                <label className="block text-sm font-medium mb-2">
+                  RPC Endpoint URL
+                </label>
+                <input
+                  type="url"
+                  value={newAddress}
+                  onChange={handleInputChange}
+                  placeholder="https://rpc.example.com"
+                  className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 ${
+                    error ? 'border-red-500' : ''
+                  }`}
+                  style={{
+                    backgroundColor: colors.background,
+                    borderColor: error ? '#ef4444' : colors.border.secondary,
+                    color: colors.text.primary,
+                  }}
+                  required
+                />
+                {error && (
+                  <p className="text-red-500 text-sm mt-1">
+                    Failed to connect to this RPC endpoint
+                  </p>
+                )}
+              </div>
+              <Button
+                type="submit"
+                disabled={state === 'submitting'}
+                className="w-full"
+              >
+                {state === 'submitting' ? (
+                  <>
+                    <FiRefreshCcw className="mr-2 h-4 w-4 animate-spin" />
+                    Connecting...
+                  </>
+                ) : (
+                  <>
+                    <FiZap className="mr-2 h-4 w-4" />
+                    Connect
+                  </>
+                )}
+              </Button>
+            </form>
+
+            {/* Saved RPC List */}
+            {rpcList.length > 0 && (
+              <div>
+                <h4 className="text-sm font-medium mb-3">
+                  Saved RPC Endpoints
+                </h4>
+                <div className="space-y-2 max-h-60 overflow-y-auto">
+                  {rpcList.map((rpc, index) => (
+                    <div
+                      key={index}
+                      className="flex items-center justify-between p-3 border rounded-lg"
+                      style={{
+                        backgroundColor: colors.background,
+                        borderColor: colors.border.secondary,
+                      }}
+                    >
+                      <div className="flex items-center space-x-2 flex-1 min-w-0">
+                        <FiRadio className="h-4 w-4 text-blue-500 flex-shrink-0" />
+                        <span className="text-sm truncate" title={rpc}>
+                          {rpc}
+                        </span>
+                        {address === rpc && (
+                          <FiCheck className="h-4 w-4 text-green-500 flex-shrink-0" />
+                        )}
+                      </div>
+                      <div className="flex items-center space-x-1 ml-2">
+                        {address !== rpc && (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => selectChain(rpc)}
+                            disabled={state === 'submitting'}
+                          >
+                            Connect
+                          </Button>
+                        )}
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => removeChain(rpc)}
+                          className="text-red-500 hover:text-red-700"
+                        >
+                          <FiTrash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
             )}
           </div>
-
-          {/* Theme Toggle */}
-          <Button
-            onClick={toggleColorScheme}
-            variant="ghost"
-            size="sm"
-            title={`Switch to ${
-              colorScheme === 'dark' ? 'light' : 'dark'
-            } mode`}
-          >
-            {colorScheme === 'dark' ? (
-              <FiSun className="h-4 w-4" />
-            ) : (
-              <FiMoon className="h-4 w-4" />
-            )}
-          </Button>
         </div>
-      </div>
-    </header>
+      )}
+    </>
   )
 }
 
