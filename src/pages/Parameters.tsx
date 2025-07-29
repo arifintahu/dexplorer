@@ -181,7 +181,6 @@ const Parameters: React.FC = () => {
     govVotingParams,
     govDepositParams,
     govTallyParams,
-    loadingStates,
     dispatch,
   ])
 

@@ -18,7 +18,19 @@ import {
   selectSubsNewBlock,
   selectSubsTxEvent,
   selectNewBlock,
+  addBlock,
+  addTransaction,
+  clearPersistentData,
 } from '@/store/streamSlice'
+import {
+  setStakingParams,
+  setMintParams,
+  setDistributionParams,
+  setSlashingParams,
+  setGovVotingParams,
+  setGovDepositParams,
+  setGovTallyParams,
+} from '@/store/paramsSlice'
 import {
   FiSearch,
   FiMenu,
@@ -36,6 +48,7 @@ import {
 } from 'react-icons/fi'
 import { Button } from '@/components/ui/Button'
 import { connectWebsocketClient, validateConnection } from '@/rpc/client'
+import { subscribeNewBlock, subscribeTx } from '@/rpc/subscribe'
 import { LS_RPC_ADDRESS, LS_RPC_ADDRESS_LIST } from '@/utils/constant'
 import { removeTrailingSlash } from '@/utils/helper'
 import { toast } from 'sonner'
@@ -111,6 +124,54 @@ const TopNavigation: React.FC<TopNavigationProps> = ({ onMenuClick }) => {
     setIsSearchOpen(false)
   }
 
+  const resetApplicationData = async () => {
+    console.log('Resetting application data...')
+
+    // Clean up subscriptions first
+    if (subsNewBlock) {
+      console.log('Unsubscribing from new block subscription')
+      subsNewBlock.unsubscribe()
+      dispatch(setSubsNewBlock(null))
+    }
+    if (subsTxEvent) {
+      console.log('Unsubscribing from tx event subscription')
+      subsTxEvent.unsubscribe()
+      dispatch(setSubsTxEvent(null))
+    }
+
+    // Disconnect the old WebSocket client
+    if (tmClient) {
+      try {
+        console.log('Disconnecting tmClient...')
+        await tmClient.disconnect()
+        console.log('tmClient disconnected successfully')
+      } catch (error) {
+        console.warn('Error disconnecting tmClient:', error)
+      }
+    }
+
+    // Clear the tmClient from Redux state immediately
+    dispatch(setTmClient(null))
+
+    // Reset stream data
+    dispatch(setNewBlock(null))
+    dispatch(setTxEvent(null))
+
+    // Clear persistent blocks and transactions
+    dispatch(clearPersistentData())
+
+    // Reset parameters data
+    dispatch(setStakingParams(null))
+    dispatch(setMintParams(null))
+    dispatch(setDistributionParams(null))
+    dispatch(setSlashingParams(null))
+    dispatch(setGovVotingParams(null))
+    dispatch(setGovDepositParams(null))
+    dispatch(setGovTallyParams(null))
+
+    console.log('Application data reset complete')
+  }
+
   const connectClient = async (rpcAddress: string) => {
     setState('submitting')
     setError(false)
@@ -126,6 +187,15 @@ const TopNavigation: React.FC<TopNavigationProps> = ({ onMenuClick }) => {
         return
       }
 
+      console.log('Starting connection to new RPC:', cleanAddress)
+
+      // Reset all application data before connecting to new RPC
+      await resetApplicationData()
+
+      // Add a small delay to ensure cleanup is complete
+      await new Promise((resolve) => setTimeout(resolve, 100))
+
+      console.log('Creating new tmClient...')
       const tmClient = await connectWebsocketClient(cleanAddress)
 
       if (tmClient) {
@@ -136,18 +206,48 @@ const TopNavigation: React.FC<TopNavigationProps> = ({ onMenuClick }) => {
         setStatus(status)
         setState('success')
 
-        // Save to localStorage
+        console.log('Starting new subscriptions...')
+
+        // Start blockchain data subscriptions
+        const newBlockSub = subscribeNewBlock(tmClient, (event) => {
+          dispatch(setNewBlock(event))
+          dispatch(addBlock(event))
+        })
+
+        const txSub = subscribeTx(tmClient, (event) => {
+          dispatch(setTxEvent(event))
+          dispatch(addTransaction(event))
+        })
+
+        dispatch(setSubsNewBlock(newBlockSub))
+        dispatch(setSubsTxEvent(txSub))
+
+        console.log('New subscriptions started successfully')
+
+        // Save current RPC address to localStorage
         localStorage.setItem(LS_RPC_ADDRESS, cleanAddress)
 
-        // Update RPC list
+        // Always save all RPC endpoints to localStorage
         const currentList = JSON.parse(
           localStorage.getItem(LS_RPC_ADDRESS_LIST) || '[]'
         )
+
+        let updatedList = [...currentList]
+
+        // Add new address if it doesn't exist
         if (!currentList.includes(cleanAddress)) {
-          const updatedList = [cleanAddress, ...currentList]
-          localStorage.setItem(LS_RPC_ADDRESS_LIST, JSON.stringify(updatedList))
-          setRPCList(updatedList)
+          updatedList = [cleanAddress, ...currentList]
+        } else {
+          // Move existing address to the front
+          updatedList = [
+            cleanAddress,
+            ...currentList.filter((addr) => addr !== cleanAddress),
+          ]
         }
+
+        // Always update localStorage with the complete list
+        localStorage.setItem(LS_RPC_ADDRESS_LIST, JSON.stringify(updatedList))
+        setRPCList(updatedList)
 
         toast.success('Successfully connected to RPC endpoint')
         setIsRPCModalOpen(false)
@@ -188,28 +288,20 @@ const TopNavigation: React.FC<TopNavigationProps> = ({ onMenuClick }) => {
     toast.success('RPC address removed')
   }
 
-  const handleDisconnect = () => {
-    // Clean up subscriptions
-    if (subsNewBlock) {
-      subsNewBlock.unsubscribe()
-      dispatch(setSubsNewBlock(null))
-    }
-    if (subsTxEvent) {
-      subsTxEvent.unsubscribe()
-      dispatch(setSubsTxEvent(null))
-    }
+  const handleDisconnect = async () => {
+    console.log('Disconnecting from RPC...')
 
-    // Clear stream data
-    dispatch(setNewBlock(null))
-    dispatch(setTxEvent(null))
+    // Reset all application data
+    await resetApplicationData()
 
     // Clear connection
     dispatch(setConnectState(false))
-    dispatch(setTmClient(null))
     dispatch(setRPCAddress(''))
-    localStorage.removeItem('rpc_address')
-    localStorage.removeItem('rpc_address_list')
+    localStorage.removeItem(LS_RPC_ADDRESS)
+    // Note: We keep the RPC address list for future connections
     toast.success('Disconnected from RPC endpoint')
+
+    console.log('Disconnection complete')
   }
 
   return (
@@ -332,7 +424,13 @@ const TopNavigation: React.FC<TopNavigationProps> = ({ onMenuClick }) => {
                   variant="ghost"
                   size="sm"
                   title="Disconnect from RPC"
-                  style={{ color: colors.status.error }}
+                  className="focus:outline-none focus:ring-0 active:outline-none border-0 focus:border-0 active:border-0"
+                  style={{
+                    color: colors.status.error,
+                    outline: 'none',
+                    border: 'none',
+                    boxShadow: 'none',
+                  }}
                 >
                   <FiLogOut className="h-4 w-4" />
                 </Button>

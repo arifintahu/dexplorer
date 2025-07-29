@@ -1,5 +1,5 @@
 import React, { FormEvent, ChangeEvent, useState } from 'react'
-import { useDispatch } from 'react-redux'
+import { useDispatch, useSelector } from 'react-redux'
 import { FiZap, FiCheck, FiLoader } from 'react-icons/fi'
 import { useTheme } from '@/hooks/useTheme'
 import { Button } from '@/components/ui/Button'
@@ -16,10 +16,20 @@ import {
   addBlock,
   addTransaction,
 } from '@/store/streamSlice'
+import {
+  setStakingParams,
+  setMintParams,
+  setDistributionParams,
+  setSlashingParams,
+  setGovVotingParams,
+  setGovDepositParams,
+  setGovTallyParams,
+} from '@/store/paramsSlice'
 import { LS_RPC_ADDRESS, LS_RPC_ADDRESS_LIST } from '@/utils/constant'
 import { validateConnection, connectWebsocketClient } from '@/rpc/client'
 import { subscribeNewBlock, subscribeTx } from '@/rpc/subscribe'
 import { removeTrailingSlash } from '@/utils/helper'
+import { RootState } from '@/store'
 
 const chainList = [
   {
@@ -40,6 +50,17 @@ export default function Connect() {
   const [error, setError] = useState(false)
   const dispatch = useDispatch()
   const { colors } = useTheme()
+
+  // Get current subscriptions and tmClient from Redux store
+  const currentSubsNewBlock = useSelector(
+    (state: RootState) => state.stream.subsNewBlock
+  )
+  const currentSubsTxEvent = useSelector(
+    (state: RootState) => state.stream.subsTxEvent
+  )
+  const currentTmClient = useSelector(
+    (state: RootState) => state.connect.tmClient
+  )
 
   const submitForm = async (e: FormEvent) => {
     e.preventDefault()
@@ -64,6 +85,36 @@ export default function Connect() {
         setState('initial')
         return
       }
+
+      // Clean up existing subscriptions and connections before establishing new ones
+      if (currentSubsNewBlock) {
+        currentSubsNewBlock.unsubscribe()
+        dispatch(setSubsNewBlock(null))
+      }
+      if (currentSubsTxEvent) {
+        currentSubsTxEvent.unsubscribe()
+        dispatch(setSubsTxEvent(null))
+      }
+      if (currentTmClient) {
+        try {
+          currentTmClient.disconnect()
+        } catch (error) {
+          console.warn('Error disconnecting previous tmClient:', error)
+        }
+      }
+
+      // Reset stream data
+      dispatch(setNewBlock(null))
+      dispatch(setTxEvent(null))
+
+      // Reset parameters data
+      dispatch(setStakingParams(null))
+      dispatch(setMintParams(null))
+      dispatch(setDistributionParams(null))
+      dispatch(setSlashingParams(null))
+      dispatch(setGovVotingParams(null))
+      dispatch(setGovDepositParams(null))
+      dispatch(setGovTallyParams(null))
 
       const tmClient = await connectWebsocketClient(rpcAddress)
 
