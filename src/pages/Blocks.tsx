@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useMemo, useCallback } from 'react'
 import { useSelector } from 'react-redux'
 import { Link } from 'react-router-dom'
 import { NewBlockEvent, TxEvent } from '@cosmjs/tendermint-rpc'
@@ -21,7 +21,7 @@ import { timeFromNow, trimHash, getTypeMsg } from '@/utils/helper'
 import { useTheme } from '@/hooks/useTheme'
 import { Button } from '@/components/ui/Button'
 
-const MAX_ROWS = 20
+const MAX_ROWS = 50
 
 interface Tx {
   TxEvent: TxEvent
@@ -50,18 +50,26 @@ const Blocks: React.FC = () => {
   const [blocks, setBlocks] = useState<BlockType[]>([])
   const [txs, setTxs] = useState<Tx[]>([])
 
-  // Initialize blocks and txs from persistent store on component mount
+  // Initialize blocks from persistent store with memoization
+  const initialBlocks = useMemo(() => {
+    return persistentBlocks.length > 0
+      ? persistentBlocks.slice(0, MAX_ROWS)
+      : []
+  }, [persistentBlocks.length])
+
+  // Initialize txs from persistent store with memoization
+  const initialTxs = useMemo(() => {
+    return persistentTxs.length > 0 ? persistentTxs.slice(0, MAX_ROWS) : []
+  }, [persistentTxs.length])
+
+  // Set initial data only when length changes (not on every block update)
   useEffect(() => {
-    if (persistentBlocks.length > 0) {
-      setBlocks(persistentBlocks.slice(0, MAX_ROWS))
-    }
-  }, [persistentBlocks])
+    setBlocks(initialBlocks)
+  }, [initialBlocks])
 
   useEffect(() => {
-    if (persistentTxs.length > 0) {
-      setTxs(persistentTxs.slice(0, MAX_ROWS))
-    }
-  }, [persistentTxs])
+    setTxs(initialTxs)
+  }, [initialTxs])
 
   useEffect(() => {
     if (newBlock) {
@@ -115,46 +123,54 @@ const Blocks: React.FC = () => {
     }
   }
 
-  const renderMessages = (data: Uint8Array | undefined) => {
-    if (data) {
-      const txBody = TxBody.decode(data)
-      const messages = txBody.messages
+  // Memoize message rendering to avoid expensive decoding on every render
+  const renderMessages = useCallback(
+    (data: Uint8Array | undefined) => {
+      if (!data) return ''
 
-      if (messages.length == 1) {
-        return (
-          <div className="flex items-center gap-2">
-            <span
-              className="px-2 py-1 rounded text-xs font-medium"
-              style={{
-                backgroundColor: colors.status.info + '20',
-                color: colors.status.info,
-              }}
-            >
-              {getTypeMsg(messages[0].typeUrl)}
-            </span>
-          </div>
-        )
-      } else if (messages.length > 1) {
-        return (
-          <div className="flex items-center gap-2">
-            <span
-              className="px-2 py-1 rounded text-xs font-medium"
-              style={{
-                backgroundColor: colors.status.info + '20',
-                color: colors.status.info,
-              }}
-            >
-              {getTypeMsg(messages[0].typeUrl)}
-            </span>
-            <span style={{ color: colors.status.info }}>
-              +{messages.length - 1}
-            </span>
-          </div>
-        )
+      try {
+        const txBody = TxBody.decode(data)
+        const messages = txBody.messages
+
+        if (messages.length === 1) {
+          return (
+            <div className="flex items-center gap-2">
+              <span
+                className="px-2 py-1 rounded text-xs font-medium"
+                style={{
+                  backgroundColor: colors.status.info + '20',
+                  color: colors.status.info,
+                }}
+              >
+                {getTypeMsg(messages[0].typeUrl)}
+              </span>
+            </div>
+          )
+        } else if (messages.length > 1) {
+          return (
+            <div className="flex items-center gap-2">
+              <span
+                className="px-2 py-1 rounded text-xs font-medium"
+                style={{
+                  backgroundColor: colors.status.info + '20',
+                  color: colors.status.info,
+                }}
+              >
+                {getTypeMsg(messages[0].typeUrl)}
+              </span>
+              <span style={{ color: colors.status.info }}>
+                +{messages.length - 1}
+              </span>
+            </div>
+          )
+        }
+      } catch (error) {
+        console.warn('Failed to decode transaction data:', error)
       }
-    }
-    return ''
-  }
+      return ''
+    },
+    [colors.status.info]
+  )
 
   return (
     <div className="space-y-6">
