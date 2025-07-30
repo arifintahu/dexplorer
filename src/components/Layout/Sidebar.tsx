@@ -12,6 +12,7 @@ import {
   FiUser,
   FiWifi,
   FiWifiOff,
+  FiGithub,
 } from 'react-icons/fi'
 import { useSelector } from 'react-redux'
 import { RootState } from '@/store'
@@ -24,6 +25,15 @@ const navigation = [
   { name: 'Proposals', href: '/proposals', icon: FiFileText },
   { name: 'Accounts', href: '/accounts', icon: FiUser },
   { name: 'Parameters', href: '/parameters', icon: FiSettings },
+]
+
+const externalLinks = [
+  {
+    name: 'Github',
+    href: 'https://github.com/arifintahu/dexplorer',
+    icon: FiGithub,
+    isExternal: true,
+  },
 ]
 
 interface SidebarProps {
@@ -174,6 +184,42 @@ const Sidebar: React.FC<SidebarProps> = ({
                   </li>
                 )
               })}
+            </ul>
+          </li>
+          <li>
+            <div
+              className="text-xs font-semibold leading-6 mb-2 px-3"
+              style={{ color: colors.text.tertiary }}
+            >
+              Links
+            </div>
+            <ul role="list" className="-mx-2 space-y-1">
+              {externalLinks.map((item) => (
+                <li key={item.name}>
+                  <a
+                    href={item.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    onClick={handleMobileLinkClick}
+                    className="group flex gap-x-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200 hover:translate-x-1"
+                    style={{
+                      color: colors.text.primary,
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.backgroundColor =
+                        colors.backgroundSecondary
+                      e.currentTarget.style.transform = 'translateX(4px)'
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.backgroundColor = 'transparent'
+                      e.currentTarget.style.transform = 'translateX(0)'
+                    }}
+                  >
+                    <item.icon className="h-5 w-5 shrink-0" />
+                    {item.name}
+                  </a>
+                </li>
+              ))}
             </ul>
           </li>
         </ul>
