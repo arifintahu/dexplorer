@@ -114,6 +114,22 @@ export const displayCoin = (deposit: Coin) => {
   return `${Number(deposit.amount).toLocaleString()} ${deposit.denom}`
 }
 
+export const getActionFromAttributes = (
+  attributes: [{ key: string; value: string }]
+) => {
+  const action = attributes.find((a) => {
+    if (a.key == 'action') {
+      return a.value
+    }
+  })
+
+  if (action) {
+    return action.value
+  }
+
+  return ''
+}
+
 export const getTypeMsg = (typeUrl: string): string => {
   const arr = typeUrl.split('.')
   if (arr.length) {

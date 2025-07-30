@@ -11,7 +11,12 @@ import {
   FiUser,
 } from 'react-icons/fi'
 import { useTheme } from '@/theme/ThemeProvider'
-import { trimHash, timeFromNow, getTypeMsg } from '@/utils/helper'
+import {
+  trimHash,
+  timeFromNow,
+  getTypeMsg,
+  getActionFromAttributes,
+} from '@/utils/helper'
 import { Button } from '@/components/ui/Button'
 import { RootState } from '@/store'
 import { selectTransactions } from '@/store/streamSlice'
@@ -35,6 +40,7 @@ const Transactions: React.FC = () => {
 
   // Helper function to get transaction status
   const getTransactionStatus = (result: any): 'success' | 'failed' => {
+    console.log('result', result)
     if (!result) return 'failed'
     return result.code === 0 ? 'success' : 'failed'
   }
@@ -45,6 +51,7 @@ const Transactions: React.FC = () => {
       if (!data) return <span className="text-xs opacity-60">No data</span>
 
       const txBody = TxBody.decode(data)
+      console.log('txBody', txBody)
       const messages = txBody.messages
 
       if (messages.length === 1) {
@@ -82,6 +89,68 @@ const Transactions: React.FC = () => {
       }
     } catch (error) {
       console.error('Error decoding transaction:', error)
+      return <span className="text-xs opacity-60">Invalid data</span>
+    }
+
+    return <span className="text-xs opacity-60">No messages</span>
+  }
+
+  const renderEventMessages = (
+    events: [{ type: string; attributes: [{ key: string; value: string }] }]
+  ) => {
+    try {
+      if (!events || !events.length)
+        return <span className="text-xs opacity-60">No data</span>
+
+      const messages = events.filter((e) => {
+        if (e.type == 'message') {
+          const hasAction = e.attributes.some((a) => {
+            if (a.key == 'action') {
+              return a.value
+            }
+          })
+
+          if (hasAction) {
+            return e.attributes
+          }
+        }
+      })
+
+      if (messages.length === 1) {
+        return (
+          <span
+            className="px-2 py-1 rounded-full text-xs font-medium"
+            style={{
+              backgroundColor: colors.primary + '20',
+              color: colors.primary,
+            }}
+          >
+            {getTypeMsg(getActionFromAttributes(messages[0].attributes))}
+          </span>
+        )
+      } else if (messages.length > 1) {
+        return (
+          <div className="flex items-center gap-2">
+            <span
+              className="px-2 py-1 rounded-full text-xs font-medium"
+              style={{
+                backgroundColor: colors.primary + '20',
+                color: colors.primary,
+              }}
+            >
+              {getTypeMsg(getActionFromAttributes(messages[0].attributes))}
+            </span>
+            <span
+              className="text-xs font-medium"
+              style={{ color: colors.primary }}
+            >
+              +{messages.length - 1}
+            </span>
+          </div>
+        )
+      }
+    } catch (error) {
+      console.error('Error decoding events:', error)
       return <span className="text-xs opacity-60">Invalid data</span>
     }
 
@@ -298,7 +367,7 @@ const Transactions: React.FC = () => {
                       </Link>
                     </td>
                     <td className="py-3 px-4">
-                      {renderMessages(tx.result?.data)}
+                      {renderEventMessages(tx.result?.events)}
                     </td>
                     <td className="py-3 px-4">
                       <span
