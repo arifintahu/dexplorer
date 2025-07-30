@@ -7,6 +7,29 @@ import { Coin } from 'cosmjs-types/cosmos/base/v1beta1/coin'
 
 export const timeFromNow = (date: string): string => {
   dayjs.extend(relativeTime)
+  const now = dayjs()
+  const then = dayjs(date)
+  const diffInSeconds = now.diff(then, 'second')
+
+  if (diffInSeconds < 60) {
+    return `${diffInSeconds}s ago`
+  }
+
+  const diffInMinutes = now.diff(then, 'minute')
+  if (diffInMinutes < 60) {
+    return `${diffInMinutes}m ago`
+  }
+
+  const diffInHours = now.diff(then, 'hour')
+  if (diffInHours < 24) {
+    return `${diffInHours}h ago`
+  }
+
+  const diffInDays = now.diff(then, 'day')
+  if (diffInDays < 30) {
+    return `${diffInDays}d ago`
+  }
+
   return dayjs(date).fromNow()
 }
 

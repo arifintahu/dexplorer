@@ -15,7 +15,7 @@ import {
   FiTrendingUp,
   FiTrendingDown,
 } from 'react-icons/fi'
-import { formatNumber, formatTimeAgo } from '@/lib/utils'
+import { formatNumber } from '@/lib/utils'
 import { trimHash, timeFromNow } from '@/utils/helper'
 import SkeletonLoader from '@/components/ui/SkeletonLoader'
 import { Link } from 'react-router-dom'
