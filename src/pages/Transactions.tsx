@@ -20,15 +20,6 @@ import {
 import { Button } from '@/components/ui/Button'
 import { RootState } from '@/store'
 import { selectTransactions } from '@/store/streamSlice'
-import { TxBody } from 'cosmjs-types/cosmos/tx/v1beta1/tx'
-
-interface SerializableTransaction {
-  hash: string
-  height: string
-  tx: string
-  result: any
-  timestamp: string
-}
 
 const Transactions: React.FC = () => {
   const { colors } = useTheme()
@@ -40,59 +31,8 @@ const Transactions: React.FC = () => {
 
   // Helper function to get transaction status
   const getTransactionStatus = (result: any): 'success' | 'failed' => {
-    console.log('result', result)
     if (!result) return 'failed'
     return result.code === 0 ? 'success' : 'failed'
-  }
-
-  // Function to render message types from transaction data
-  const renderMessages = (data: Uint8Array | undefined) => {
-    try {
-      if (!data) return <span className="text-xs opacity-60">No data</span>
-
-      const txBody = TxBody.decode(data)
-      console.log('txBody', txBody)
-      const messages = txBody.messages
-
-      if (messages.length === 1) {
-        return (
-          <span
-            className="px-2 py-1 rounded-full text-xs font-medium"
-            style={{
-              backgroundColor: colors.primary + '20',
-              color: colors.primary,
-            }}
-          >
-            {getTypeMsg(messages[0].typeUrl)}
-          </span>
-        )
-      } else if (messages.length > 1) {
-        return (
-          <div className="flex items-center gap-2">
-            <span
-              className="px-2 py-1 rounded-full text-xs font-medium"
-              style={{
-                backgroundColor: colors.primary + '20',
-                color: colors.primary,
-              }}
-            >
-              {getTypeMsg(messages[0].typeUrl)}
-            </span>
-            <span
-              className="text-xs font-medium"
-              style={{ color: colors.primary }}
-            >
-              +{messages.length - 1}
-            </span>
-          </div>
-        )
-      }
-    } catch (error) {
-      console.error('Error decoding transaction:', error)
-      return <span className="text-xs opacity-60">Invalid data</span>
-    }
-
-    return <span className="text-xs opacity-60">No messages</span>
   }
 
   const renderEventMessages = (

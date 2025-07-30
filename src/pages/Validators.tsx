@@ -235,7 +235,7 @@ const Validators: React.FC = () => {
                 className="text-2xl font-bold"
                 style={{ color: colors.text.primary }}
               >
-                {data.filter((v) => v.status === 'Active').length}
+                {total}
               </p>
             </div>
           </div>
