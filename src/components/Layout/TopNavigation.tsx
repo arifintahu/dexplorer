@@ -17,7 +17,6 @@ import {
   setSubsTxEvent,
   selectSubsNewBlock,
   selectSubsTxEvent,
-  selectNewBlock,
   addBlock,
   addTransaction,
   clearPersistentData,
@@ -52,7 +51,6 @@ import { subscribeNewBlock, subscribeTx } from '@/rpc/subscribe'
 import { LS_RPC_ADDRESS, LS_RPC_ADDRESS_LIST } from '@/utils/constant'
 import { removeTrailingSlash } from '@/utils/helper'
 import { toast } from 'sonner'
-import { StatusResponse } from '@cosmjs/tendermint-rpc'
 
 interface TopNavigationProps {
   onMenuClick?: () => void
@@ -65,27 +63,23 @@ const TopNavigation: React.FC<TopNavigationProps> = ({ onMenuClick }) => {
   const { connectState } = useSelector((state: RootState) => state.connect)
   const tmClient = useSelector(selectTmClient)
   const address = useSelector(selectRPCAddress)
-  const newBlock = useSelector(selectNewBlock)
   const subsNewBlock = useSelector(selectSubsNewBlock)
   const subsTxEvent = useSelector(selectSubsTxEvent)
   const isConnected = connectState
   const [searchQuery, setSearchQuery] = useState('')
 
   // RPC Management State
-  const [status, setStatus] = useState<StatusResponse | null>()
   const [state, setState] = useState<'initial' | 'submitting' | 'success'>(
     'initial'
   )
   const [newAddress, setNewAddress] = useState('')
   const [error, setError] = useState(false)
-  const [isSearchOpen, setIsSearchOpen] = useState(false)
   const [isRPCModalOpen, setIsRPCModalOpen] = useState(false)
   const [rpcList, setRPCList] = useState<string[]>([])
-  const [isLoadedSkeleton, setIsLoadedSkeleton] = useState(false)
 
   // Search patterns
   const heightRegex = /^\d+$/
-  const txhashRegex = /^[A-Z\d]{64}$/
+  const txhashRegex = /^[A-Za-z\d]{64}$/
   const addrRegex = /^[a-z\d]+1[a-z\d]{38,58}$/
 
   // Load RPC list from localStorage on component mount
@@ -99,13 +93,6 @@ const TopNavigation: React.FC<TopNavigationProps> = ({ onMenuClick }) => {
       }
     }
   }, [])
-
-  // Update skeleton loading state
-  useEffect(() => {
-    if (newBlock) {
-      setIsLoadedSkeleton(true)
-    }
-  }, [newBlock])
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault()
@@ -121,7 +108,6 @@ const TopNavigation: React.FC<TopNavigationProps> = ({ onMenuClick }) => {
       toast.error('Invalid search query format')
     }
     setSearchQuery('')
-    setIsSearchOpen(false)
   }
 
   const resetApplicationData = async () => {
@@ -199,11 +185,9 @@ const TopNavigation: React.FC<TopNavigationProps> = ({ onMenuClick }) => {
       const tmClient = await connectWebsocketClient(cleanAddress)
 
       if (tmClient) {
-        const status = await tmClient.status()
         dispatch(setTmClient(tmClient))
         dispatch(setRPCAddress(cleanAddress))
         dispatch(setConnectState(true))
-        setStatus(status)
         setState('success')
 
         console.log('Starting new subscriptions...')
