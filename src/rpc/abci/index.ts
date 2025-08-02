@@ -14,6 +14,8 @@ import {
 import {
   QueryProposalsRequest,
   QueryProposalsResponse,
+  QueryProposalRequest,
+  QueryProposalResponse,
   QueryParamsRequest as QueryGovParamsRequest,
   QueryParamsResponse as QueryGovParamsResponse,
 } from 'cosmjs-types/cosmos/gov/v1/query'
@@ -88,6 +90,21 @@ export async function queryProposals(
     req
   )
   return QueryProposalsResponse.decode(value)
+}
+
+export async function queryProposalById(
+  tmClient: Tendermint37Client,
+  proposalId: number
+): Promise<QueryProposalResponse> {
+  const queryClient = new QueryClient(tmClient)
+  const req = QueryProposalRequest.encode({
+    proposalId: BigInt(proposalId),
+  }).finish()
+  const { value } = await queryClient.queryAbci(
+    '/cosmos.gov.v1.Query/Proposal',
+    req
+  )
+  return QueryProposalResponse.decode(value)
 }
 
 export async function queryStakingParams(
