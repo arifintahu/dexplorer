@@ -10,7 +10,7 @@ import {
   FiPercent,
 } from 'react-icons/fi'
 import { selectTmClient } from '@/store/connectSlice'
-import { queryActiveValidators } from '@/rpc/abci'
+import { queryActiveValidators, queryValidators } from '@/rpc/abci'
 import DataTable from '@/components/Datatable'
 import { createColumnHelper } from '@tanstack/react-table'
 import { convertRateToPercent, convertVotingPower } from '@/utils/helper'
@@ -30,7 +30,8 @@ const Validators: React.FC = () => {
   const tmClient = useSelector(selectTmClient)
   const [page, setPage] = useState(0)
   const [perPage, setPerPage] = useState(10)
-  const [total, setTotal] = useState(0)
+  const [totalValidator, setTotalValidator] = useState(0)
+  const [totalActiveValidator, setTotalActiveValidator] = useState(0)
   const [data, setData] = useState<ValidatorData[]>([])
   const [isLoading, setIsLoading] = useState(true)
 
@@ -148,7 +149,7 @@ const Validators: React.FC = () => {
       setIsLoading(true)
       queryActiveValidators(tmClient, page, perPage)
         .then((response) => {
-          setTotal(Number(response.pagination?.total))
+          setTotalActiveValidator(Number(response.pagination?.total))
           const validatorData: ValidatorData[] = response.validators.map(
             (val) => {
               return {
@@ -170,6 +171,18 @@ const Validators: React.FC = () => {
         })
     }
   }, [tmClient, page, perPage])
+
+  useEffect(() => {
+    if (tmClient) {
+      queryValidators(tmClient, page, perPage)
+        .then((response) => {
+          setTotalValidator(Number(response.pagination?.total))
+        })
+        .catch((error) => {
+          console.error('Failed to fetch validators:', error)
+        })
+    }
+  }, [tmClient])
 
   const onChangePagination = (value: {
     pageIndex: number
@@ -235,7 +248,7 @@ const Validators: React.FC = () => {
                 className="text-2xl font-bold"
                 style={{ color: colors.text.primary }}
               >
-                {total}
+                {totalActiveValidator}
               </p>
             </div>
           </div>
@@ -267,7 +280,7 @@ const Validators: React.FC = () => {
                 className="text-2xl font-bold"
                 style={{ color: colors.text.primary }}
               >
-                {total}
+                {totalValidator}
               </p>
             </div>
           </div>
@@ -339,7 +352,7 @@ const Validators: React.FC = () => {
           <DataTable
             columns={columns}
             data={data}
-            total={total}
+            total={totalActiveValidator}
             isLoading={isLoading}
             onChangePagination={onChangePagination}
           />

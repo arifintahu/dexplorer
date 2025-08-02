@@ -47,6 +47,27 @@ export async function queryActiveValidators(
   return QueryValidatorsResponse.decode(value)
 }
 
+export async function queryValidators(
+  tmClient: Tendermint37Client,
+  page: number,
+  perPage: number
+): Promise<QueryValidatorsResponse> {
+  const queryClient = new QueryClient(tmClient)
+  const validatorsRequest = QueryValidatorsRequest.fromPartial({
+    pagination: PageRequest.fromJSON({
+      offset: page * perPage,
+      limit: perPage,
+      countTotal: true,
+    }),
+  })
+  const req = QueryValidatorsRequest.encode(validatorsRequest).finish()
+  const { value } = await queryClient.queryAbci(
+    '/cosmos.staking.v1beta1.Query/Validators',
+    req
+  )
+  return QueryValidatorsResponse.decode(value)
+}
+
 export async function queryProposals(
   tmClient: Tendermint37Client,
   page: number,
