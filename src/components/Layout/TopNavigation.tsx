@@ -329,19 +329,18 @@ const TopNavigation: React.FC<TopNavigationProps> = ({ onMenuClick }) => {
                   onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder="Search transactions, blocks, addresses..."
                   className="w-full pl-10 pr-4 py-2.5 rounded-lg border transition-all duration-200 focus:outline-none focus:ring-2 text-sm"
-                  style={
-                    {
-                      backgroundColor: colors.background,
-                      borderColor: colors.border.secondary,
-                      color: colors.text.primary,
-                      '--tw-ring-color': `${colors.primary}40`,
-                    } as React.CSSProperties
-                  }
+                  style={{
+                    backgroundColor: colors.background,
+                    borderColor: colors.border.secondary,
+                    color: colors.text.primary,
+                  }}
                   onFocus={(e) => {
                     e.currentTarget.style.borderColor = colors.primary
+                    e.currentTarget.style.boxShadow = `0 0 0 2px ${colors.primary}40`
                   }}
                   onBlur={(e) => {
                     e.currentTarget.style.borderColor = colors.border.secondary
+                    e.currentTarget.style.boxShadow = 'none'
                   }}
                 />
               </div>
