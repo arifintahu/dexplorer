@@ -7,14 +7,52 @@ import { Coin } from 'cosmjs-types/cosmos/base/v1beta1/coin'
 
 export const timeFromNow = (date: string): string => {
   dayjs.extend(relativeTime)
+  const now = dayjs()
+  const then = dayjs(date)
+  const diffInSeconds = now.diff(then, 'second')
+
+  if (diffInSeconds < 60) {
+    return `${diffInSeconds}s ago`
+  }
+
+  const diffInMinutes = now.diff(then, 'minute')
+  if (diffInMinutes < 60) {
+    return `${diffInMinutes}m ago`
+  }
+
+  const diffInHours = now.diff(then, 'hour')
+  if (diffInHours < 24) {
+    return `${diffInHours}h ago`
+  }
+
+  const diffInDays = now.diff(then, 'day')
+  if (diffInDays < 30) {
+    return `${diffInDays}d ago`
+  }
+
   return dayjs(date).fromNow()
 }
 
-export const trimHash = (txHash: Uint8Array): string => {
-  const hash = toHex(txHash).toUpperCase()
-  const first = hash.slice(0, 5)
-  const last = hash.slice(hash.length - 5, hash.length)
-  return first + '...' + last
+export function trimHash(txHash: Uint8Array): string
+export function trimHash(txHash: string, length?: number): string
+export function trimHash(txHash: Uint8Array | string, length?: number): string {
+  let hash: string
+
+  if (txHash instanceof Uint8Array) {
+    hash = toHex(txHash).toUpperCase()
+    const first = hash.slice(0, 5)
+    const last = hash.slice(hash.length - 5, hash.length)
+    return first + '...' + last
+  } else {
+    hash = txHash
+    const trimLength = length || 8
+    if (hash.length <= trimLength * 2) {
+      return hash
+    }
+    const first = hash.slice(0, trimLength)
+    const last = hash.slice(hash.length - trimLength, hash.length)
+    return first + '...' + last
+  }
 }
 
 export const displayDate = (date: string): string => {
@@ -74,6 +112,22 @@ export const displayCoin = (deposit: Coin) => {
     return `${amount.toLocaleString()} ${symbol}`
   }
   return `${Number(deposit.amount).toLocaleString()} ${deposit.denom}`
+}
+
+export const getActionFromAttributes = (
+  attributes: [{ key: string; value: string }]
+) => {
+  const action = attributes.find((a) => {
+    if (a.key == 'action') {
+      return a.value
+    }
+  })
+
+  if (action) {
+    return action.value
+  }
+
+  return ''
 }
 
 export const getTypeMsg = (typeUrl: string): string => {

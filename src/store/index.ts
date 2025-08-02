@@ -1,47 +1,52 @@
-import { configureStore, ThunkAction, Action } from '@reduxjs/toolkit'
-import { connectSlice } from './connectSlice'
-import { streamSlice } from './streamSlice'
-import { paramsSlice } from './paramsSlice'
-import { createWrapper } from 'next-redux-wrapper'
+import { configureStore } from '@reduxjs/toolkit'
+import connectSlice from './connectSlice'
+import paramsSlice from './paramsSlice'
+import streamSlice from './streamSlice'
 
-const makeStore = () =>
-  configureStore({
-    reducer: {
-      [connectSlice.name]: connectSlice.reducer,
-      [streamSlice.name]: streamSlice.reducer,
-      [paramsSlice.name]: paramsSlice.reducer,
-    },
-    middleware: (getDefaultMiddleware) =>
-      getDefaultMiddleware({
-        serializableCheck: {
-          // Ignore these action types
-          ignoredActions: [
-            'stream/setNewBlock',
-            'stream/setSubsNewBlock',
-            'stream/setTxEvent',
-            'stream/setSubsTxEvent',
-            'connect/setTmClient',
-          ],
-          // Ignore these paths in the state
-          ignoredPaths: [
-            'connect.tmClient',
-            'stream.subsNewBlock',
-            'stream.subsTxEvent',
-            'stream.newBlock',
-            'stream.txEvent',
-          ],
-        },
-      }),
-    devTools: true,
-  })
+export const store = configureStore({
+  reducer: {
+    connect: connectSlice,
+    params: paramsSlice,
+    stream: streamSlice,
+  },
+  middleware: (getDefaultMiddleware) =>
+    getDefaultMiddleware({
+      serializableCheck: {
+        // Ignore these action types
+        ignoredActions: [
+          'stream/setClient',
+          'connect/setClient',
+          'connect/setTmClient',
+          'stream/setSubsNewBlock',
+          'stream/setSubsTxEvent',
+        ],
+        // Ignore these field paths in all actions
+        ignoredActionsPaths: [
+          'payload.client',
+          'payload.header.time',
+          'payload.tx',
+          'payload.result.tx',
+          'payload.result.header.time',
+        ],
+        // Ignore these paths in the state
+        ignoredPaths: [
+          'connect.client',
+          'stream.client',
+          'connect.tmClient',
+          'stream.newBlock.header.time',
+          'stream.newBlock.header.lastBlockId.hash',
+          'stream.txEvent.tx',
+          'stream.txEvent.hash',
+          'stream.txEvent.result.tx',
+          'stream.txEvent.result.header.time',
+          'stream.subsNewBlock',
+          'stream.subsTxEvent',
+          'stream.txEvent.result.data',
+          'stream.newBlock.header.lastBlockId.parts.hash',
+        ],
+      },
+    }),
+})
 
-export type AppStore = ReturnType<typeof makeStore>
-export type AppState = ReturnType<AppStore['getState']>
-export type AppThunk<ReturnType = void> = ThunkAction<
-  ReturnType,
-  AppState,
-  unknown,
-  Action
->
-
-export const wrapper = createWrapper<AppStore>(makeStore)
+export type RootState = ReturnType<typeof store.getState>
+export type AppDispatch = typeof store.dispatch

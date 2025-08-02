@@ -14,6 +14,8 @@ import {
 import {
   QueryProposalsRequest,
   QueryProposalsResponse,
+  QueryProposalRequest,
+  QueryProposalResponse,
   QueryParamsRequest as QueryGovParamsRequest,
   QueryParamsResponse as QueryGovParamsResponse,
 } from 'cosmjs-types/cosmos/gov/v1/query'
@@ -47,6 +49,27 @@ export async function queryActiveValidators(
   return QueryValidatorsResponse.decode(value)
 }
 
+export async function queryValidators(
+  tmClient: Tendermint37Client,
+  page: number,
+  perPage: number
+): Promise<QueryValidatorsResponse> {
+  const queryClient = new QueryClient(tmClient)
+  const validatorsRequest = QueryValidatorsRequest.fromPartial({
+    pagination: PageRequest.fromJSON({
+      offset: page * perPage,
+      limit: perPage,
+      countTotal: true,
+    }),
+  })
+  const req = QueryValidatorsRequest.encode(validatorsRequest).finish()
+  const { value } = await queryClient.queryAbci(
+    '/cosmos.staking.v1beta1.Query/Validators',
+    req
+  )
+  return QueryValidatorsResponse.decode(value)
+}
+
 export async function queryProposals(
   tmClient: Tendermint37Client,
   page: number,
@@ -67,6 +90,21 @@ export async function queryProposals(
     req
   )
   return QueryProposalsResponse.decode(value)
+}
+
+export async function queryProposalById(
+  tmClient: Tendermint37Client,
+  proposalId: number
+): Promise<QueryProposalResponse> {
+  const queryClient = new QueryClient(tmClient)
+  const req = QueryProposalRequest.encode({
+    proposalId: BigInt(proposalId),
+  }).finish()
+  const { value } = await queryClient.queryAbci(
+    '/cosmos.gov.v1.Query/Proposal',
+    req
+  )
+  return QueryProposalResponse.decode(value)
 }
 
 export async function queryStakingParams(

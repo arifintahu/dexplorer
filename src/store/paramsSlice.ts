@@ -1,6 +1,4 @@
 import { createSlice } from '@reduxjs/toolkit'
-import { AppState } from './index'
-import { HYDRATE } from 'next-redux-wrapper'
 import { Params as StakingParams } from 'cosmjs-types/cosmos/staking/v1beta1/staking'
 import { Params as MintParams } from 'cosmjs-types/cosmos/mint/v1beta1/mint'
 import { Params as DistributionParams } from 'cosmjs-types/cosmos/distribution/v1beta1/distribution'
@@ -60,16 +58,6 @@ export const paramsSlice = createSlice({
       state.govTallyParams = action.payload
     },
   },
-
-  // Special reducer for hydrating the state. Special case for next-redux-wrapper
-  extraReducers: {
-    [HYDRATE]: (state, action) => {
-      return {
-        ...state,
-        ...action.payload.params,
-      }
-    },
-  },
 })
 
 export const {
@@ -82,18 +70,15 @@ export const {
   setGovTallyParams,
 } = paramsSlice.actions
 
-export const selectStakingParams = (state: AppState) =>
-  state.params.stakingParams
-export const selectMintParams = (state: AppState) => state.params.mintParams
-export const selectDistributionParams = (state: AppState) =>
+export const selectStakingParams = (state: any) => state.params.stakingParams
+export const selectMintParams = (state: any) => state.params.mintParams
+export const selectDistributionParams = (state: any) =>
   state.params.distributionParams
-export const selectSlashingParams = (state: AppState) =>
-  state.params.slashingParams
-export const selectGovVotingParams = (state: AppState) =>
+export const selectSlashingParams = (state: any) => state.params.slashingParams
+export const selectGovVotingParams = (state: any) =>
   state.params.govVotingParams
-export const selectGovDepositParams = (state: AppState) =>
+export const selectGovDepositParams = (state: any) =>
   state.params.govDepositParams
-export const selectGovTallyParams = (state: AppState) =>
-  state.params.govTallyParams
+export const selectGovTallyParams = (state: any) => state.params.govTallyParams
 
 export default paramsSlice.reducer

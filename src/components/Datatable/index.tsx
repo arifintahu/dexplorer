@@ -1,32 +1,13 @@
 import { useState, useMemo, useEffect } from 'react'
 import {
-  Table,
-  Thead,
-  Tbody,
-  Tr,
-  Th,
-  Td,
-  chakra,
-  Flex,
-  Tooltip,
-  IconButton,
-  NumberInput,
-  NumberInputField,
-  NumberInputStepper,
-  NumberIncrementStepper,
-  NumberDecrementStepper,
-  Select,
-  Text,
-  SkeletonText,
-} from '@chakra-ui/react'
-import {
-  ArrowLeftIcon,
-  ArrowRightIcon,
-  ChevronLeftIcon,
-  ChevronRightIcon,
-  TriangleDownIcon,
-  TriangleUpIcon,
-} from '@chakra-ui/icons'
+  FiChevronLeft,
+  FiChevronRight,
+  FiChevronsLeft,
+  FiChevronsRight,
+  FiChevronUp,
+  FiChevronDown,
+} from 'react-icons/fi'
+import { useTheme } from '@/theme/ThemeProvider'
 import {
   useReactTable,
   flexRender,
@@ -52,6 +33,7 @@ export default function DataTable<Data extends object>({
   isLoading,
   onChangePagination,
 }: DataTableProps<Data>) {
+  const { colors } = useTheme()
   const [sorting, setSorting] = useState<SortingState>([])
   const [pageCount, setPageCount] = useState(0)
 
@@ -91,160 +73,149 @@ export default function DataTable<Data extends object>({
   })
 
   return (
-    <>
-      <Table>
-        <Thead>
-          {table.getHeaderGroups().map((headerGroup) => (
-            <Tr key={headerGroup.id}>
-              {headerGroup.headers.map((header) => {
-                // see https://tanstack.com/table/v8/docs/api/core/column-def#meta to type this correctly
-                const meta: any = header.column.columnDef.meta
-                return (
-                  <Th
-                    key={header.id}
-                    onClick={header.column.getToggleSortingHandler()}
-                    isNumeric={meta?.isNumeric}
-                  >
-                    {flexRender(
-                      header.column.columnDef.header,
-                      header.getContext()
-                    )}
+    <div className="w-full">
+      <div className="overflow-x-auto">
+        <table className="w-full">
+          <thead>
+            {table.getHeaderGroups().map((headerGroup) => (
+              <tr key={headerGroup.id}>
+                {headerGroup.headers.map((header) => {
+                  const meta: any = header.column.columnDef.meta
+                  return (
+                    <th
+                      key={header.id}
+                      onClick={header.column.getToggleSortingHandler()}
+                      className={`px-4 py-3 text-left text-sm font-medium border-b cursor-pointer hover:opacity-70 transition-opacity ${
+                        meta?.isNumeric ? 'text-right' : ''
+                      }`}
+                      style={{
+                        color: colors.text.secondary,
+                        borderColor: colors.border.primary,
+                        backgroundColor: colors.surface,
+                      }}
+                    >
+                      <div className="flex items-center gap-2">
+                        {flexRender(
+                          header.column.columnDef.header,
+                          header.getContext()
+                        )}
+                        {header.column.getIsSorted() ? (
+                          header.column.getIsSorted() === 'desc' ? (
+                            <FiChevronDown className="w-4 h-4" />
+                          ) : (
+                            <FiChevronUp className="w-4 h-4" />
+                          )
+                        ) : null}
+                      </div>
+                    </th>
+                  )
+                })}
+              </tr>
+            ))}
+          </thead>
+          {isLoading ? (
+            <tbody>
+              {table.getRowModel().rows.map((row) => (
+                <tr key={row.id}>
+                  {row.getVisibleCells().map((cell) => {
+                    return (
+                      <td
+                        key={cell.id}
+                        className="px-4 py-3 border-b"
+                        style={{
+                          borderColor: colors.border.secondary,
+                          backgroundColor: colors.background,
+                        }}
+                      >
+                        <div
+                          className="h-4 rounded animate-pulse"
+                          style={{ backgroundColor: colors.border.primary }}
+                        ></div>
+                      </td>
+                    )
+                  })}
+                </tr>
+              ))}
+            </tbody>
+          ) : (
+            <tbody>
+              {table.getRowModel().rows.map((row) => (
+                <tr
+                  key={row.id}
+                  className="hover:opacity-70 transition-opacity"
+                >
+                  {row.getVisibleCells().map((cell) => {
+                    const meta: any = cell.column.columnDef.meta
+                    return (
+                      <td
+                        key={cell.id}
+                        className={`px-4 py-3 border-b text-sm ${
+                          meta?.isNumeric ? 'text-right' : ''
+                        }`}
+                        style={{
+                          color: colors.text.primary,
+                          borderColor: colors.border.secondary,
+                          backgroundColor: colors.background,
+                        }}
+                      >
+                        {flexRender(
+                          cell.column.columnDef.cell,
+                          cell.getContext()
+                        )}
+                      </td>
+                    )
+                  })}
+                </tr>
+              ))}
+            </tbody>
+          )}
+        </table>
+      </div>
 
-                    <chakra.span pl="4">
-                      {header.column.getIsSorted() ? (
-                        header.column.getIsSorted() === 'desc' ? (
-                          <TriangleDownIcon aria-label="sorted descending" />
-                        ) : (
-                          <TriangleUpIcon aria-label="sorted ascending" />
-                        )
-                      ) : null}
-                    </chakra.span>
-                  </Th>
-                )
-              })}
-            </Tr>
-          ))}
-        </Thead>
-        {isLoading ? (
-          <Tbody>
-            {table.getRowModel().rows.map((row) => (
-              <Tr key={row.id}>
-                {row.getVisibleCells().map((cell) => {
-                  return (
-                    <Td key={cell.id}>
-                      <SkeletonText noOfLines={1}></SkeletonText>
-                    </Td>
-                  )
-                })}
-              </Tr>
-            ))}
-          </Tbody>
-        ) : (
-          <Tbody>
-            {table.getRowModel().rows.map((row) => (
-              <Tr key={row.id}>
-                {row.getVisibleCells().map((cell) => {
-                  const meta: any = cell.column.columnDef.meta
-                  return (
-                    <Td key={cell.id} isNumeric={meta?.isNumeric}>
-                      {flexRender(
-                        cell.column.columnDef.cell,
-                        cell.getContext()
-                      )}
-                    </Td>
-                  )
-                })}
-              </Tr>
-            ))}
-          </Tbody>
-        )}
-      </Table>
-      <Flex justifyContent="space-between" m={4} alignItems="center">
-        <Flex>
-          <Tooltip label="First Page">
-            <IconButton
-              onClick={() => table.setPageIndex(0)}
-              isDisabled={!table.getCanPreviousPage()}
-              icon={<ArrowLeftIcon h={3} w={3} />}
-              mr={4}
-              aria-label="First Page"
-            />
-          </Tooltip>
-          <Tooltip label="Previous Page">
-            <IconButton
+      {/* Pagination */}
+      {pageCount > 1 && (
+        <div
+          className="flex items-center justify-between mt-6 pt-6"
+          style={{ borderTop: `1px solid ${colors.border.secondary}` }}
+        >
+          <div className="text-sm" style={{ color: colors.text.secondary }}>
+            Showing {pageIndex * pageSize + 1} to{' '}
+            {Math.min((pageIndex + 1) * pageSize, total)} of {total} items
+          </div>
+          <div className="flex items-center gap-2">
+            <button
               onClick={() => table.previousPage()}
               disabled={!table.getCanPreviousPage()}
-              icon={<ChevronLeftIcon h={6} w={6} />}
-              aria-label="Previous Page"
-            />
-          </Tooltip>
-        </Flex>
-
-        <Flex alignItems="center">
-          <Text flexShrink="0" mr={8}>
-            Page{' '}
-            <Text fontWeight="bold" as="span">
-              {table.getState().pagination.pageIndex + 1}
-            </Text>{' '}
-            of{' '}
-            <Text fontWeight="bold" as="span">
-              {table.getPageCount()}
-            </Text>
-          </Text>
-          <Text flexShrink="0">Go to page:</Text>{' '}
-          <NumberInput
-            ml={2}
-            mr={8}
-            w={28}
-            min={1}
-            max={table.getPageCount()}
-            onChange={(value) => {
-              const page = value ? Number(value) - 1 : 0
-              table.setPageIndex(page)
-            }}
-            defaultValue={pageIndex + 1}
-          >
-            <NumberInputField />
-            <NumberInputStepper>
-              <NumberIncrementStepper />
-              <NumberDecrementStepper />
-            </NumberInputStepper>
-          </NumberInput>
-          <Select
-            w={32}
-            value={table.getState().pagination.pageSize}
-            onChange={(e) => {
-              table.setPageSize(Number(e.target.value))
-            }}
-          >
-            {[10, 20, 30, 40, 50].map((pageSize) => (
-              <option key={pageSize} value={pageSize}>
-                Show {pageSize}
-              </option>
-            ))}
-          </Select>
-        </Flex>
-
-        <Flex>
-          <Tooltip label="Next Page">
-            <IconButton
+              className="px-3 py-1 rounded border disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              style={{
+                borderColor: colors.border.secondary,
+                backgroundColor: colors.background,
+                color: colors.text.primary,
+              }}
+            >
+              Previous
+            </button>
+            <span
+              className="px-3 py-1 text-sm"
+              style={{ color: colors.text.secondary }}
+            >
+              Page {pageIndex + 1} of {pageCount}
+            </span>
+            <button
               onClick={() => table.nextPage()}
               disabled={!table.getCanNextPage()}
-              icon={<ChevronRightIcon h={6} w={6} />}
-              aria-label="Next Page"
-            />
-          </Tooltip>
-          <Tooltip label="Last Page">
-            <IconButton
-              onClick={() => table.setPageIndex(table.getPageCount() - 1)}
-              disabled={!table.getCanNextPage()}
-              icon={<ArrowRightIcon h={3} w={3} />}
-              ml={4}
-              aria-label="Last Page"
-            />
-          </Tooltip>
-        </Flex>
-      </Flex>
-    </>
+              className="px-3 py-1 rounded border disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              style={{
+                borderColor: colors.border.secondary,
+                backgroundColor: colors.background,
+                color: colors.text.primary,
+              }}
+            >
+              Next
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
   )
 }
