@@ -1,9 +1,10 @@
-import { Box, useColorMode, useColorModeValue } from '@chakra-ui/react'
+// Updated to remove Chakra UI dependencies
 import SyntaxHighlighter from 'react-syntax-highlighter'
 import {
   atomOneLight,
   atomOneDark,
 } from 'react-syntax-highlighter/dist/cjs/styles/hljs'
+import { useTheme } from '@/theme/ThemeProvider'
 
 const CodeBlock = ({
   language,
@@ -12,26 +13,25 @@ const CodeBlock = ({
   language: string
   codeString: string
 }) => {
-  const { colorMode } = useColorMode()
-  const bgColor = useColorModeValue('light-container', 'dark-container')
+  const { colorScheme, colors } = useTheme()
+  
   return (
-    <Box
-      as="pre"
-      bg={bgColor}
-      borderRadius={4}
-      p={4}
-      border={'1px'}
-      borderColor={useColorModeValue('gray.300', 'gray.700')}
-      overflowX="auto"
+    <div
+      className="rounded p-4 border overflow-x-auto"
+      style={{
+        backgroundColor: colors.surface,
+        borderColor: colors.border.primary,
+        boxShadow: colors.shadow.sm,
+      }}
     >
       <SyntaxHighlighter
         language={language}
-        style={colorMode === 'dark' ? atomOneDark : atomOneLight}
+        style={colorScheme === 'dark' ? atomOneDark : atomOneLight}
         customStyle={{ background: 'none' }}
       >
         {codeString}
       </SyntaxHighlighter>
-    </Box>
+    </div>
   )
 }
 

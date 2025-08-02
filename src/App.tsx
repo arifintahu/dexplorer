@@ -16,6 +16,7 @@ import Parameters from '@/pages/Parameters'
 import BlockDetail from '@/pages/BlockDetail'
 import TransactionDetail from '@/pages/TransactionDetail'
 import AccountDetail from '@/pages/AccountDetail'
+import ProposalDetail from '@/pages/ProposalDetail'
 
 function AppContent() {
   const isConnected = useSelector(
@@ -36,6 +37,7 @@ function AppContent() {
         <Route path="/blocks/:height" element={<BlockDetail />} />
         <Route path="/validators" element={<Validators />} />
         <Route path="/proposals" element={<Proposals />} />
+        <Route path="/proposals/:id" element={<ProposalDetail />} />
         <Route path="/txs" element={<Transactions />} />
         <Route path="/txs/:hash" element={<TransactionDetail />} />
         <Route path="/accounts" element={<Accounts />} />
