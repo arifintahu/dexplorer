@@ -1,5 +1,5 @@
 import { MsgSend } from 'cosmjs-types/cosmos/bank/v1beta1/tx'
-import { MsgWithdrawDelegatorReward } from 'cosmjs-types/cosmos/distribution/v1beta1/tx'
+import { MsgCommunityPoolSpend, MsgWithdrawDelegatorReward } from 'cosmjs-types/cosmos/distribution/v1beta1/tx'
 import { MsgDelegate } from 'cosmjs-types/cosmos/staking/v1beta1/tx'
 import { MsgUpdateClient } from 'cosmjs-types/ibc/core/client/v1/tx'
 import {
@@ -25,6 +25,7 @@ const TYPE = {
   MsgGrant: '/cosmos.authz.v1beta1.MsgGrant',
   MsgRevoke: '/cosmos.authz.v1beta1.MsgRevoke',
   MsgTransfer: '/ibc.applications.transfer.v1.MsgTransfer',
+  MsgCommunityPoolSpend: '/cosmos.distribution.v1beta1.MsgCommunityPoolSpend',
 }
 
 export interface DecodeMsg {
@@ -64,6 +65,9 @@ export const decodeMsg = (typeUrl: string, value: Uint8Array): DecodeMsg => {
       break
     case TYPE.MsgTransfer:
       data = MsgTransfer.decode(value)
+      break
+    case TYPE.MsgCommunityPoolSpend:
+      data = MsgCommunityPoolSpend.decode(value)
       break
     default:
       break
