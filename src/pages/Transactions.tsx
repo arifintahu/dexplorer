@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { useSelector } from 'react-redux'
 import {
   FiChevronRight,
@@ -28,6 +28,8 @@ const Transactions: React.FC = () => {
   // Get persistent transaction data from Redux store
   const transactions = useSelector(selectTransactions)
   const { connectState } = useSelector((state: RootState) => state.connect)
+
+  const navigate = useNavigate()
 
   // Helper function to get transaction status
   const getTransactionStatus = (result: any): 'success' | 'failed' => {
@@ -104,7 +106,7 @@ const Transactions: React.FC = () => {
     setTimeout(() => {
       setIsSearching(false)
       // Navigate to transaction detail page
-      window.location.href = `/txs/${searchHash}`
+      navigate(`/txs/${searchHash}`)
     }, 1000)
   }
 
