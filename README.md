@@ -43,9 +43,7 @@
 - [Installation](#installation)
 - [Usage](#usage)
 - [Project Structure](#project-structure)
-- [API Documentation](#api-documentation)
 - [Contributing](#contributing)
-- [Roadmap](#roadmap)
 - [FAQ](#faq)
 - [License](#license)
 - [Contributors](#contributors)
@@ -64,7 +62,13 @@ This makes it perfect for:
 
 ### Screenshots
 
-> 📸 **Coming Soon**: Screenshots of the web application will be added here
+#### 🏠 Home Dashboard
+![Dexplorer Home Dashboard](./public/dexplorer2.png)
+*Real-time blockchain explorer dashboard showing chain statistics, latest blocks, and transactions*
+
+#### 🔗 Connect to Blockchain
+![Connect to Blockchain](./public/dexplorer1.png)
+*Simple connection interface to connect to any Cosmos SDK RPC endpoint*
 
 ### Live Demo
 
