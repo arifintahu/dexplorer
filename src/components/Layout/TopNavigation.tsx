@@ -103,7 +103,7 @@ const TopNavigation: React.FC<TopNavigationProps> = ({ onMenuClick }) => {
     } else if (txhashRegex.test(searchQuery)) {
       navigate(`/txs/${searchQuery}`)
     } else if (addrRegex.test(searchQuery)) {
-      navigate(`/account/${searchQuery}`)
+      navigate(`/accounts/${searchQuery}`)
     } else {
       toast.error('Invalid search query format')
     }
