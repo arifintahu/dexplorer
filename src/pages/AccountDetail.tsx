@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { useSelector } from 'react-redux'
 import {
@@ -6,7 +6,9 @@ import {
   FiHome,
   FiUser,
   FiDollarSign,
-  FiActivity,
+  FiChevronLeft,
+  FiChevronsLeft,
+  FiChevronsRight,
 } from 'react-icons/fi'
 import { useTheme } from '@/theme/ThemeProvider'
 import {
@@ -16,11 +18,12 @@ import {
   getTxsBySender,
 } from '@/rpc/query'
 import { selectTmClient } from '@/store/connectSlice'
-import { Account, Coin, IndexedTx } from '@cosmjs/stargate'
+import { Account, Coin } from '@cosmjs/stargate'
 import { Tx } from 'cosmjs-types/cosmos/tx/v1beta1/tx'
-import { timeFromNow, displayDate, getTypeMsg } from '@/utils/helper'
+import { getTypeMsg, trimHash } from '../utils/helper'
 import { decodeMsg, DecodeMsg } from '@/encoding'
 import { toast } from 'sonner'
+import { TxResponse } from '@cosmjs/tendermint-rpc'
 
 export default function AccountDetail() {
   const { address } = useParams<{ address: string }>()
@@ -29,11 +32,15 @@ export default function AccountDetail() {
   const [account, setAccount] = useState<Account | null>(null)
   const [balances, setBalances] = useState<Coin[]>([])
   const [stakedBalance, setStakedBalance] = useState<Coin | null>(null)
-  const [transactions, setTransactions] = useState<IndexedTx[]>([])
+  const [transactions, setTransactions] = useState<TxResponse[]>([])
   const [decodedTxs, setDecodedTxs] = useState<
-    { tx: IndexedTx; msgs: DecodeMsg[] }[]
+    { tx: TxResponse; msgs: DecodeMsg[] }[]
   >([])
   const [loading, setLoading] = useState(true)
+  
+  // Pagination state for IBC tokens
+  const [currentPage, setCurrentPage] = useState(1)
+  const [itemsPerPage, setItemsPerPage] = useState(10)
 
   useEffect(() => {
     if (tmClient && address) {
@@ -66,7 +73,7 @@ export default function AccountDetail() {
 
   useEffect(() => {
     if (transactions.length > 0) {
-      const decoded: { tx: IndexedTx; msgs: DecodeMsg[] }[] = []
+      const decoded: { tx: TxResponse; msgs: DecodeMsg[] }[] = []
 
       for (const tx of transactions) {
         try {
@@ -92,34 +99,148 @@ export default function AccountDetail() {
     }
   }, [transactions])
 
+  // Helper functions for Cosmos denomination conversion
+  const convertFromMicroUnits = (amount: string): string => {
+    const num = parseFloat(amount)
+    return (num / 1e6).toFixed(6)
+  }
+
+  const convertFromAttoUnits = (amount: string): string => {
+    const num = parseFloat(amount)
+    return (num / 1e18).toFixed(18)
+  }
+
+  const getBaseDenom = (denom: string): string => {
+    if (denom.startsWith('u')) {
+      return denom.slice(1) // Remove 'u' prefix
+    }
+    if (denom.startsWith('a')) {
+      return denom.slice(1) // Remove 'a' prefix
+    }
+    return denom
+  }
+
+  const getConvertedAmount = (amount: string, denom: string): { converted: string; base: string } => {
+    if (denom.startsWith('u')) {
+      return {
+        converted: convertFromMicroUnits(amount),
+        base: getBaseDenom(denom)
+      }
+    }
+    if (denom.startsWith('a')) {
+      return {
+        converted: convertFromAttoUnits(amount),
+        base: getBaseDenom(denom)
+      }
+    }
+    return {
+      converted: amount,
+      base: denom
+    }
+  }
+
   const formatBalance = (balance: Coin) => {
-    return (
-      <div className="flex items-center gap-2">
-        <span style={{ color: colors.text.primary }}>{balance.amount}</span>
-        <span style={{ color: colors.text.secondary }}>{balance.denom}</span>
-      </div>
-    )
+    const { converted, base } = getConvertedAmount(balance.amount, balance.denom)
+    
+    const formatAmount = (amount: string) => {
+      const num = parseFloat(amount)
+      if (num >= 1e9) return (num / 1e9).toFixed(2) + 'B'
+      if (num >= 1e6) return (num / 1e6).toFixed(2) + 'M'
+      if (num >= 1e3) return (num / 1e3).toFixed(2) + 'K'
+      return parseFloat(amount).toLocaleString(undefined, { maximumFractionDigits: 6 })
+    }
+
+    const formatDenom = (denom: string) => {
+      if (denom.startsWith('ibc/')) {
+        return denom.slice(0, 12) + '...'
+      }
+      return denom
+    }
+
+    return {
+      amount: balance.amount,
+      convertedAmount: converted,
+      formattedAmount: formatAmount(converted),
+      rawFormattedAmount: formatAmount(balance.amount),
+      denom: balance.denom,
+      baseDenom: base,
+      formattedDenom: formatDenom(balance.denom),
+      isIBC: balance.denom.startsWith('ibc/'),
+      isConverted: balance.denom.startsWith('u') || balance.denom.startsWith('a')
+    }
+  }
+
+  // Separate native and IBC tokens
+  const nativeTokens = balances.filter(balance => !balance.denom.includes('/'))
+  const ibcTokens = balances.filter(balance => balance.denom.includes('/'))
+  
+  // Find native token in staked balance
+  const nativeStakedToken = stakedBalance && !stakedBalance.denom.includes('/') ? stakedBalance : null
+
+  // Pagination calculations for IBC tokens
+  const totalPages = Math.ceil(ibcTokens.length / itemsPerPage)
+  const startIndex = (currentPage - 1) * itemsPerPage
+  const endIndex = startIndex + itemsPerPage
+  const paginatedIbcTokens = ibcTokens.slice(startIndex, endIndex)
+  const showingStart = ibcTokens.length > 0 ? startIndex + 1 : 0
+  const showingEnd = Math.min(endIndex, ibcTokens.length)
+
+  // Reset to first page when items per page changes
+  useEffect(() => {
+    setCurrentPage(1)
+  }, [itemsPerPage])
+
+  // Reset to first page when IBC tokens change
+  useEffect(() => {
+    if (currentPage > totalPages && totalPages > 0) {
+      setCurrentPage(1)
+    }
+  }, [ibcTokens.length, totalPages, currentPage])
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(Math.max(1, Math.min(page, totalPages)))
+  }
+
+  const handleItemsPerPageChange = (newItemsPerPage: number) => {
+    setItemsPerPage(newItemsPerPage)
   }
 
   const renderTransactionMessages = (msgs: DecodeMsg[]) => {
     if (msgs.length === 0) return 'No messages'
 
-    return (
-      <div className="space-y-1">
-        {msgs.map((msg, index) => (
+    if (msgs.length === 1) {
+      return (
+        <span
+          className="px-2 py-1 rounded text-xs font-medium"
+          style={{
+            backgroundColor: colors.primary + '20',
+            color: colors.primary,
+          }}
+        >
+          {getTypeMsg(msgs[0].typeUrl)}
+        </span>
+      )
+    } else {
+      return (
+        <div className="flex items-center gap-2">
           <span
-            key={index}
-            className="inline-block px-2 py-1 rounded text-xs font-medium mr-1 mb-1"
+            className="px-2 py-1 rounded text-xs font-medium"
             style={{
-              backgroundColor: colors.status.info + '20',
-              color: colors.status.info,
+              backgroundColor: colors.primary + '20',
+              color: colors.primary,
             }}
           >
-            {getTypeMsg(msg.typeUrl)}
+            {getTypeMsg(msgs[0].typeUrl)}
           </span>
-        ))}
-      </div>
-    )
+          <span
+            className="text-xs font-medium"
+            style={{ color: colors.primary }}
+          >
+            +{msgs.length - 1}
+          </span>
+        </div>
+      )
+    }
   }
 
   if (loading) {
@@ -277,66 +398,520 @@ export default function AccountDetail() {
           style={{ borderColor: colors.border.secondary }}
         ></div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {/* Available Balances */}
-          <div
-            className="p-4 rounded-lg"
-            style={{
-              backgroundColor: colors.background,
-              border: `1px solid ${colors.border.secondary}`,
-            }}
-          >
-            <div className="flex items-center gap-2 mb-3">
-              <FiDollarSign
-                className="w-5 h-5"
-                style={{ color: colors.status.success }}
-              />
-              <h3
-                className="font-medium"
-                style={{ color: colors.text.primary }}
-              >
-                Available
-              </h3>
-            </div>
-            {balances.length > 0 ? (
-              <div className="space-y-2">
-                {balances.map((balance, index) => (
-                  <div key={index}>{formatBalance(balance)}</div>
-                ))}
+        <div className="space-y-6">
+          {/* Native Token Section */}
+          {(nativeTokens.length > 0 || nativeStakedToken) && (
+            <div>
+              <div className="flex items-center gap-2 mb-4">
+                <FiUser
+                  className="w-5 h-5"
+                  style={{ color: colors.primary }}
+                />
+                <h3
+                  className="text-lg font-medium"
+                  style={{ color: colors.text.primary }}
+                >
+                  Native Token
+                </h3>
               </div>
-            ) : (
-              <p style={{ color: colors.text.secondary }}>
-                No available balances
-              </p>
-            )}
-          </div>
+              <div
+                className="rounded-lg overflow-hidden"
+                style={{
+                  backgroundColor: colors.background,
+                  border: `1px solid ${colors.border.secondary}`,
+                }}
+              >
+                <div className="overflow-x-auto">
+                  <table className="w-full">
+                    <thead
+                      style={{
+                        backgroundColor: colors.surface,
+                        borderBottom: `1px solid ${colors.border.secondary}`,
+                      }}
+                    >
+                      <tr>
+                        <th
+                          className="text-left py-3 px-4 font-medium text-sm"
+                          style={{ color: colors.text.secondary }}
+                        >
+                          Token
+                        </th>
+                        <th
+                          className="text-right py-3 px-4 font-medium text-sm"
+                          style={{ color: colors.text.secondary }}
+                        >
+                          Available
+                        </th>
+                        <th
+                          className="text-right py-3 px-4 font-medium text-sm"
+                          style={{ color: colors.text.secondary }}
+                        >
+                          Delegated
+                        </th>
+                        <th
+                          className="text-right py-3 px-4 font-medium text-sm"
+                          style={{ color: colors.text.secondary }}
+                        >
+                          Total
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {nativeTokens.length > 0 ? (
+                        nativeTokens.map((balance, index) => {
+                          const formatted = formatBalance(balance)
+                          const stakedForThisToken = nativeStakedToken && nativeStakedToken.denom === balance.denom ? nativeStakedToken : null
+                          const stakedFormatted = stakedForThisToken ? formatBalance(stakedForThisToken) : null
+                          const totalAmount = stakedForThisToken 
+                            ? (parseFloat(balance.amount) + parseFloat(stakedForThisToken.amount)).toString()
+                            : balance.amount
+                          const totalFormatted = formatBalance({ amount: totalAmount, denom: balance.denom })
+                          
+                          return (
+                            <tr
+                              key={index}
+                              className="border-b hover:bg-opacity-50 transition-colors"
+                              style={{
+                                borderColor: colors.border.secondary,
+                                backgroundColor: 'transparent',
+                              }}
+                              onMouseEnter={(e) => {
+                                e.currentTarget.style.backgroundColor = colors.surface + '50'
+                              }}
+                              onMouseLeave={(e) => {
+                                e.currentTarget.style.backgroundColor = 'transparent'
+                              }}
+                            >
+                              <td className="py-3 px-4">
+                                <div className="flex flex-col">
+                                  <span
+                                    className="font-mono text-sm font-semibold"
+                                    style={{ color: colors.text.primary }}
+                                  >
+                                    {formatted.baseDenom.toUpperCase()}
+                                  </span>
+                                  {formatted.isConverted && (
+                                    <span
+                                      className="text-xs font-mono"
+                                      style={{ color: colors.text.tertiary }}
+                                      title={`Raw denomination: ${formatted.denom}`}
+                                    >
+                                      ({formatted.denom})
+                                    </span>
+                                  )}
+                                </div>
+                              </td>
+                              <td className="py-3 px-4 text-right">
+                                <div className="flex flex-col items-end">
+                                  <span
+                                    className="font-semibold text-lg"
+                                    style={{ color: colors.status.success }}
+                                  >
+                                    {formatted.formattedAmount}
+                                  </span>
+                                  {formatted.isConverted && (
+                                    <span
+                                      className="text-xs font-mono"
+                                      style={{ color: colors.text.tertiary }}
+                                      title={`Raw amount: ${formatted.amount}`}
+                                    >
+                                      Raw: {formatted.rawFormattedAmount}
+                                    </span>
+                                  )}
+                                </div>
+                              </td>
+                              <td className="py-3 px-4 text-right">
+                                <div className="flex flex-col items-end">
+                                  <span
+                                    className="font-semibold text-lg"
+                                    style={{ color: colors.status.warning }}
+                                  >
+                                    {stakedFormatted ? stakedFormatted.formattedAmount : '0'}
+                                  </span>
+                                  {stakedFormatted && stakedFormatted.isConverted && (
+                                    <span
+                                      className="text-xs font-mono"
+                                      style={{ color: colors.text.tertiary }}
+                                      title={`Raw amount: ${stakedFormatted.amount}`}
+                                    >
+                                      Raw: {stakedFormatted.rawFormattedAmount}
+                                    </span>
+                                  )}
+                                </div>
+                              </td>
+                              <td className="py-3 px-4 text-right">
+                                <div className="flex flex-col items-end">
+                                  <span
+                                    className="font-bold text-lg"
+                                    style={{ color: colors.text.primary }}
+                                  >
+                                    {totalFormatted.formattedAmount}
+                                  </span>
+                                  {totalFormatted.isConverted && (
+                                    <span
+                                      className="text-xs font-mono"
+                                      style={{ color: colors.text.tertiary }}
+                                      title={`Raw total: ${totalAmount}`}
+                                    >
+                                      Raw: {totalFormatted.rawFormattedAmount}
+                                    </span>
+                                  )}
+                                </div>
+                              </td>
+                            </tr>
+                          )
+                        })
+                      ) : nativeStakedToken ? (
+                        <tr
+                          className="border-b hover:bg-opacity-50 transition-colors"
+                          style={{
+                            borderColor: colors.border.secondary,
+                            backgroundColor: 'transparent',
+                          }}
+                          onMouseEnter={(e) => {
+                            e.currentTarget.style.backgroundColor = colors.surface + '50'
+                          }}
+                          onMouseLeave={(e) => {
+                            e.currentTarget.style.backgroundColor = 'transparent'
+                          }}
+                        >
+                          <td className="py-3 px-4">
+                            <div className="flex flex-col">
+                              <span
+                                className="font-mono text-sm font-semibold"
+                                style={{ color: colors.text.primary }}
+                              >
+                                {formatBalance(nativeStakedToken).baseDenom.toUpperCase()}
+                              </span>
+                              {formatBalance(nativeStakedToken).isConverted && (
+                                <span
+                                  className="text-xs font-mono"
+                                  style={{ color: colors.text.tertiary }}
+                                  title={`Raw denomination: ${nativeStakedToken.denom}`}
+                                >
+                                  ({nativeStakedToken.denom})
+                                </span>
+                              )}
+                            </div>
+                          </td>
+                          <td className="py-3 px-4 text-right">
+                            <span
+                              className="font-semibold text-lg"
+                              style={{ color: colors.status.success }}
+                            >
+                              0
+                            </span>
+                          </td>
+                          <td className="py-3 px-4 text-right">
+                            <div className="flex flex-col items-end">
+                              <span
+                                className="font-semibold text-lg"
+                                style={{ color: colors.status.warning }}
+                              >
+                                {formatBalance(nativeStakedToken).formattedAmount}
+                              </span>
+                              {formatBalance(nativeStakedToken).isConverted && (
+                                <span
+                                  className="text-xs font-mono"
+                                  style={{ color: colors.text.tertiary }}
+                                  title={`Raw amount: ${nativeStakedToken.amount}`}
+                                >
+                                  Raw: {formatBalance(nativeStakedToken).rawFormattedAmount}
+                                </span>
+                              )}
+                            </div>
+                          </td>
+                          <td className="py-3 px-4 text-right">
+                            <div className="flex flex-col items-end">
+                              <span
+                                className="font-bold text-lg"
+                                style={{ color: colors.text.primary }}
+                              >
+                                {formatBalance(nativeStakedToken).formattedAmount}
+                              </span>
+                              {formatBalance(nativeStakedToken).isConverted && (
+                                <span
+                                  className="text-xs font-mono"
+                                  style={{ color: colors.text.tertiary }}
+                                  title={`Raw amount: ${nativeStakedToken.amount}`}
+                                >
+                                  Raw: {formatBalance(nativeStakedToken).rawFormattedAmount}
+                                </span>
+                              )}
+                            </div>
+                          </td>
+                        </tr>
+                      ) : null}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          )}
 
-          {/* Staked Balance */}
-          <div
-            className="p-4 rounded-lg"
-            style={{
-              backgroundColor: colors.background,
-              border: `1px solid ${colors.border.secondary}`,
-            }}
-          >
-            <div className="flex items-center gap-2 mb-3">
-              <FiActivity
-                className="w-5 h-5"
-                style={{ color: colors.status.warning }}
+          {/* Other Available Tokens (IBC) */}
+          {ibcTokens.length > 0 && (
+            <div>
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-2">
+                  <FiDollarSign
+                    className="w-5 h-5"
+                    style={{ color: colors.status.info }}
+                  />
+                  <h3
+                    className="text-lg font-medium"
+                    style={{ color: colors.text.primary }}
+                  >
+                    Other Available Tokens ({ibcTokens.length})
+                  </h3>
+                </div>
+                <div className="flex items-center gap-4">
+                  <div className="flex items-center gap-2">
+                    <span
+                      className="text-sm"
+                      style={{ color: colors.text.secondary }}
+                    >
+                      Show:
+                    </span>
+                    <select
+                      value={itemsPerPage}
+                      onChange={(e) => handleItemsPerPageChange(Number(e.target.value))}
+                      className="px-2 py-1 rounded text-sm border"
+                      style={{
+                        backgroundColor: colors.surface,
+                        borderColor: colors.border.secondary,
+                        color: colors.text.primary,
+                      }}
+                    >
+                      <option value={5}>5</option>
+                      <option value={10}>10</option>
+                      <option value={20}>20</option>
+                    </select>
+                  </div>
+                  <span
+                    className="text-sm"
+                    style={{ color: colors.text.secondary }}
+                  >
+                    Showing {showingStart}-{showingEnd} of {ibcTokens.length}
+                  </span>
+                </div>
+              </div>
+              <div
+                className="rounded-lg overflow-hidden"
+                style={{
+                  backgroundColor: colors.background,
+                  border: `1px solid ${colors.border.secondary}`,
+                }}
+              >
+                <div className="overflow-x-auto">
+                  <table className="w-full">
+                    <thead
+                      style={{
+                        backgroundColor: colors.surface,
+                        borderBottom: `1px solid ${colors.border.secondary}`,
+                      }}
+                    >
+                      <tr>
+                        <th
+                          className="text-left py-3 px-4 font-medium text-sm"
+                          style={{ color: colors.text.secondary }}
+                        >
+                          Token
+                        </th>
+                        <th
+                          className="text-right py-3 px-4 font-medium text-sm"
+                          style={{ color: colors.text.secondary }}
+                        >
+                          Amount
+                        </th>
+                        <th
+                          className="text-right py-3 px-4 font-medium text-sm"
+                          style={{ color: colors.text.secondary }}
+                        >
+                          Raw Amount
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                    {paginatedIbcTokens.map((balance, index) => {
+                        const formatted = formatBalance(balance)
+                        return (
+                          <tr
+                            key={index}
+                            className="border-b hover:bg-opacity-50 transition-colors"
+                            style={{
+                              borderColor: colors.border.secondary,
+                              backgroundColor: 'transparent',
+                            }}
+                            onMouseEnter={(e) => {
+                              e.currentTarget.style.backgroundColor = colors.surface + '50'
+                            }}
+                            onMouseLeave={(e) => {
+                              e.currentTarget.style.backgroundColor = 'transparent'
+                            }}
+                          >
+                            <td className="py-3 px-4">
+                              <div className="flex items-center gap-2">
+                                <span
+                                  className="px-2 py-1 rounded text-xs font-medium"
+                                  style={{
+                                    backgroundColor: colors.status.info + '20',
+                                    color: colors.status.info,
+                                  }}
+                                >
+                                  IBC
+                                </span>
+                                <span
+                                  className="font-mono text-sm"
+                                  style={{ color: colors.text.primary }}
+                                  title={formatted.denom}
+                                >
+                                  {formatted.formattedDenom}
+                                </span>
+                              </div>
+                            </td>
+                            <td
+                              className="py-3 px-4 text-right font-semibold"
+                              style={{ color: colors.text.primary }}
+                            >
+                              {formatted.formattedAmount}
+                            </td>
+                            <td
+                              className="py-3 px-4 text-right font-mono text-sm"
+                              style={{ color: colors.text.secondary }}
+                              title={formatted.amount}
+                            >
+                              {formatted.amount.length > 12
+                                ? formatted.amount.slice(0, 12) + '...'
+                                : formatted.amount}
+                            </td>
+                          </tr>
+                        )
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+                
+                {/* Pagination Controls */}
+                {totalPages > 1 && (
+                  <div className="flex items-center justify-between mt-4 pt-4" style={{ borderTop: `1px solid ${colors.border.secondary}` }}>
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={() => handlePageChange(1)}
+                        disabled={currentPage === 1}
+                        className="p-2 rounded border disabled:opacity-50 disabled:cursor-not-allowed hover:bg-opacity-80 transition-colors"
+                        style={{
+                          backgroundColor: currentPage === 1 ? colors.surface : colors.background,
+                          borderColor: colors.border.secondary,
+                          color: colors.text.primary,
+                        }}
+                        title="First page"
+                      >
+                        <FiChevronsLeft className="w-4 h-4" />
+                      </button>
+                      <button
+                        onClick={() => handlePageChange(currentPage - 1)}
+                        disabled={currentPage === 1}
+                        className="p-2 rounded border disabled:opacity-50 disabled:cursor-not-allowed hover:bg-opacity-80 transition-colors"
+                        style={{
+                          backgroundColor: currentPage === 1 ? colors.surface : colors.background,
+                          borderColor: colors.border.secondary,
+                          color: colors.text.primary,
+                        }}
+                        title="Previous page"
+                      >
+                        <FiChevronLeft className="w-4 h-4" />
+                      </button>
+                    </div>
+                    
+                    <div className="flex items-center gap-1">
+                      {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                        let pageNum
+                        if (totalPages <= 5) {
+                          pageNum = i + 1
+                        } else if (currentPage <= 3) {
+                          pageNum = i + 1
+                        } else if (currentPage >= totalPages - 2) {
+                          pageNum = totalPages - 4 + i
+                        } else {
+                          pageNum = currentPage - 2 + i
+                        }
+                        
+                        return (
+                          <button
+                            key={pageNum}
+                            onClick={() => handlePageChange(pageNum)}
+                            className="px-3 py-1 rounded border text-sm hover:bg-opacity-80 transition-colors"
+                            style={{
+                              backgroundColor: currentPage === pageNum ? colors.primary : colors.background,
+                              borderColor: currentPage === pageNum ? colors.primary : colors.border.secondary,
+                              color: currentPage === pageNum ? colors.background : colors.text.primary,
+                            }}
+                          >
+                            {pageNum}
+                          </button>
+                        )
+                      })}
+                    </div>
+                    
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={() => handlePageChange(currentPage + 1)}
+                        disabled={currentPage === totalPages}
+                        className="p-2 rounded border disabled:opacity-50 disabled:cursor-not-allowed hover:bg-opacity-80 transition-colors"
+                        style={{
+                          backgroundColor: currentPage === totalPages ? colors.surface : colors.background,
+                          borderColor: colors.border.secondary,
+                          color: colors.text.primary,
+                        }}
+                        title="Next page"
+                      >
+                        <FiChevronRight className="w-4 h-4" />
+                      </button>
+                      <button
+                        onClick={() => handlePageChange(totalPages)}
+                        disabled={currentPage === totalPages}
+                        className="p-2 rounded border disabled:opacity-50 disabled:cursor-not-allowed hover:bg-opacity-80 transition-colors"
+                        style={{
+                          backgroundColor: currentPage === totalPages ? colors.surface : colors.background,
+                          borderColor: colors.border.secondary,
+                          color: colors.text.primary,
+                        }}
+                        title="Last page"
+                      >
+                        <FiChevronsRight className="w-4 h-4" />
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* Empty State */}
+          {nativeTokens.length === 0 && !nativeStakedToken && ibcTokens.length === 0 && (
+            <div
+              className="text-center py-12 rounded-lg"
+              style={{
+                backgroundColor: colors.background,
+                border: `1px solid ${colors.border.secondary}`,
+              }}
+            >
+              <FiDollarSign
+                className="w-16 h-16 mx-auto mb-4"
+                style={{ color: colors.text.tertiary }}
               />
               <h3
-                className="font-medium"
-                style={{ color: colors.text.primary }}
+                className="text-lg font-medium mb-2"
+                style={{ color: colors.text.secondary }}
               >
-                Staked
+                No Balances Found
               </h3>
+              <p style={{ color: colors.text.tertiary }}>
+                This account has no available or staked tokens
+              </p>
             </div>
-            {stakedBalance ? (
-              formatBalance(stakedBalance)
-            ) : (
-              <p style={{ color: colors.text.secondary }}>No staked balance</p>
-            )}
-          </div>
+          )}
         </div>
       </div>
 
@@ -407,7 +982,7 @@ export default function AccountDetail() {
                         className="font-mono text-sm hover:opacity-70 transition-opacity"
                         style={{ color: colors.primary }}
                       >
-                        {tx.hash.slice(0, 8)}...{tx.hash.slice(-8)}
+                        {trimHash(tx.hash)}
                       </Link>
                     </td>
                     <td className="py-3 px-0">
@@ -427,16 +1002,16 @@ export default function AccountDetail() {
                         className="px-2 py-1 rounded text-xs font-medium"
                         style={{
                           backgroundColor:
-                            tx.code === 0
+                            tx.result.code === 0
                               ? colors.status.success + '20'
                               : colors.status.error + '20',
                           color:
-                            tx.code === 0
+                            tx.result.code === 0
                               ? colors.status.success
                               : colors.status.error,
                         }}
                       >
-                        {tx.code === 0 ? 'Success' : 'Failed'}
+                        {tx.result.code === 0 ? 'Success' : 'Failed'}
                       </span>
                     </td>
                   </tr>
