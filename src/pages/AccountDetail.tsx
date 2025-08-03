@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { useSelector } from 'react-redux'
 import {
@@ -18,11 +18,12 @@ import {
   getTxsBySender,
 } from '@/rpc/query'
 import { selectTmClient } from '@/store/connectSlice'
-import { Account, Coin, IndexedTx } from '@cosmjs/stargate'
+import { Account, Coin } from '@cosmjs/stargate'
 import { Tx } from 'cosmjs-types/cosmos/tx/v1beta1/tx'
-import { getTypeMsg } from '@/utils/helper'
+import { getTypeMsg, trimHash } from '../utils/helper'
 import { decodeMsg, DecodeMsg } from '@/encoding'
 import { toast } from 'sonner'
+import { TxResponse } from '@cosmjs/tendermint-rpc'
 
 export default function AccountDetail() {
   const { address } = useParams<{ address: string }>()
@@ -31,9 +32,9 @@ export default function AccountDetail() {
   const [account, setAccount] = useState<Account | null>(null)
   const [balances, setBalances] = useState<Coin[]>([])
   const [stakedBalance, setStakedBalance] = useState<Coin | null>(null)
-  const [transactions, setTransactions] = useState<IndexedTx[]>([])
+  const [transactions, setTransactions] = useState<TxResponse[]>([])
   const [decodedTxs, setDecodedTxs] = useState<
-    { tx: IndexedTx; msgs: DecodeMsg[] }[]
+    { tx: TxResponse; msgs: DecodeMsg[] }[]
   >([])
   const [loading, setLoading] = useState(true)
   
@@ -72,7 +73,7 @@ export default function AccountDetail() {
 
   useEffect(() => {
     if (transactions.length > 0) {
-      const decoded: { tx: IndexedTx; msgs: DecodeMsg[] }[] = []
+      const decoded: { tx: TxResponse; msgs: DecodeMsg[] }[] = []
 
       for (const tx of transactions) {
         try {
@@ -207,22 +208,39 @@ export default function AccountDetail() {
   const renderTransactionMessages = (msgs: DecodeMsg[]) => {
     if (msgs.length === 0) return 'No messages'
 
-    return (
-      <div className="space-y-1">
-        {msgs.map((msg, index) => (
+    if (msgs.length === 1) {
+      return (
+        <span
+          className="px-2 py-1 rounded text-xs font-medium"
+          style={{
+            backgroundColor: colors.primary + '20',
+            color: colors.primary,
+          }}
+        >
+          {getTypeMsg(msgs[0].typeUrl)}
+        </span>
+      )
+    } else {
+      return (
+        <div className="flex items-center gap-2">
           <span
-            key={index}
-            className="inline-block px-2 py-1 rounded text-xs font-medium mr-1 mb-1"
+            className="px-2 py-1 rounded text-xs font-medium"
             style={{
-              backgroundColor: colors.status.info + '20',
-              color: colors.status.info,
+              backgroundColor: colors.primary + '20',
+              color: colors.primary,
             }}
           >
-            {getTypeMsg(msg.typeUrl)}
+            {getTypeMsg(msgs[0].typeUrl)}
           </span>
-        ))}
-      </div>
-    )
+          <span
+            className="text-xs font-medium"
+            style={{ color: colors.primary }}
+          >
+            +{msgs.length - 1}
+          </span>
+        </div>
+      )
+    }
   }
 
   if (loading) {
@@ -964,7 +982,7 @@ export default function AccountDetail() {
                         className="font-mono text-sm hover:opacity-70 transition-opacity"
                         style={{ color: colors.primary }}
                       >
-                        {tx.hash.slice(0, 8)}...{tx.hash.slice(-8)}
+                        {trimHash(tx.hash)}
                       </Link>
                     </td>
                     <td className="py-3 px-0">
@@ -984,16 +1002,16 @@ export default function AccountDetail() {
                         className="px-2 py-1 rounded text-xs font-medium"
                         style={{
                           backgroundColor:
-                            tx.code === 0
+                            tx.result.code === 0
                               ? colors.status.success + '20'
                               : colors.status.error + '20',
                           color:
-                            tx.code === 0
+                            tx.result.code === 0
                               ? colors.status.success
                               : colors.status.error,
                         }}
                       >
-                        {tx.code === 0 ? 'Success' : 'Failed'}
+                        {tx.result.code === 0 ? 'Success' : 'Failed'}
                       </span>
                     </td>
                   </tr>
