@@ -18,7 +18,7 @@ import {
 import { formatNumber } from '@/lib/utils'
 import { trimHash, timeFromNow } from '@/utils/helper'
 import SkeletonLoader from '@/components/ui/SkeletonLoader'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 
 interface StatCardProps {
   title: string
@@ -141,6 +141,7 @@ const StatCard: React.FC<StatCardProps> = ({
 
 const RecentBlocksCard: React.FC = () => {
   const { colors } = useTheme()
+  const navigate = useNavigate()
   const persistentBlocks = useSelector(selectBlocks)
   const [recentBlocks, setRecentBlocks] = useState<any[]>([])
 
@@ -200,6 +201,7 @@ const RecentBlocksCard: React.FC = () => {
                   backgroundColor: colors.background,
                   border: `1px solid ${colors.border.secondary}`,
                 }}
+                onClick={() => navigate(`/blocks/${block.height}`)}
                 onMouseEnter={(e) => {
                   e.currentTarget.style.backgroundColor = `${colors.primary}08`
                   e.currentTarget.style.borderColor = `${colors.primary}30`
