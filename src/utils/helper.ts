@@ -44,7 +44,7 @@ export function trimHash(txHash: Uint8Array | string, length?: number): string {
     const last = hash.slice(hash.length - 5, hash.length)
     return first + '...' + last
   } else {
-    hash = txHash
+    hash = txHash.toUpperCase()
     const trimLength = length || 8
     if (hash.length <= trimLength * 2) {
       return hash

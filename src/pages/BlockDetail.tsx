@@ -279,7 +279,7 @@ export default function BlockDetail() {
                   className="py-3 font-mono text-sm"
                   style={{ color: colors.text.primary }}
                 >
-                  {block.id ? trimHash(block.id) : 'N/A'}
+                  {block.id ? block.id : 'N/A'}
                 </td>
               </tr>
               <tr>
@@ -365,7 +365,7 @@ export default function BlockDetail() {
                         className="hover:opacity-70 transition-opacity font-mono text-sm"
                         style={{ color: colors.primary }}
                       >
-                        {trimHash(toHex(tx.hash))}
+                        {trimHash(tx.hash)}
                       </Link>
                     </td>
                     <td className="py-3 px-4">
