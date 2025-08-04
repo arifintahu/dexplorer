@@ -20,10 +20,12 @@ import {
 import { selectTmClient } from '@/store/connectSlice'
 import { Account, Coin } from '@cosmjs/stargate'
 import { Tx } from 'cosmjs-types/cosmos/tx/v1beta1/tx'
-import { getTypeMsg, trimHash } from '../utils/helper'
+import { getTypeMsg, trimHash } from '@/utils/helper'
+import { formatAmount, formatDenom, getConvertedAmount } from '@/utils/cosmos'
 import { decodeMsg, DecodeMsg } from '@/encoding'
 import { toast } from 'sonner'
 import { TxResponse } from '@cosmjs/tendermint-rpc'
+import { toHex } from '@cosmjs/encoding'
 
 export default function AccountDetail() {
   const { address } = useParams<{ address: string }>()
@@ -99,63 +101,10 @@ export default function AccountDetail() {
     }
   }, [transactions])
 
-  // Helper functions for Cosmos denomination conversion
-  const convertFromMicroUnits = (amount: string): string => {
-    const num = parseFloat(amount)
-    return (num / 1e6).toFixed(6)
-  }
 
-  const convertFromAttoUnits = (amount: string): string => {
-    const num = parseFloat(amount)
-    return (num / 1e18).toFixed(18)
-  }
-
-  const getBaseDenom = (denom: string): string => {
-    if (denom.startsWith('u')) {
-      return denom.slice(1) // Remove 'u' prefix
-    }
-    if (denom.startsWith('a')) {
-      return denom.slice(1) // Remove 'a' prefix
-    }
-    return denom
-  }
-
-  const getConvertedAmount = (amount: string, denom: string): { converted: string; base: string } => {
-    if (denom.startsWith('u')) {
-      return {
-        converted: convertFromMicroUnits(amount),
-        base: getBaseDenom(denom)
-      }
-    }
-    if (denom.startsWith('a')) {
-      return {
-        converted: convertFromAttoUnits(amount),
-        base: getBaseDenom(denom)
-      }
-    }
-    return {
-      converted: amount,
-      base: denom
-    }
-  }
 
   const formatBalance = (balance: Coin) => {
     const { converted, base } = getConvertedAmount(balance.amount, balance.denom)
-    
-    const formatAmount = (amount: string) => {
-      const num = parseFloat(amount)
-      if (num >= 1e9) return (num / 1e9).toFixed(2) + 'B'
-      if (num >= 1e6) return (num / 1e6).toFixed(2) + 'M'
-      if (num >= 1e3) return (num / 1e3).toFixed(2) + 'K'
-      return parseFloat(amount).toLocaleString(undefined, { maximumFractionDigits: 6 })
-    }
-
-    const formatDenom = (denom: string) => {
-      if (denom.startsWith('ibc/')) {
-        return denom.slice(0, 12) + '...'
-      }
-      return denom
-    }
 
     return {
       amount: balance.amount,
@@ -978,7 +927,7 @@ export default function AccountDetail() {
                   >
                     <td className="py-3 px-0">
                       <Link
-                        to={`/txs/${tx.hash}`}
+                        to={`/txs/${toHex(tx.hash)}`}
                         className="font-mono text-sm hover:opacity-70 transition-opacity"
                         style={{ color: colors.primary }}
                       >

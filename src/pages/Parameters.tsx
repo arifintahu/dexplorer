@@ -37,6 +37,7 @@ import {
   queryGovParams,
 } from '@/rpc/abci'
 import { displayDurationSeconds, convertRateToPercent } from '@/utils/helper'
+import { getConvertedAmount, formatAmount } from '@/utils/cosmos'
 import { fromUtf8 } from '@cosmjs/encoding'
 import { toast } from 'sonner'
 
@@ -547,7 +548,10 @@ const Parameters: React.FC = () => {
           label="Min Deposit"
           value={
             govDepositParams?.minDeposit?.[0]
-              ? `${govDepositParams.minDeposit[0].amount} ${govDepositParams.minDeposit[0].denom}`
+              ? (() => {
+                  const converted = getConvertedAmount(govDepositParams.minDeposit[0].amount, govDepositParams.minDeposit[0].denom);
+                  return `${formatAmount(converted.converted)} ${converted.base.toUpperCase()}`;
+                })()
               : 'N/A'
           }
           tooltip="Minimum deposit required to submit a proposal"

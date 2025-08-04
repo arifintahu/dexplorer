@@ -78,7 +78,7 @@ const Sidebar: React.FC<SidebarProps> = ({
             className="text-xl font-bold tracking-tight"
             style={{ color: colors.text.primary }}
           >
-            DExplorer
+            Dexplorer
           </h1>
         </div>
       </div>

@@ -16,8 +16,9 @@ import { selectTmClient } from '@/store/connectSlice'
 import { queryProposalById } from '@/rpc/abci'
 import { displayDate } from '@/utils/helper'
 import { proposalStatusList } from '@/utils/constant'
+import { formatAmount, getConvertedAmount } from '@/utils/cosmos'
 import { Proposal } from 'cosmjs-types/cosmos/gov/v1/gov'
-import { decodeMsg, DecodeMsg } from '@/encoding'
+import { decodeMsg } from '@/encoding'
 
 // Helper function to safely serialize objects with BigInt values
 const safeStringify = (obj: any, space?: number): string => {
@@ -441,7 +442,10 @@ export default function ProposalDetail() {
               <div className="flex justify-between">
                 <span style={{ color: colors.text.secondary }}>Total Deposit:</span>
                 <span style={{ color: colors.text.primary }}>
-                  {proposal.totalDeposit[0].amount} {proposal.totalDeposit[0].denom}
+                  {(() => {
+                    const converted = getConvertedAmount(proposal.totalDeposit[0].amount, proposal.totalDeposit[0].denom);
+                    return `${formatAmount(converted.converted)} ${converted.base.toUpperCase()}`;
+                  })()}
                 </span>
               </div>
             )}
