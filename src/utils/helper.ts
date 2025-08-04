@@ -130,6 +130,22 @@ export const getActionFromAttributes = (
   return ''
 }
 
+export const getModuleFromAttributes = (
+  attributes: [{ key: string; value: string }]
+) => {
+  const module = attributes.find((a) => {
+    if (a.key == 'module') {
+      return a.value
+    }
+  })
+
+  if (module) {
+    return module.value
+  }
+
+  return ''
+}
+
 export const getTypeMsg = (typeUrl: string): string => {
   const arr = typeUrl.split('.')
   if (arr.length) {

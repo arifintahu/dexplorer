@@ -1,24 +1,26 @@
-import React, { useState } from 'react'
+import React, { useState, useMemo } from 'react'
 import { Link } from 'react-router-dom'
+import { useSelector } from 'react-redux'
 import {
   FiChevronRight,
   FiHome,
   FiSearch,
   FiUser,
-  FiDollarSign,
   FiCopy,
-  FiExternalLink,
+  FiMail,
+  FiFolder,
 } from 'react-icons/fi'
 import { useTheme } from '@/theme/ThemeProvider'
-import { trimHash } from '@/utils/helper'
+import { timeFromNow, getTypeMsg, getActionFromAttributes, getModuleFromAttributes } from '@/utils/helper'
+import { getSendersFromEvents } from '@/utils/cosmos'
+import { selectTransactions } from '@/store/streamSlice'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/Button'
 
 interface Account {
   address: string
-  balance: string
-  type: 'user' | 'validator' | 'contract'
-  transactions: number
+  module: string
+  lastMessage: string
   lastActivity: string
 }
 
@@ -26,31 +28,69 @@ const Accounts: React.FC = () => {
   const { colors } = useTheme()
   const [searchAddress, setSearchAddress] = useState('')
   const [isSearching, setIsSearching] = useState(false)
+  
+  // Get recent transactions from Redux store
+  const transactions = useSelector(selectTransactions)
+  
+  // Extract recent active accounts from transaction senders
+  const recentAccounts: Account[] = useMemo(() => {
+    if (!transactions || transactions.length === 0) {
+      return []
+    }
+    
+    const accountMap = new Map<string, { lastActivity: string; lastMessage: string, module: string }>()
+    
+    // Process recent transactions to extract senders and their last message
+    transactions.slice(0, 20).forEach((tx) => {
+      if (tx.result?.events) {
+        const senders = getSendersFromEvents(tx.result.events)
+        
+        // Get the message type from events
+        let messageType = 'Unknown'
+        let moduleType = 'Unknown'
+        const messageEvents = tx.result.events.filter((e: any) => e.type === 'message')
+        const messageAction = messageEvents.find((e: any) => e.attributes?.find((attr: any) => attr.key === 'action'))
+        if (messageAction) {
+          const action = getActionFromAttributes(messageAction.attributes)
+          if (action) {
+            messageType = getTypeMsg(action)
+          }
 
-  // Mock data - replace with real data from your store
-  const accounts: Account[] = [
-    {
-      address: 'cosmos1abc123def456ghi789jkl012mno345pqr678stu',
-      balance: '1,234.56 ATOM',
-      type: 'validator',
-      transactions: 1250,
-      lastActivity: '2 mins ago',
-    },
-    {
-      address: 'cosmos1def456ghi789jkl012mno345pqr678stu901vwx',
-      balance: '567.89 ATOM',
-      type: 'user',
-      transactions: 45,
-      lastActivity: '15 mins ago',
-    },
-    {
-      address: 'cosmos1ghi789jkl012mno345pqr678stu901vwx234yzab',
-      balance: '89.12 ATOM',
-      type: 'contract',
-      transactions: 892,
-      lastActivity: '1 hour ago',
-    },
-  ]
+          const module = getModuleFromAttributes(messageAction.attributes)
+          if (module) {
+            moduleType = module
+          }
+        }
+        
+        senders.forEach((sender) => {
+          if (sender && sender.length > 0) {
+            const existing = accountMap.get(sender)
+            if (!existing || new Date(tx.timestamp) > new Date(existing.lastActivity)) {
+              accountMap.set(sender, {
+                lastActivity: tx.timestamp,
+                lastMessage: messageType,
+                module: moduleType
+              })
+            }
+          }
+        })
+      }
+    })
+    
+    // Convert to Account array and limit to 10 most recent
+    return Array.from(accountMap.entries())
+      .map(([address, data]) => ({
+        address,
+        module: data.module,
+        lastMessage: data.lastMessage,
+        lastActivity: timeFromNow(data.lastActivity)
+      }))
+      .sort((a, b) => new Date(accountMap.get(b.address)!.lastActivity).getTime() - new Date(accountMap.get(a.address)!.lastActivity).getTime())
+      .slice(0, 10)
+  }, [transactions])
+  
+  // Use recentAccounts for display, but keep mock data for stats
+  const accounts = recentAccounts
 
   const handleSearch = () => {
     if (!searchAddress.trim()) return
@@ -66,30 +106,6 @@ const Accounts: React.FC = () => {
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text)
     toast.success('Address copied to clipboard')
-  }
-
-  const getAccountTypeColor = (type: string) => {
-    switch (type) {
-      case 'validator':
-        return colors.status.success
-      case 'contract':
-        return colors.status.info
-      case 'user':
-      default:
-        return colors.primary
-    }
-  }
-
-  const getAccountTypeIcon = (type: string) => {
-    switch (type) {
-      case 'validator':
-        return '🛡️'
-      case 'contract':
-        return '📄'
-      case 'user':
-      default:
-        return '👤'
-    }
   }
 
   return (
@@ -168,96 +184,6 @@ const Accounts: React.FC = () => {
         </div>
       </div>
 
-      {/* Account Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div
-          className="rounded-xl p-6"
-          style={{
-            backgroundColor: colors.surface,
-            border: `1px solid ${colors.border.primary}`,
-            boxShadow: colors.shadow.sm,
-          }}
-        >
-          <div className="flex items-center gap-3">
-            <div
-              className="p-3 rounded-lg"
-              style={{ backgroundColor: colors.primary + '20' }}
-            >
-              <FiUser className="w-6 h-6" style={{ color: colors.primary }} />
-            </div>
-            <div>
-              <p
-                className="text-2xl font-bold"
-                style={{ color: colors.text.primary }}
-              >
-                {accounts.filter((a) => a.type === 'user').length}
-              </p>
-              <p className="text-sm" style={{ color: colors.text.secondary }}>
-                User Accounts
-              </p>
-            </div>
-          </div>
-        </div>
-
-        <div
-          className="rounded-xl p-6"
-          style={{
-            backgroundColor: colors.surface,
-            border: `1px solid ${colors.border.primary}`,
-            boxShadow: colors.shadow.sm,
-          }}
-        >
-          <div className="flex items-center gap-3">
-            <div
-              className="p-3 rounded-lg"
-              style={{ backgroundColor: colors.status.success + '20' }}
-            >
-              <span className="text-xl">🛡️</span>
-            </div>
-            <div>
-              <p
-                className="text-2xl font-bold"
-                style={{ color: colors.text.primary }}
-              >
-                {accounts.filter((a) => a.type === 'validator').length}
-              </p>
-              <p className="text-sm" style={{ color: colors.text.secondary }}>
-                Validators
-              </p>
-            </div>
-          </div>
-        </div>
-
-        <div
-          className="rounded-xl p-6"
-          style={{
-            backgroundColor: colors.surface,
-            border: `1px solid ${colors.border.primary}`,
-            boxShadow: colors.shadow.sm,
-          }}
-        >
-          <div className="flex items-center gap-3">
-            <div
-              className="p-3 rounded-lg"
-              style={{ backgroundColor: colors.status.info + '20' }}
-            >
-              <span className="text-xl">📄</span>
-            </div>
-            <div>
-              <p
-                className="text-2xl font-bold"
-                style={{ color: colors.text.primary }}
-              >
-                {accounts.filter((a) => a.type === 'contract').length}
-              </p>
-              <p className="text-sm" style={{ color: colors.text.secondary }}>
-                Smart Contracts
-              </p>
-            </div>
-          </div>
-        </div>
-      </div>
-
       {/* Recent Accounts */}
       <div
         className="rounded-xl p-6"
@@ -272,10 +198,10 @@ const Accounts: React.FC = () => {
             className="text-lg font-semibold"
             style={{ color: colors.text.primary }}
           >
-            Recent Accounts
+            Recent Active Accounts
           </h2>
           <p className="text-sm mt-1" style={{ color: colors.text.secondary }}>
-            Recently active accounts on the network
+            Message senders from recent transactions on the network
           </p>
         </div>
 
@@ -300,12 +226,12 @@ const Accounts: React.FC = () => {
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-4">
                   <div
-                    className="p-3 rounded-lg text-xl"
+                    className="p-3 rounded-lg"
                     style={{
-                      backgroundColor: getAccountTypeColor(account.type) + '20',
+                      backgroundColor: colors.primary + '20',
                     }}
                   >
-                    {getAccountTypeIcon(account.type)}
+                    <FiUser className="w-6 h-6" style={{ color: colors.primary }} />
                   </div>
                   <div>
                     <div className="flex items-center gap-3 mb-1">
@@ -314,7 +240,7 @@ const Accounts: React.FC = () => {
                         className="font-mono text-sm hover:opacity-70 transition-opacity"
                         style={{ color: colors.primary }}
                       >
-                        {trimHash(account.address, 16)}
+                        {account.address}
                       </Link>
                       <button
                         onClick={() => copyToClipboard(account.address)}
@@ -324,34 +250,24 @@ const Accounts: React.FC = () => {
                       >
                         <FiCopy className="w-3 h-3" />
                       </button>
-                      <span
-                        className="px-2 py-1 rounded text-xs font-medium capitalize"
-                        style={{
-                          backgroundColor:
-                            getAccountTypeColor(account.type) + '20',
-                          color: getAccountTypeColor(account.type),
-                        }}
-                      >
-                        {account.type}
-                      </span>
                     </div>
                     <div className="flex items-center gap-4 text-sm">
                       <div className="flex items-center gap-1">
-                        <FiDollarSign
+                        <FiFolder
                           className="w-3 h-3"
                           style={{ color: colors.text.tertiary }}
                         />
                         <span style={{ color: colors.text.secondary }}>
-                          Balance: {account.balance}
+                          Module: {account.module}
                         </span>
                       </div>
                       <div className="flex items-center gap-1">
-                        <FiExternalLink
+                        <FiMail
                           className="w-3 h-3"
                           style={{ color: colors.text.tertiary }}
                         />
                         <span style={{ color: colors.text.secondary }}>
-                          {account.transactions} txs
+                          Message: {account.lastMessage}
                         </span>
                       </div>
                     </div>

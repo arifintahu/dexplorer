@@ -25,6 +25,7 @@ import { formatAmount, formatDenom, getConvertedAmount } from '@/utils/cosmos'
 import { decodeMsg, DecodeMsg } from '@/encoding'
 import { toast } from 'sonner'
 import { TxResponse } from '@cosmjs/tendermint-rpc'
+import { toHex } from '@cosmjs/encoding'
 
 export default function AccountDetail() {
   const { address } = useParams<{ address: string }>()
@@ -926,7 +927,7 @@ export default function AccountDetail() {
                   >
                     <td className="py-3 px-0">
                       <Link
-                        to={`/txs/${tx.hash}`}
+                        to={`/txs/${toHex(tx.hash)}`}
                         className="font-mono text-sm hover:opacity-70 transition-opacity"
                         style={{ color: colors.primary }}
                       >

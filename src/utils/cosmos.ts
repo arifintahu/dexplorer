@@ -86,3 +86,29 @@ export const formatDenom = (denom: string) => {
   }
   return denom
 }
+
+/**
+ * Extract unique sender addresses from transaction events
+ * @param events - Array of transaction events with type and attributes
+ * @returns Array of unique sender addresses
+ */
+export const getSendersFromEvents = (events: any[]): string[] => {
+  if (!events || !Array.isArray(events)) {
+    return []
+  }
+
+  const senders: string[] = []
+
+  events.forEach((event) => {
+    if (event?.type === 'message' && event?.attributes && Array.isArray(event.attributes)) {
+      event.attributes.forEach((attr: { key: string; value: string }) => {
+        if (attr?.key === 'sender' && attr?.value && typeof attr.value === 'string') {
+          senders.push(attr.value)
+        }
+      })
+    }
+  })
+
+  // Return unique senders
+  return [...new Set(senders)]
+}
