@@ -34,7 +34,7 @@ import { RootState } from '@/store'
 const chainList = [
   {
     name: 'Cosmos Hub',
-    rpc: 'https://cosmos-rpc.stakeandrelax.net',
+    rpc: 'https://rpc.cosmos.nodestake.org',
   },
   {
     name: 'Osmosis',
