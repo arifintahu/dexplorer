@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react'
 import { useTheme } from '@/theme/ThemeProvider'
-import { useSelector } from 'react-redux'
+import { useSelector, useDispatch } from 'react-redux'
 import { RootState } from '@/store'
 import {
   selectTxEvent,
   selectBlocks,
+  selectTotalActiveValidator,
+  setTotalActiveValidator,
 } from '@/store/streamSlice'
 import {
   FiBox,
@@ -348,12 +350,13 @@ const Home: React.FC = () => {
   const { colors } = useTheme()
   const { connectState } = useSelector((state: RootState) => state.connect)
   const tmClient = useSelector(selectTmClient)
-  const [totalActiveValidator, setTotalActiveValidator] = useState(0)
+  const totalActiveValidator = useSelector(selectTotalActiveValidator)
   const persistentBlocks = useSelector(selectBlocks)
   const txEvent = useSelector(selectTxEvent)
   const isConnected = connectState
   const [isLoading, setIsLoading] = useState(true)
   const navigate = useNavigate()
+  const dispatch = useDispatch()
 
   // Real blockchain data - get latest block from persistent blocks
   const latestBlock =
@@ -395,19 +398,21 @@ const Home: React.FC = () => {
   }, [txEvent])
 
   useEffect(() => {
-    if (tmClient) {
+    if (tmClient && totalActiveValidator === 0) {
       setIsLoading(true)
       queryActiveValidators(tmClient, 0, 10)
         .then((response) => {
-          setTotalActiveValidator(Number(response.pagination?.total))
+          dispatch(setTotalActiveValidator(Number(response.pagination?.total)))
           setIsLoading(false)
         })
         .catch((error) => {
           console.error('Failed to fetch validators:', error)
           setIsLoading(false)
         })
+    } else if (totalActiveValidator > 0) {
+      setIsLoading(false)
     }
-  }, [tmClient])
+  }, [tmClient, totalActiveValidator, dispatch])
 
   return (
     <div className="space-y-8">

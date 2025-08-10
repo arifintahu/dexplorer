@@ -31,6 +31,7 @@ export interface StreamState {
   subsTxEvent: Subscription | null
   blocks: SerializableBlock[]
   transactions: SerializableTransaction[]
+  totalActiveValidator: number
 }
 
 // Helper function to convert Buffer to hex string
@@ -89,6 +90,7 @@ const initialState: StreamState = {
   subsTxEvent: null,
   blocks: [],
   transactions: [],
+  totalActiveValidator: 0,
 }
 
 // Actual Slice
@@ -148,10 +150,16 @@ export const streamSlice = createSlice({
       }
     },
 
+    // Action to set total active validators
+    setTotalActiveValidator(state, action) {
+      state.totalActiveValidator = action.payload
+    },
+
     // Action to clear all persistent data
     clearPersistentData(state) {
       state.blocks = []
       state.transactions = []
+      state.totalActiveValidator = 0
     },
   },
 })
@@ -163,6 +171,7 @@ export const {
   setSubsTxEvent,
   addBlock,
   addTransaction,
+  setTotalActiveValidator,
   clearPersistentData,
 } = streamSlice.actions
 
@@ -173,5 +182,6 @@ export const selectSubsNewBlock = (state: any) => state.stream.subsNewBlock
 export const selectSubsTxEvent = (state: any) => state.stream.subsTxEvent
 export const selectBlocks = (state: any) => state.stream.blocks
 export const selectTransactions = (state: any) => state.stream.transactions
+export const selectTotalActiveValidator = (state: any) => state.stream.totalActiveValidator
 
 export default streamSlice.reducer
