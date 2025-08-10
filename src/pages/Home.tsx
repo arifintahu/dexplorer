@@ -417,7 +417,7 @@ const Home: React.FC = () => {
           className="text-3xl font-bold tracking-tight mb-2"
           style={{ color: colors.text.primary }}
         >
-          Blockchain Explorer Dashboard
+          Dexplorer Dashboard
         </h1>
         <p className="text-lg" style={{ color: colors.text.secondary }}>
           Real-time insights into the blockchain network
