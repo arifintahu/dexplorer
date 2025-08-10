@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react'
 import { useTheme } from '@/theme/ThemeProvider'
-import { useSelector } from 'react-redux'
+import { useSelector, useDispatch } from 'react-redux'
 import { RootState } from '@/store'
 import {
-  selectNewBlock,
   selectTxEvent,
   selectBlocks,
+  selectTotalActiveValidator,
+  setTotalActiveValidator,
 } from '@/store/streamSlice'
 import {
   FiBox,
@@ -19,6 +20,8 @@ import { formatNumber } from '@/lib/utils'
 import { trimHash, timeFromNow } from '@/utils/helper'
 import SkeletonLoader from '@/components/ui/SkeletonLoader'
 import { Link, useNavigate } from 'react-router-dom'
+import { selectTmClient } from '@/store/connectSlice'
+import { queryActiveValidators } from '@/rpc/abci'
 
 interface StatCardProps {
   title: string
@@ -346,10 +349,14 @@ const RecentBlocksCard: React.FC = () => {
 const Home: React.FC = () => {
   const { colors } = useTheme()
   const { connectState } = useSelector((state: RootState) => state.connect)
-  const newBlock = useSelector(selectNewBlock)
+  const tmClient = useSelector(selectTmClient)
+  const totalActiveValidator = useSelector(selectTotalActiveValidator)
   const persistentBlocks = useSelector(selectBlocks)
   const txEvent = useSelector(selectTxEvent)
   const isConnected = connectState
+  const [isLoading, setIsLoading] = useState(true)
+  const navigate = useNavigate()
+  const dispatch = useDispatch()
 
   // Real blockchain data - get latest block from persistent blocks
   const latestBlock =
@@ -390,8 +397,22 @@ const Home: React.FC = () => {
     }
   }, [txEvent])
 
-  // Mock validator count (would need separate API call)
-  const totalValidators = 125
+  useEffect(() => {
+    if (tmClient && totalActiveValidator === 0) {
+      setIsLoading(true)
+      queryActiveValidators(tmClient, 0, 10)
+        .then((response) => {
+          dispatch(setTotalActiveValidator(Number(response.pagination?.total)))
+          setIsLoading(false)
+        })
+        .catch((error) => {
+          console.error('Failed to fetch validators:', error)
+          setIsLoading(false)
+        })
+    } else if (totalActiveValidator > 0) {
+      setIsLoading(false)
+    }
+  }, [tmClient, totalActiveValidator, dispatch])
 
   return (
     <div className="space-y-8">
@@ -401,7 +422,7 @@ const Home: React.FC = () => {
           className="text-3xl font-bold tracking-tight mb-2"
           style={{ color: colors.text.primary }}
         >
-          Blockchain Explorer Dashboard
+          Dexplorer Dashboard
         </h1>
         <p className="text-lg" style={{ color: colors.text.secondary }}>
           Real-time insights into the blockchain network
@@ -426,7 +447,7 @@ const Home: React.FC = () => {
         />
         <StatCard
           title="Active Validators"
-          value={isConnected ? totalValidators : 'Not Connected'}
+          value={!isLoading ? totalActiveValidator : 'Loading'}
           icon={FiUsers}
           subtitle="Currently online"
           iconColor={colors.status.success}
@@ -556,6 +577,7 @@ const Home: React.FC = () => {
                   border: `1px solid ${colors.border.secondary}`,
                   color: colors.text.primary,
                 }}
+                onClick={() => navigate('/txs')}
               >
                 <div className="text-sm font-medium">Search Transaction</div>
                 <div
@@ -573,6 +595,7 @@ const Home: React.FC = () => {
                   border: `1px solid ${colors.border.secondary}`,
                   color: colors.text.primary,
                 }}
+                onClick={() => navigate('/validators')}
               >
                 <div className="text-sm font-medium">View Validators</div>
                 <div
@@ -590,13 +613,14 @@ const Home: React.FC = () => {
                   border: `1px solid ${colors.border.secondary}`,
                   color: colors.text.primary,
                 }}
+                onClick={() => navigate('/proposals')}
               >
-                <div className="text-sm font-medium">Network Stats</div>
+                <div className="text-sm font-medium">View Proposals</div>
                 <div
                   className="text-xs"
                   style={{ color: colors.text.tertiary }}
                 >
-                  Detailed analytics
+                  Detailed governance proposals
                 </div>
               </button>
             </div>
