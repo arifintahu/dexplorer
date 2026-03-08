@@ -1,10 +1,8 @@
 import React, { useEffect, useState } from 'react'
 import { useParams, Link } from 'react-router-dom'
-import { useSelector } from 'react-redux'
-import { FiChevronRight, FiHome, FiHash, FiCheck, FiX } from 'react-icons/fi'
+import { FiChevronRight, FiHome, FiCheck, FiX } from 'react-icons/fi'
 import { useTheme } from '@/theme/ThemeProvider'
 import { getTx, getBlock } from '@/rpc/query'
-import { selectTmClient } from '@/store/connectSlice'
 import { IndexedTx, Block, Coin } from '@cosmjs/stargate'
 import { Tx } from 'cosmjs-types/cosmos/tx/v1beta1/tx'
 import {
@@ -16,11 +14,12 @@ import {
 import { decodeMsg, DecodeMsg } from '@/encoding'
 import { toast } from 'sonner'
 import CodeBlock from '@/components/CodeBlock'
+import { useClientStore } from '@/store/clientStore'
 
 export default function TransactionDetail() {
   const { hash } = useParams<{ hash: string }>()
   const { colors } = useTheme()
-  const tmClient = useSelector(selectTmClient)
+  const tmClient = useClientStore((state) => state.tmClient)
   const [tx, setTx] = useState<IndexedTx | null>(null)
   const [txData, setTxData] = useState<Tx | null>(null)
   const [block, setBlock] = useState<Block | null>(null)
@@ -91,14 +90,14 @@ export default function TransactionDetail() {
     return 'N/A'
   }
 
-  const showMsgData = (msgData: any) => {
+  const showMsgData = (msgData: unknown) => {
     if (msgData) {
-      if (Array.isArray(msgData)) {
+      if (typeof msgData === 'object') {
         const data = JSON.stringify(msgData, null, 2)
         return <CodeBlock language="json" codeString={data} />
       }
 
-      if (!Array.isArray(msgData) && msgData.length) {
+      if (typeof msgData === 'string' && msgData.length) {
         if (isBech32Address(msgData)) {
           return (
             <Link
@@ -109,10 +108,11 @@ export default function TransactionDetail() {
               {msgData}
             </Link>
           )
-        } else {
-          return String(msgData)
         }
+        return msgData
       }
+
+      return String(msgData)
     }
     return ''
   }
@@ -255,7 +255,7 @@ export default function TransactionDetail() {
                   className="py-3 font-mono text-sm"
                   style={{ color: colors.text.primary }}
                 >
-                  {hash.toUpperCase()}
+                  {hash ? hash.toUpperCase() : ''}
                 </td>
               </tr>
               <tr

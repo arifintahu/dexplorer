@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react'
-import { useSelector } from 'react-redux'
 import { Link } from 'react-router-dom'
 import {
   FiChevronRight,
@@ -9,12 +8,12 @@ import {
   FiTrendingUp,
   FiPercent,
 } from 'react-icons/fi'
-import { selectTmClient } from '@/store/connectSlice'
 import { queryActiveValidators, queryValidators } from '@/rpc/abci'
 import DataTable from '@/components/Datatable'
 import { createColumnHelper } from '@tanstack/react-table'
 import { convertRateToPercent, convertVotingPower } from '@/utils/helper'
 import { useTheme } from '@/theme/ThemeProvider'
+import { useClientStore } from '@/store/clientStore'
 
 type ValidatorData = {
   validator: string
@@ -27,7 +26,7 @@ const columnHelper = createColumnHelper<ValidatorData>()
 
 const Validators: React.FC = () => {
   const { colors } = useTheme()
-  const tmClient = useSelector(selectTmClient)
+  const tmClient = useClientStore((state) => state.tmClient)
   const [page, setPage] = useState(0)
   const [perPage, setPerPage] = useState(10)
   const [totalValidator, setTotalValidator] = useState(0)

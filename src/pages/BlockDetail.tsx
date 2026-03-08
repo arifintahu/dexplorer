@@ -1,22 +1,20 @@
 import React, { useEffect, useState } from 'react'
 import { useParams, Link } from 'react-router-dom'
-import { useSelector } from 'react-redux'
 import {
   FiChevronRight,
   FiHome,
   FiHash,
-  FiClock,
   FiActivity,
 } from 'react-icons/fi'
 import { useTheme } from '@/theme/ThemeProvider'
 import { getBlock } from '@/rpc/query'
-import { selectTmClient } from '@/store/connectSlice'
 import { Block, Coin } from '@cosmjs/stargate'
 import { Tx as TxData } from 'cosmjs-types/cosmos/tx/v1beta1/tx'
 import { sha256 } from '@cosmjs/crypto'
 import { toHex } from '@cosmjs/encoding'
 import { timeFromNow, trimHash, displayDate, getTypeMsg } from '@/utils/helper'
 import { toast } from 'sonner'
+import { useClientStore } from '@/store/clientStore'
 
 interface Tx {
   data: TxData
@@ -26,7 +24,7 @@ interface Tx {
 export default function BlockDetail() {
   const { height } = useParams<{ height: string }>()
   const { colors } = useTheme()
-  const tmClient = useSelector(selectTmClient)
+  const tmClient = useClientStore((state) => state.tmClient)
   const [block, setBlock] = useState<Block | null>(null)
   const [txs, setTxs] = useState<Tx[]>([])
   const [loading, setLoading] = useState(true)
@@ -63,7 +61,7 @@ export default function BlockDetail() {
     }
   }, [block, txs.length])
 
-  const renderMessages = (messages: any[]) => {
+  const renderMessages = (messages: { typeUrl: string }[]) => {
     if (messages.length === 1) {
       return (
         <div className="flex items-center gap-2">

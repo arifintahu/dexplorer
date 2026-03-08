@@ -1,0 +1,32 @@
+{
+  "app": {
+    "title": "Cosmos Explorer",
+    "search": "Search by address, block or transaction hash",
+    "connect": "Connect",
+    "disconnect": "Disconnect",
+    "disconnected": "Disconnected",
+    "connecting": "Connecting..."
+  },
+  "nav": {
+    "dashboard": "Dashboard",
+    "blocks": "Blocks",
+    "transactions": "Transactions",
+    "validators": "Validators",
+    "proposals": "Proposals",
+    "parameters": "Parameters"
+  },
+  "dashboard": {
+    "latestBlocks": "Latest Blocks",
+    "latestTransactions": "Latest Transactions",
+    "connectedTo": "Connected to",
+    "blockHeight": "Block Height",
+    "activeValidators": "Active Validators"
+  },
+  "common": {
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success",
+    "copy": "Copy to clipboard",
+    "copied": "Copied!"
+  }
+}

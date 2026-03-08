@@ -1,10 +1,9 @@
-import React, { useState, useMemo } from 'react'
+import React, { useMemo } from 'react'
 import { Link } from 'react-router-dom'
 import { useSelector } from 'react-redux'
 import {
   FiChevronRight,
   FiHome,
-  FiSearch,
   FiUser,
   FiCopy,
   FiMail,
@@ -15,7 +14,7 @@ import { timeFromNow, getTypeMsg, getActionFromAttributes, getModuleFromAttribut
 import { getSendersFromEvents } from '@/utils/cosmos'
 import { selectTransactions } from '@/store/streamSlice'
 import { toast } from 'sonner'
-import { Button } from '@/components/ui/Button'
+import SearchBar from '@/components/ui/SearchBar'
 
 interface Account {
   address: string
@@ -26,8 +25,6 @@ interface Account {
 
 const Accounts: React.FC = () => {
   const { colors } = useTheme()
-  const [searchAddress, setSearchAddress] = useState('')
-  const [isSearching, setIsSearching] = useState(false)
   
   // Get recent transactions from Redux store
   const transactions = useSelector(selectTransactions)
@@ -92,17 +89,6 @@ const Accounts: React.FC = () => {
   // Use recentAccounts for display, but keep mock data for stats
   const accounts = recentAccounts
 
-  const handleSearch = () => {
-    if (!searchAddress.trim()) return
-    setIsSearching(true)
-    // Simulate search delay
-    setTimeout(() => {
-      setIsSearching(false)
-      // Navigate to account detail page
-      window.location.href = `/accounts/${searchAddress}`
-    }, 1000)
-  }
-
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text)
     toast.success('Address copied to clipboard')
@@ -151,37 +137,7 @@ const Accounts: React.FC = () => {
         >
           Search Account
         </h2>
-        <div className="flex gap-3">
-          <div className="flex-1 relative">
-            <FiUser
-              className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4"
-              style={{ color: colors.text.tertiary }}
-            />
-            <input
-              type="text"
-              placeholder="Enter account address..."
-              value={searchAddress}
-              onChange={(e) => setSearchAddress(e.target.value)}
-              onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
-              className="w-full pl-10 pr-4 py-3 rounded-lg border focus:outline-none focus:ring-2 transition-all duration-200"
-              style={{
-                backgroundColor: colors.background,
-                borderColor: colors.border.secondary,
-                color: colors.text.primary,
-              }}
-            />
-          </div>
-          <Button
-            onClick={handleSearch}
-            disabled={!searchAddress.trim() || isSearching}
-            variant="primary"
-            size="md"
-            loading={isSearching}
-          >
-            <FiSearch className="w-4 h-4" />
-            {isSearching ? 'Searching...' : 'Search'}
-          </Button>
-        </div>
+        <SearchBar placeholder="Enter account address..." basePath="/accounts" />
       </div>
 
       {/* Recent Accounts */}
@@ -206,7 +162,7 @@ const Accounts: React.FC = () => {
         </div>
 
         <div className="space-y-3">
-          {accounts.map((account, index) => (
+          {accounts.map((account) => (
             <div
               key={account.address}
               className="p-4 rounded-lg border transition-all duration-200 hover:shadow-md"

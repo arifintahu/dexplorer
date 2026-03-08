@@ -12,7 +12,6 @@ import {
   FiCheckCircle,
 } from 'react-icons/fi'
 import { useTheme } from '@/theme/ThemeProvider'
-import { selectTmClient } from '@/store/connectSlice'
 import {
   selectMintParams,
   selectStakingParams,
@@ -40,21 +39,12 @@ import { displayDurationSeconds, convertRateToPercent } from '@/utils/helper'
 import { getConvertedAmount, formatAmount } from '@/utils/cosmos'
 import { fromUtf8 } from '@cosmjs/encoding'
 import { toast } from 'sonner'
-
-interface ParameterSection {
-  title: string
-  icon: React.ReactNode
-  color: string
-  isLoaded: boolean
-  isHidden: boolean
-  params: any
-  children: React.ReactNode
-}
+import { useClientStore } from '@/store/clientStore'
 
 const Parameters: React.FC = () => {
   const { colors } = useTheme()
   const dispatch = useDispatch()
-  const tmClient = useSelector(selectTmClient)
+  const tmClient = useClientStore((state) => state.tmClient)
 
   // Parameter states
   const mintParams = useSelector(selectMintParams)

@@ -1,6 +1,5 @@
 import { createSlice } from '@reduxjs/toolkit'
 import { NewBlockEvent, TxEvent } from '@cosmjs/tendermint-rpc'
-import { Subscription } from 'xstream'
 
 // Serializable block type
 interface SerializableBlock {
@@ -27,8 +26,6 @@ interface SerializableTransaction {
 export interface StreamState {
   newBlock: NewBlockEvent | null
   txEvent: TxEvent | null
-  subsNewBlock: Subscription | null
-  subsTxEvent: Subscription | null
   blocks: SerializableBlock[]
   transactions: SerializableTransaction[]
   totalActiveValidator: number
@@ -86,8 +83,6 @@ const serializeTransaction = (txEvent: TxEvent): SerializableTransaction => {
 const initialState: StreamState = {
   newBlock: null,
   txEvent: null,
-  subsNewBlock: null,
-  subsTxEvent: null,
   blocks: [],
   transactions: [],
   totalActiveValidator: 0,
@@ -106,16 +101,6 @@ export const streamSlice = createSlice({
     // Action to set the tx event
     setTxEvent(state, action) {
       state.txEvent = action.payload
-    },
-
-    // Action to set the subs state new block
-    setSubsNewBlock(state, action) {
-      state.subsNewBlock = action.payload
-    },
-
-    // Action to set the subs state tx event
-    setSubsTxEvent(state, action) {
-      state.subsTxEvent = action.payload
     },
 
     // Action to add a new block to the persistent blocks array
@@ -167,21 +152,19 @@ export const streamSlice = createSlice({
 export const {
   setNewBlock,
   setTxEvent,
-  setSubsNewBlock,
-  setSubsTxEvent,
   addBlock,
   addTransaction,
   setTotalActiveValidator,
   clearPersistentData,
 } = streamSlice.actions
 
-export const selectNewBlock = (state: any) => state.stream.newBlock
-export const selectTxEvent = (state: any) => state.stream.txEvent
+export const selectNewBlock = (state: { stream: StreamState }) => state.stream.newBlock
+export const selectTxEvent = (state: { stream: StreamState }) => state.stream.txEvent
 
-export const selectSubsNewBlock = (state: any) => state.stream.subsNewBlock
-export const selectSubsTxEvent = (state: any) => state.stream.subsTxEvent
-export const selectBlocks = (state: any) => state.stream.blocks
-export const selectTransactions = (state: any) => state.stream.transactions
-export const selectTotalActiveValidator = (state: any) => state.stream.totalActiveValidator
+export const selectBlocks = (state: { stream: StreamState }) => state.stream.blocks
+export const selectTransactions = (state: { stream: StreamState }) =>
+  state.stream.transactions
+export const selectTotalActiveValidator = (state: { stream: StreamState }) =>
+  state.stream.totalActiveValidator
 
 export default streamSlice.reducer

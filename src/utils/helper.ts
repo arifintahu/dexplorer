@@ -72,7 +72,7 @@ export const replaceHTTPtoWebsocket = (url: string): string => {
   return url.replace('http', 'ws')
 }
 
-export const isBech32Address = (address: string): Boolean => {
+export const isBech32Address = (address: string): boolean => {
   try {
     const decoded = bech32.decode(address)
     if (decoded.prefix.includes('valoper')) {
@@ -85,7 +85,7 @@ export const isBech32Address = (address: string): Boolean => {
 
     const encoded = bech32.encode(decoded.prefix, decoded.words)
     return encoded === address
-  } catch (e) {
+  } catch {
     return false
   }
 }
@@ -154,17 +154,13 @@ export const getTypeMsg = (typeUrl: string): string => {
   return ''
 }
 
-export const isValidUrl = (urlString: string): Boolean => {
-  var urlPattern = new RegExp(
-    '^(https?:\\/\\/)?' + // validate protocol
-      '((([a-z\\d]([a-z\\d-]*[a-z\\d])*)\\.)+[a-z]{2,}|' + // validate domain name
-      '((\\d{1,3}\\.){3}\\d{1,3}))' + // validate OR ip (v4) address
-      '(\\:\\d+)?(\\/[-a-z\\d%_.~+]*)*' + // validate port and path
-      '(\\?[;&a-z\\d%_.~+=-]*)?' + // validate query string
-      '(\\#[-a-z\\d_]*)?$',
-    'i'
-  ) // validate fragment locator
-  return !!urlPattern.test(urlString)
+export const isValidUrl = (urlString: string): boolean => {
+  try {
+    const url = new URL(urlString)
+    return ['http:', 'https:'].includes(url.protocol)
+  } catch {
+    return false
+  }
 }
 
 export const normalizeUrl = (urlString: string): string => {
@@ -195,7 +191,21 @@ export function isValidJSON(text: string): boolean {
   try {
     JSON.parse(text)
     return true
-  } catch (error) {
+  } catch {
     return false
   }
+}
+
+// Helper function to safely serialize objects with BigInt values
+export const safeStringify = (obj: unknown, space?: number): string => {
+  return JSON.stringify(
+    obj,
+    (key, value) => {
+      if (typeof value === 'bigint') {
+        return value.toString()
+      }
+      return value
+    },
+    space
+  )
 }

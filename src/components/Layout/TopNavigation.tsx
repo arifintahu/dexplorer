@@ -5,18 +5,12 @@ import { RootState } from '@/store'
 import { useNavigate } from 'react-router-dom'
 import {
   setConnectState,
-  setTmClient,
   setRPCAddress,
-  selectTmClient,
   selectRPCAddress,
 } from '@/store/connectSlice'
 import {
   setNewBlock,
   setTxEvent,
-  setSubsNewBlock,
-  setSubsTxEvent,
-  selectSubsNewBlock,
-  selectSubsTxEvent,
   addBlock,
   addTransaction,
   clearPersistentData,
@@ -51,20 +45,24 @@ import { subscribeNewBlock, subscribeTx } from '@/rpc/subscribe'
 import { LS_RPC_ADDRESS, LS_RPC_ADDRESS_LIST } from '@/utils/constant'
 import { removeTrailingSlash } from '@/utils/helper'
 import { toast } from 'sonner'
+import { useClientStore } from '@/store/clientStore'
+import { useTranslation } from 'react-i18next'
 
 interface TopNavigationProps {
   onMenuClick?: () => void
 }
 
 const TopNavigation: React.FC<TopNavigationProps> = ({ onMenuClick }) => {
+  const { t } = useTranslation()
   const { colors, colorScheme, toggleColorScheme } = useTheme()
   const dispatch = useDispatch()
   const navigate = useNavigate()
   const { connectState } = useSelector((state: RootState) => state.connect)
-  const tmClient = useSelector(selectTmClient)
+
+  const { setTmClient, setSubsNewBlock, setSubsTxEvent, disconnect } =
+    useClientStore()
+
   const address = useSelector(selectRPCAddress)
-  const subsNewBlock = useSelector(selectSubsNewBlock)
-  const subsTxEvent = useSelector(selectSubsTxEvent)
   const isConnected = connectState
   const [searchQuery, setSearchQuery] = useState('')
 
@@ -113,31 +111,8 @@ const TopNavigation: React.FC<TopNavigationProps> = ({ onMenuClick }) => {
   const resetApplicationData = async () => {
     console.log('Resetting application data...')
 
-    // Clean up subscriptions first
-    if (subsNewBlock) {
-      console.log('Unsubscribing from new block subscription')
-      subsNewBlock.unsubscribe()
-      dispatch(setSubsNewBlock(null))
-    }
-    if (subsTxEvent) {
-      console.log('Unsubscribing from tx event subscription')
-      subsTxEvent.unsubscribe()
-      dispatch(setSubsTxEvent(null))
-    }
-
-    // Disconnect the old WebSocket client
-    if (tmClient) {
-      try {
-        console.log('Disconnecting tmClient...')
-        await tmClient.disconnect()
-        console.log('tmClient disconnected successfully')
-      } catch (error) {
-        console.warn('Error disconnecting tmClient:', error)
-      }
-    }
-
-    // Clear the tmClient from Redux state immediately
-    dispatch(setTmClient(null))
+    // Clean up subscriptions and disconnect using Zustand store
+    disconnect()
 
     // Reset stream data
     dispatch(setNewBlock(null))
@@ -185,7 +160,7 @@ const TopNavigation: React.FC<TopNavigationProps> = ({ onMenuClick }) => {
       const tmClient = await connectWebsocketClient(cleanAddress)
 
       if (tmClient) {
-        dispatch(setTmClient(tmClient))
+        setTmClient(tmClient)
         dispatch(setRPCAddress(cleanAddress))
         dispatch(setConnectState(true))
         setState('success')
@@ -203,8 +178,8 @@ const TopNavigation: React.FC<TopNavigationProps> = ({ onMenuClick }) => {
           dispatch(addTransaction(event))
         })
 
-        dispatch(setSubsNewBlock(newBlockSub))
-        dispatch(setSubsTxEvent(txSub))
+        setSubsNewBlock(newBlockSub)
+        setSubsTxEvent(txSub)
 
         console.log('New subscriptions started successfully')
 
@@ -212,7 +187,7 @@ const TopNavigation: React.FC<TopNavigationProps> = ({ onMenuClick }) => {
         localStorage.setItem(LS_RPC_ADDRESS, cleanAddress)
 
         // Always save all RPC endpoints to localStorage
-        const currentList = JSON.parse(
+        const currentList: string[] = JSON.parse(
           localStorage.getItem(LS_RPC_ADDRESS_LIST) || '[]'
         )
 
@@ -305,6 +280,7 @@ const TopNavigation: React.FC<TopNavigationProps> = ({ onMenuClick }) => {
               onClick={onMenuClick}
               variant="ghost"
               size="sm"
+              aria-label="Open menu"
               className="lg:hidden focus:outline-none focus:ring-0 active:outline-none border-0 focus:border-0 active:border-0"
               style={{
                 color: colors.text.primary,
@@ -377,7 +353,9 @@ const TopNavigation: React.FC<TopNavigationProps> = ({ onMenuClick }) => {
                       ></div>
                     </div>
                     <div className="hidden sm:flex sm:flex-col sm:items-start">
-                      <span className="text-xs font-medium">Connected to:</span>
+                      <span className="text-xs font-medium">
+                        {t('dashboard.connectedTo')}:
+                      </span>
                       <span
                         className="text-xs truncate max-w-32"
                         title={address}
@@ -389,7 +367,9 @@ const TopNavigation: React.FC<TopNavigationProps> = ({ onMenuClick }) => {
                 ) : (
                   <>
                     <FiWifiOff className="h-4 w-4" />
-                    <span className="hidden sm:inline">Disconnected</span>
+                    <span className="hidden sm:inline">
+                      {t('app.disconnected')}
+                    </span>
                   </>
                 )}
               </div>
@@ -399,7 +379,7 @@ const TopNavigation: React.FC<TopNavigationProps> = ({ onMenuClick }) => {
                 onClick={() => setIsRPCModalOpen(true)}
                 variant="ghost"
                 size="sm"
-                title="Change RPC Connection"
+                title={t('app.connect')}
                 className="text-sm focus:outline-none focus:ring-0 active:outline-none border-0 focus:border-0 active:border-0"
                 style={{
                   color: colors.text.primary,
@@ -409,7 +389,9 @@ const TopNavigation: React.FC<TopNavigationProps> = ({ onMenuClick }) => {
                 }}
               >
                 <FiRefreshCcw className="h-4 w-4" />
-                <span className="hidden md:inline ml-1">Change</span>
+                <span className="hidden md:inline ml-1">
+                  {t('app.connect')}
+                </span>
               </Button>
 
               {/* Disconnect Button */}
@@ -418,6 +400,7 @@ const TopNavigation: React.FC<TopNavigationProps> = ({ onMenuClick }) => {
                   onClick={handleDisconnect}
                   variant="ghost"
                   size="sm"
+                  aria-label="Disconnect from RPC"
                   title="Disconnect from RPC"
                   className="focus:outline-none focus:ring-0 active:outline-none border-0 focus:border-0 active:border-0"
                   style={{
@@ -437,8 +420,9 @@ const TopNavigation: React.FC<TopNavigationProps> = ({ onMenuClick }) => {
               onClick={toggleColorScheme}
               variant="ghost"
               size="sm"
+              aria-label={`Switch to ${colorScheme === 'light' ? 'dark' : 'light'} mode`}
               title={`Switch to ${
-                colorScheme === 'dark' ? 'light' : 'dark'
+                colorScheme === 'light' ? 'dark' : 'light'
               } mode`}
               className="focus:outline-none focus:ring-0 active:outline-none border-0 focus:border-0 active:border-0"
               style={{

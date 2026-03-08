@@ -1,18 +1,15 @@
-import React, { FormEvent, ChangeEvent, useState } from 'react'
-import { useDispatch, useSelector } from 'react-redux'
-import { FiZap, FiCheck, FiLoader } from 'react-icons/fi'
+import React, { FormEvent, ChangeEvent, useState, useEffect } from 'react'
+import { useDispatch } from 'react-redux'
+import { FiZap, FiCheck } from 'react-icons/fi'
 import { useTheme } from '@/theme/ThemeProvider'
 import { Button } from '@/components/ui/Button'
 import {
   setConnectState,
-  setTmClient,
   setRPCAddress,
 } from '@/store/connectSlice'
 import {
   setNewBlock,
   setTxEvent,
-  setSubsNewBlock,
-  setSubsTxEvent,
   addBlock,
   addTransaction,
 } from '@/store/streamSlice'
@@ -29,7 +26,7 @@ import { LS_RPC_ADDRESS, LS_RPC_ADDRESS_LIST } from '@/utils/constant'
 import { validateConnection, connectWebsocketClient } from '@/rpc/client'
 import { subscribeNewBlock, subscribeTx } from '@/rpc/subscribe'
 import { removeTrailingSlash } from '@/utils/helper'
-import { RootState } from '@/store'
+import { useClientStore } from '@/store/clientStore'
 
 const chainList = [
   {
@@ -51,16 +48,13 @@ export default function Connect() {
   const dispatch = useDispatch()
   const { colors } = useTheme()
 
-  // Get current subscriptions and tmClient from Redux store
-  const currentSubsNewBlock = useSelector(
-    (state: RootState) => state.stream.subsNewBlock
-  )
-  const currentSubsTxEvent = useSelector(
-    (state: RootState) => state.stream.subsTxEvent
-  )
-  const currentTmClient = useSelector(
-    (state: RootState) => state.connect.tmClient
-  )
+  // Use client store
+  const { 
+    setTmClient, 
+    setSubsNewBlock, 
+    setSubsTxEvent,
+    disconnect 
+  } = useClientStore()
 
   const submitForm = async (e: FormEvent) => {
     e.preventDefault()
@@ -87,21 +81,7 @@ export default function Connect() {
       }
 
       // Clean up existing subscriptions and connections before establishing new ones
-      if (currentSubsNewBlock) {
-        currentSubsNewBlock.unsubscribe()
-        dispatch(setSubsNewBlock(null))
-      }
-      if (currentSubsTxEvent) {
-        currentSubsTxEvent.unsubscribe()
-        dispatch(setSubsTxEvent(null))
-      }
-      if (currentTmClient) {
-        try {
-          currentTmClient.disconnect()
-        } catch (error) {
-          console.warn('Error disconnecting previous tmClient:', error)
-        }
-      }
+      disconnect()
 
       // Reset stream data
       dispatch(setNewBlock(null))
@@ -125,7 +105,7 @@ export default function Connect() {
       }
 
       dispatch(setConnectState(true))
-      dispatch(setTmClient(tmClient))
+      setTmClient(tmClient)
       dispatch(setRPCAddress(rpcAddress))
 
       // Start blockchain data subscriptions
@@ -139,8 +119,8 @@ export default function Connect() {
         dispatch(addTransaction(event))
       })
 
-      dispatch(setSubsNewBlock(newBlockSub))
-      dispatch(setSubsTxEvent(txSub))
+      setSubsNewBlock(newBlockSub)
+      setSubsTxEvent(txSub)
 
       setState('success')
 
@@ -162,7 +142,7 @@ export default function Connect() {
     connectClient(rpcAddress)
   }
 
-  React.useEffect(() => {
+  useEffect(() => {
     // Auto-reconnect if RPC address exists in localStorage
     const savedRpcAddress = window.localStorage.getItem(LS_RPC_ADDRESS)
     if (savedRpcAddress && state === 'initial') {
