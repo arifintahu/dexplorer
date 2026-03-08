@@ -181,6 +181,7 @@ const Validators: React.FC = () => {
           console.error('Failed to fetch validators:', error)
         })
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tmClient])
 
   const onChangePagination = (value: {

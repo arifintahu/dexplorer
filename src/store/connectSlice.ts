@@ -28,10 +28,11 @@ export const connectSlice = createSlice({
   },
 })
 
-export const { setRPCAddress, setConnectState } =
-  connectSlice.actions
+export const { setRPCAddress, setConnectState } = connectSlice.actions
 
-export const selectRPCAddress = (state: any) => state.connect.rpcAddress
-export const selectConnectState = (state: any) => state.connect.connectState
+export const selectRPCAddress = (state: { connect: ConnectState }) =>
+  state.connect.rpcAddress
+export const selectConnectState = (state: { connect: ConnectState }) =>
+  state.connect.connectState
 
 export default connectSlice.reducer

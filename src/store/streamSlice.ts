@@ -8,9 +8,9 @@ interface SerializableBlock {
     time: string
     appHash: string
     proposerAddress: string
-    [key: string]: any
+    [key: string]: string | number | boolean | null | undefined
   }
-  txs: any[]
+  txs: Uint8Array[]
 }
 
 // Serializable transaction type
@@ -18,7 +18,22 @@ interface SerializableTransaction {
   hash: string
   height: string
   tx: string
-  result: any
+  result: {
+    code: number
+    data: string | null
+    log: string
+    info: string
+    gasWanted: string
+    gasUsed: string
+    events: {
+      type: string
+      attributes: {
+        key: string
+        value: string
+        index: boolean
+      }[]
+    }[]
+  }
   timestamp: string
 }
 
@@ -32,15 +47,14 @@ export interface StreamState {
 }
 
 // Helper function to convert Buffer to hex string
-const bufferToHex = (buffer: any): string => {
+const bufferToHex = (
+  buffer: Uint8Array | string | null | undefined
+): string => {
   if (!buffer) return ''
   if (typeof buffer === 'string') return buffer
-  if (buffer instanceof Uint8Array) {
-    return Array.from(buffer, (byte) =>
-      byte.toString(16).padStart(2, '0')
-    ).join('')
-  }
-  return ''
+  return Array.from(buffer, (byte) => byte.toString(16).padStart(2, '0')).join(
+    ''
+  )
 }
 
 // Helper function to serialize block data
@@ -57,10 +71,10 @@ const serializeBlock = (block: NewBlockEvent): SerializableBlock => {
           value instanceof Date
             ? value.toISOString()
             : value &&
-              typeof value === 'object' &&
-              value.constructor === Uint8Array
-            ? bufferToHex(value)
-            : value,
+                typeof value === 'object' &&
+                value.constructor === Uint8Array
+              ? bufferToHex(value)
+              : value,
         ])
       ),
     },
@@ -158,10 +172,12 @@ export const {
   clearPersistentData,
 } = streamSlice.actions
 
-export const selectNewBlock = (state: { stream: StreamState }) => state.stream.newBlock
-export const selectTxEvent = (state: { stream: StreamState }) => state.stream.txEvent
-
-export const selectBlocks = (state: { stream: StreamState }) => state.stream.blocks
+export const selectNewBlock = (state: { stream: StreamState }) =>
+  state.stream.newBlock
+export const selectTxEvent = (state: { stream: StreamState }) =>
+  state.stream.txEvent
+export const selectBlocks = (state: { stream: StreamState }) =>
+  state.stream.blocks
 export const selectTransactions = (state: { stream: StreamState }) =>
   state.stream.transactions
 export const selectTotalActiveValidator = (state: { stream: StreamState }) =>

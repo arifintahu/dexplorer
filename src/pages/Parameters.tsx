@@ -163,6 +163,7 @@ const Parameters: React.FC = () => {
           setLoadingStates((prev) => ({ ...prev, gov: false }))
         })
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     tmClient,
     mintParams,
@@ -539,8 +540,11 @@ const Parameters: React.FC = () => {
           value={
             govDepositParams?.minDeposit?.[0]
               ? (() => {
-                  const converted = getConvertedAmount(govDepositParams.minDeposit[0].amount, govDepositParams.minDeposit[0].denom);
-                  return `${formatAmount(converted.converted)} ${converted.base.toUpperCase()}`;
+                  const converted = getConvertedAmount(
+                    govDepositParams.minDeposit[0].amount,
+                    govDepositParams.minDeposit[0].denom
+                  )
+                  return `${formatAmount(converted.converted)} ${converted.base.toUpperCase()}`
                 })()
               : 'N/A'
           }

@@ -4,7 +4,7 @@ import { Subscription } from 'xstream'
 
 export function subscribeNewBlock(
   tmClient: Tendermint37Client,
-  callback: (event: NewBlockEvent) => any
+  callback: (event: NewBlockEvent) => void
 ): Subscription {
   const stream = tmClient.subscribeNewBlock()
   const subscription = stream.subscribe({
@@ -22,7 +22,7 @@ export function subscribeNewBlock(
 
 export function subscribeTx(
   tmClient: Tendermint37Client,
-  callback: (event: TxEvent) => any
+  callback: (event: TxEvent) => void
 ): Subscription {
   const stream = tmClient.subscribeTx()
   const subscription = stream.subscribe({

@@ -1,5 +1,8 @@
 import { MsgSend } from 'cosmjs-types/cosmos/bank/v1beta1/tx'
-import { MsgCommunityPoolSpend, MsgWithdrawDelegatorReward } from 'cosmjs-types/cosmos/distribution/v1beta1/tx'
+import {
+  MsgCommunityPoolSpend,
+  MsgWithdrawDelegatorReward,
+} from 'cosmjs-types/cosmos/distribution/v1beta1/tx'
 import { MsgDelegate } from 'cosmjs-types/cosmos/staking/v1beta1/tx'
 import { MsgUpdateClient } from 'cosmjs-types/ibc/core/client/v1/tx'
 import { MsgSoftwareUpgrade } from 'cosmjs-types/cosmos/upgrade/v1beta1/tx'
@@ -32,7 +35,7 @@ const TYPE = {
 
 export interface DecodeMsg {
   typeUrl: string
-  data: Object | null
+  data: object | null
 }
 
 export const decodeMsg = (typeUrl: string, value: Uint8Array): DecodeMsg => {
