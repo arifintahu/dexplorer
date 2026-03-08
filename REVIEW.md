@@ -28,7 +28,7 @@ Here's a comprehensive review of the **dexplorer** repository — a lightweight,
 ### 4. Large Page Components
 - `AccountDetail.tsx` — **985 lines**
 - `ProposalDetail.tsx` — **649 lines**
-- `Home.tsx` — **634 lines**
+- `Home.tsx` — **634 lines** (Refactored: Now <100 lines)
 - These mix data fetching, state management, and rendering in one component.
 
 ### 5. Code Duplication
@@ -54,8 +54,11 @@ Here's a comprehensive review of the **dexplorer** repository — a lightweight,
   - Implemented `WeakMap` caching in `src/rpc/query/index.ts`.
   - `StargateClient` is now reused for the same `Tendermint37Client` instance.
 
-### 9. No Route-Level Code Splitting
-- All 11 pages are statically imported in `App.tsx`. Using `React.lazy()` would reduce initial bundle size.
+### 9. No Route-Level Code Splitting - [RESOLVED]
+- **Status**: ✅ Fixed
+- **Changes**:
+  - Implemented `React.lazy()` and `Suspense` in `App.tsx`.
+  - Added loading fallback component.
 
 ### 10. Missing Memoization
 - `Home.tsx` `StatCard` and `RecentBlocksCard` re-render on every parent update
@@ -68,11 +71,18 @@ Here's a comprehensive review of the **dexplorer** repository — a lightweight,
 
 ## Missing Features
 
-### 12. No 404 / Error Boundary Routes
-- Invalid URLs render nothing. No `<Route path="*">` fallback or React error boundaries.
+### 12. No 404 / Error Boundary Routes - [RESOLVED]
+- **Status**: ✅ Fixed
+- **Changes**:
+  - Added `NotFound.tsx` page.
+  - Added `ErrorBoundary.tsx` component.
+  - Configured routes in `App.tsx` to handle 404 and catch errors.
 
-### 13. No CI/CD Pipeline
-- No `.github/workflows/` — no automated linting, type-checking, or build verification on PRs.
+### 13. No CI/CD Pipeline - [RESOLVED]
+- **Status**: ✅ Fixed
+- **Changes**:
+  - Created `.github/workflows/ci.yml`.
+  - Runs lint, type-check, test, and build on push/PR.
 
 ### 14. No Pre-commit Hooks
 - ESLint and Prettier are configured but not enforced. No `husky` or `lint-staged` setup.
