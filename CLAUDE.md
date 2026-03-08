@@ -7,7 +7,7 @@
 - **Lint**: `pnpm lint`
 - **Type Check**: `pnpm check`
 - **Preview**: `pnpm preview`
-- **Test**: *No test script currently configured* (See `REVIEW.md`)
+- **Test**: `pnpm test`
 
 ## Project Overview
 
@@ -43,8 +43,8 @@ Dexplorer is a lightweight, frontend-only Cosmos blockchain explorer built with 
 - **Security**: No hardcoded secrets. Sanitize inputs.
 
 ## Known Issues (Fix Priority)
-- **Critical**: No tests.
-- **High**: Excessive use of `any` types.
+- **High**: Silent error swallowing.
 - **High**: Large components (`AccountDetail`, `ProposalDetail`, `Home`).
-- **High**: `StargateClient` recreation per query (Performance).
 - **High**: Non-serializable data in Redux.
+- **High**: Code duplication.
+- **Medium**: Performance issues (re-renders, bundle size).

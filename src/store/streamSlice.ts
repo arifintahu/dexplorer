@@ -175,13 +175,17 @@ export const {
   clearPersistentData,
 } = streamSlice.actions
 
-export const selectNewBlock = (state: any) => state.stream.newBlock
-export const selectTxEvent = (state: any) => state.stream.txEvent
+export const selectNewBlock = (state: { stream: StreamState }) => state.stream.newBlock
+export const selectTxEvent = (state: { stream: StreamState }) => state.stream.txEvent
 
-export const selectSubsNewBlock = (state: any) => state.stream.subsNewBlock
-export const selectSubsTxEvent = (state: any) => state.stream.subsTxEvent
-export const selectBlocks = (state: any) => state.stream.blocks
-export const selectTransactions = (state: any) => state.stream.transactions
-export const selectTotalActiveValidator = (state: any) => state.stream.totalActiveValidator
+export const selectSubsNewBlock = (state: { stream: StreamState }) =>
+  state.stream.subsNewBlock
+export const selectSubsTxEvent = (state: { stream: StreamState }) =>
+  state.stream.subsTxEvent
+export const selectBlocks = (state: { stream: StreamState }) => state.stream.blocks
+export const selectTransactions = (state: { stream: StreamState }) =>
+  state.stream.transactions
+export const selectTotalActiveValidator = (state: { stream: StreamState }) =>
+  state.stream.totalActiveValidator
 
 export default streamSlice.reducer

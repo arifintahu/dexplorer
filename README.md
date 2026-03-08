@@ -159,6 +159,16 @@ pnpm build
 pnpm preview
 ```
 
+### Running Tests
+
+```bash
+# Run unit tests
+pnpm test
+
+# Run type check
+pnpm check
+```
+
 ## 📖 Usage
 
 ### Basic Usage

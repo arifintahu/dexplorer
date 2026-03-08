@@ -212,7 +212,7 @@ const TopNavigation: React.FC<TopNavigationProps> = ({ onMenuClick }) => {
         localStorage.setItem(LS_RPC_ADDRESS, cleanAddress)
 
         // Always save all RPC endpoints to localStorage
-        const currentList = JSON.parse(
+        const currentList: string[] = JSON.parse(
           localStorage.getItem(LS_RPC_ADDRESS_LIST) || '[]'
         )
 

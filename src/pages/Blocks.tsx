@@ -11,21 +11,13 @@ import {
 } from 'react-icons/fi'
 import {
   selectNewBlock,
-  selectTxEvent,
   selectBlocks,
-  selectTransactions,
 } from '@/store/streamSlice'
 import { toHex } from '@cosmjs/encoding'
-import { TxBody } from 'cosmjs-types/cosmos/tx/v1beta1/tx'
-import { timeFromNow, trimHash, getTypeMsg } from '@/utils/helper'
+import { timeFromNow, trimHash } from '@/utils/helper'
 import { useTheme } from '@/theme/ThemeProvider'
 
 const MAX_ROWS = 50
-
-interface Tx {
-  TxEvent: TxEvent
-  Timestamp: Date
-}
 
 interface SerializableBlock {
   header: {
@@ -43,11 +35,8 @@ type BlockType = NewBlockEvent | SerializableBlock
 const Blocks: React.FC = () => {
   const { colors } = useTheme()
   const newBlock = useSelector(selectNewBlock)
-  const txEvent = useSelector(selectTxEvent)
   const persistentBlocks = useSelector(selectBlocks)
-  const persistentTxs = useSelector(selectTransactions)
   const [blocks, setBlocks] = useState<BlockType[]>([])
-  const [txs, setTxs] = useState<Tx[]>([])
 
   // Initialize blocks from persistent store with memoization
   const initialBlocks = useMemo(() => {
@@ -56,31 +45,16 @@ const Blocks: React.FC = () => {
       : []
   }, [persistentBlocks.length])
 
-  // Initialize txs from persistent store with memoization
-  const initialTxs = useMemo(() => {
-    return persistentTxs.length > 0 ? persistentTxs.slice(0, MAX_ROWS) : []
-  }, [persistentTxs.length])
-
   // Set initial data only when length changes (not on every block update)
   useEffect(() => {
     setBlocks(initialBlocks)
   }, [initialBlocks])
 
   useEffect(() => {
-    setTxs(initialTxs)
-  }, [initialTxs])
-
-  useEffect(() => {
     if (newBlock) {
       updateBlocks(newBlock)
     }
   }, [newBlock])
-
-  useEffect(() => {
-    if (txEvent) {
-      updateTxs(txEvent)
-    }
-  }, [txEvent])
 
   const getBlockHeight = (block: BlockType): number => {
     return typeof block.header.height === 'string'
@@ -104,72 +78,6 @@ const Blocks: React.FC = () => {
       setBlocks([block])
     }
   }
-
-  const updateTxs = (txEvent: TxEvent) => {
-    const tx = {
-      TxEvent: txEvent,
-      Timestamp: new Date(),
-    }
-    if (txs.length) {
-      if (
-        txEvent.height >= txs[0].TxEvent.height &&
-        txEvent.hash != txs[0].TxEvent.hash
-      ) {
-        setTxs((prevTx) => [tx, ...prevTx.slice(0, MAX_ROWS - 1)])
-      }
-    } else {
-      setTxs([tx])
-    }
-  }
-
-  // Memoize message rendering to avoid expensive decoding on every render
-  const renderMessages = useCallback(
-    (data: Uint8Array | undefined) => {
-      if (!data) return ''
-
-      try {
-        const txBody = TxBody.decode(data)
-        const messages = txBody.messages
-
-        if (messages.length === 1) {
-          return (
-            <div className="flex items-center gap-2">
-              <span
-                className="px-2 py-1 rounded text-xs font-medium"
-                style={{
-                  backgroundColor: colors.status.info + '20',
-                  color: colors.status.info,
-                }}
-              >
-                {getTypeMsg(messages[0].typeUrl)}
-              </span>
-            </div>
-          )
-        } else if (messages.length > 1) {
-          return (
-            <div className="flex items-center gap-2">
-              <span
-                className="px-2 py-1 rounded text-xs font-medium"
-                style={{
-                  backgroundColor: colors.status.info + '20',
-                  color: colors.status.info,
-                }}
-              >
-                {getTypeMsg(messages[0].typeUrl)}
-              </span>
-              <span style={{ color: colors.status.info }}>
-                +{messages.length - 1}
-              </span>
-            </div>
-          )
-        }
-      } catch (error) {
-        console.warn('Failed to decode transaction data:', error)
-      }
-      return ''
-    },
-    [colors.status.info]
-  )
 
   return (
     <div className="space-y-6">

@@ -255,7 +255,7 @@ export default function TransactionDetail() {
                   className="py-3 font-mono text-sm"
                   style={{ color: colors.text.primary }}
                 >
-                  {hash.toUpperCase()}
+                  {hash ? hash.toUpperCase() : ''}
                 </td>
               </tr>
               <tr

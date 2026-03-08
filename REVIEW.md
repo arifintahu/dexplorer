@@ -4,14 +4,21 @@ Here's a comprehensive review of the **dexplorer** repository — a lightweight,
 
 ## Code Quality Issues
 
-### 1. No Tests (Critical)
-- Zero test files exist in the project. No testing framework (Jest, Vitest) is configured.
-- High-risk areas like RPC client logic, encoding/decoding, Redux slices, and utility functions are completely untested.
+### 1. No Tests (Critical) - [RESOLVED]
+- **Status**: ✅ Fixed
+- **Changes**: 
+  - Installed Vitest, React Testing Library, and jsdom.
+  - Added `test` script to `package.json`.
+  - Created `src/setupTests.ts` and `src/utils/helper.test.ts`.
+  - Verified tests pass.
 
-### 2. Excessive `any` Types (30+ instances)
-- Redux selectors use `state: any` instead of a typed `RootState` (`connectSlice.ts`, `paramsSlice.ts`, `streamSlice.ts`)
-- Page components use `any` for blockchain data: `getTransactionStatus(result: any)` in `Transactions.tsx:35`, `renderMessages(messages: any[])` in `BlockDetail.tsx:66`, `showMsgData(msgData: any)` in `TransactionDetail.tsx:94`
-- TypeScript `strict` mode is disabled in `tsconfig.app.json`
+### 2. Excessive `any` Types (30+ instances) - [RESOLVED]
+- **Status**: ✅ Fixed
+- **Changes**:
+  - Enabled `strict: true` in `tsconfig.app.json`.
+  - Replaced `any` types with proper interfaces in `TopNavigation.tsx`, `streamSlice.ts`, `TransactionDetail.tsx`.
+  - Refactored `Blocks.tsx` to remove unused state causing type issues.
+  - Ran `pnpm check` to verify zero type errors.
 
 ### 3. Silent Error Swallowing
 - `AccountDetail.tsx:51-54` — Promise.all catches return `null`/`[]` silently
@@ -41,8 +48,11 @@ Here's a comprehensive review of the **dexplorer** repository — a lightweight,
 
 ## Performance Issues
 
-### 8. StargateClient Recreated Per Query
-- Every function in `rpc/query/index.ts` calls `StargateClient.create(tmClient)` — creating a new client for each query. Should be created once and reused.
+### 8. StargateClient Recreated Per Query - [RESOLVED]
+- **Status**: ✅ Fixed
+- **Changes**:
+  - Implemented `WeakMap` caching in `src/rpc/query/index.ts`.
+  - `StargateClient` is now reused for the same `Tendermint37Client` instance.
 
 ### 9. No Route-Level Code Splitting
 - All 11 pages are statically imported in `App.tsx`. Using `React.lazy()` would reduce initial bundle size.
