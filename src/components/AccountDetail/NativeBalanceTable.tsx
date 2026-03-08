@@ -5,15 +5,21 @@ import { formatAmount, formatDenom, getConvertedAmount } from '@/utils/cosmos'
 import { FiUser } from 'react-icons/fi'
 
 interface NativeBalanceTableProps {
-  nativeTokens: Coin[]
+  nativeTokens: readonly Coin[]
   nativeStakedToken: Coin | null
 }
 
-export default function NativeBalanceTable({ nativeTokens, nativeStakedToken }: NativeBalanceTableProps) {
+export default function NativeBalanceTable({
+  nativeTokens,
+  nativeStakedToken,
+}: NativeBalanceTableProps) {
   const { colors } = useTheme()
 
   const formatBalance = (balance: Coin) => {
-    const { converted, base } = getConvertedAmount(balance.amount, balance.denom)
+    const { converted, base } = getConvertedAmount(
+      balance.amount,
+      balance.denom
+    )
 
     return {
       amount: balance.amount,
@@ -24,7 +30,8 @@ export default function NativeBalanceTable({ nativeTokens, nativeStakedToken }: 
       baseDenom: base,
       formattedDenom: formatDenom(balance.denom),
       isIBC: balance.denom.startsWith('ibc/'),
-      isConverted: balance.denom.startsWith('u') || balance.denom.startsWith('a')
+      isConverted:
+        balance.denom.startsWith('u') || balance.denom.startsWith('a'),
     }
   }
 
@@ -33,10 +40,7 @@ export default function NativeBalanceTable({ nativeTokens, nativeStakedToken }: 
   return (
     <div>
       <div className="flex items-center gap-2 mb-4">
-        <FiUser
-          className="w-5 h-5"
-          style={{ color: colors.primary }}
-        />
+        <FiUser className="w-5 h-5" style={{ color: colors.primary }} />
         <h3
           className="text-lg font-medium"
           style={{ color: colors.text.primary }}
@@ -90,13 +94,25 @@ export default function NativeBalanceTable({ nativeTokens, nativeStakedToken }: 
               {nativeTokens.length > 0 ? (
                 nativeTokens.map((balance, index) => {
                   const formatted = formatBalance(balance)
-                  const stakedForThisToken = nativeStakedToken && nativeStakedToken.denom === balance.denom ? nativeStakedToken : null
-                  const stakedFormatted = stakedForThisToken ? formatBalance(stakedForThisToken) : null
-                  const totalAmount = stakedForThisToken 
-                    ? (parseFloat(balance.amount) + parseFloat(stakedForThisToken.amount)).toString()
+                  const stakedForThisToken =
+                    nativeStakedToken &&
+                    nativeStakedToken.denom === balance.denom
+                      ? nativeStakedToken
+                      : null
+                  const stakedFormatted = stakedForThisToken
+                    ? formatBalance(stakedForThisToken)
+                    : null
+                  const totalAmount = stakedForThisToken
+                    ? (
+                        parseFloat(balance.amount) +
+                        parseFloat(stakedForThisToken.amount)
+                      ).toString()
                     : balance.amount
-                  const totalFormatted = formatBalance({ amount: totalAmount, denom: balance.denom })
-                  
+                  const totalFormatted = formatBalance({
+                    amount: totalAmount,
+                    denom: balance.denom,
+                  })
+
                   return (
                     <tr
                       key={index}
@@ -106,7 +122,8 @@ export default function NativeBalanceTable({ nativeTokens, nativeStakedToken }: 
                         backgroundColor: 'transparent',
                       }}
                       onMouseEnter={(e) => {
-                        e.currentTarget.style.backgroundColor = colors.surface + '50'
+                        e.currentTarget.style.backgroundColor =
+                          colors.surface + '50'
                       }}
                       onMouseLeave={(e) => {
                         e.currentTarget.style.backgroundColor = 'transparent'
@@ -156,7 +173,9 @@ export default function NativeBalanceTable({ nativeTokens, nativeStakedToken }: 
                             className="font-semibold text-lg"
                             style={{ color: colors.status.warning }}
                           >
-                            {stakedFormatted ? stakedFormatted.formattedAmount : '0'}
+                            {stakedFormatted
+                              ? stakedFormatted.formattedAmount
+                              : '0'}
                           </span>
                           {stakedFormatted && stakedFormatted.isConverted && (
                             <span
@@ -199,7 +218,8 @@ export default function NativeBalanceTable({ nativeTokens, nativeStakedToken }: 
                     backgroundColor: 'transparent',
                   }}
                   onMouseEnter={(e) => {
-                    e.currentTarget.style.backgroundColor = colors.surface + '50'
+                    e.currentTarget.style.backgroundColor =
+                      colors.surface + '50'
                   }}
                   onMouseLeave={(e) => {
                     e.currentTarget.style.backgroundColor = 'transparent'
@@ -211,7 +231,9 @@ export default function NativeBalanceTable({ nativeTokens, nativeStakedToken }: 
                         className="font-mono text-sm font-semibold"
                         style={{ color: colors.text.primary }}
                       >
-                        {formatBalance(nativeStakedToken).baseDenom.toUpperCase()}
+                        {formatBalance(
+                          nativeStakedToken
+                        ).baseDenom.toUpperCase()}
                       </span>
                       {formatBalance(nativeStakedToken).isConverted && (
                         <span
@@ -246,7 +268,8 @@ export default function NativeBalanceTable({ nativeTokens, nativeStakedToken }: 
                           style={{ color: colors.text.tertiary }}
                           title={`Raw amount: ${nativeStakedToken.amount}`}
                         >
-                          Raw: {formatBalance(nativeStakedToken).rawFormattedAmount}
+                          Raw:{' '}
+                          {formatBalance(nativeStakedToken).rawFormattedAmount}
                         </span>
                       )}
                     </div>
@@ -265,7 +288,8 @@ export default function NativeBalanceTable({ nativeTokens, nativeStakedToken }: 
                           style={{ color: colors.text.tertiary }}
                           title={`Raw amount: ${nativeStakedToken.amount}`}
                         >
-                          Raw: {formatBalance(nativeStakedToken).rawFormattedAmount}
+                          Raw:{' '}
+                          {formatBalance(nativeStakedToken).rawFormattedAmount}
                         </span>
                       )}
                     </div>

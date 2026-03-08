@@ -6,7 +6,7 @@ import NativeBalanceTable from './NativeBalanceTable'
 import IBCBalanceTable from './IBCBalanceTable'
 
 interface BalancesProps {
-  balances: Coin[]
+  balances: readonly Coin[]
   stakedBalance: Coin | null
 }
 
@@ -14,13 +14,20 @@ export default function Balances({ balances, stakedBalance }: BalancesProps) {
   const { colors } = useTheme()
 
   // Separate native and IBC tokens
-  const nativeTokens = balances.filter(balance => !balance.denom.includes('/'))
-  const ibcTokens = balances.filter(balance => balance.denom.includes('/'))
-  
-  // Find native token in staked balance
-  const nativeStakedToken = stakedBalance && !stakedBalance.denom.includes('/') ? stakedBalance : null
+  const nativeTokens = balances.filter(
+    (balance) => !balance.denom.includes('/')
+  )
+  const ibcTokens = balances.filter((balance) => balance.denom.includes('/'))
 
-  if (nativeTokens.length === 0 && !nativeStakedToken && ibcTokens.length === 0) {
+  // Find native token in staked balance
+  const nativeStakedToken =
+    stakedBalance && !stakedBalance.denom.includes('/') ? stakedBalance : null
+
+  if (
+    nativeTokens.length === 0 &&
+    !nativeStakedToken &&
+    ibcTokens.length === 0
+  ) {
     return (
       <div
         className="rounded-xl p-6"
@@ -86,7 +93,10 @@ export default function Balances({ balances, stakedBalance }: BalancesProps) {
       ></div>
 
       <div className="space-y-6">
-        <NativeBalanceTable nativeTokens={nativeTokens} nativeStakedToken={nativeStakedToken} />
+        <NativeBalanceTable
+          nativeTokens={nativeTokens}
+          nativeStakedToken={nativeStakedToken}
+        />
         <IBCBalanceTable ibcTokens={ibcTokens} />
       </div>
     </div>

@@ -1,11 +1,6 @@
 import React from 'react'
 import { useTheme } from '@/theme/ThemeProvider'
-import {
-  FiBox,
-  FiUsers,
-  FiClock,
-  FiActivity,
-} from 'react-icons/fi'
+import { FiBox, FiUsers, FiClock, FiActivity } from 'react-icons/fi'
 import { useHomeData } from '@/hooks/useHomeData'
 import StatCard from '@/components/Home/StatCard'
 import RecentBlocksCard from '@/components/Home/RecentBlocksCard'
@@ -58,14 +53,14 @@ const Home: React.FC = () => {
           title="Active Validators"
           value={!isLoading ? totalActiveValidator : 'Loading'}
           icon={FiUsers}
-          subtitle="Currently online"
+          subtitle="Currently active"
           iconColor={colors.status.success}
         />
         <StatCard
           title="Total Transactions"
           value={isConnected ? totalTransactions : 'Not Connected'}
           icon={FiActivity}
-          subtitle="Session count"
+          subtitle="Transaction count"
           iconColor={colors.status.warning}
         />
         <StatCard

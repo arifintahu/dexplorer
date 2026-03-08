@@ -1,12 +1,16 @@
 import React, { Suspense, lazy } from 'react'
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 import { Provider, useSelector } from 'react-redux'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { ThemeProvider } from '@/theme/ThemeProvider'
 import { store, RootState } from '@/store'
 import Layout from '@/components/Layout/Layout'
 import Connect from '@/components/Connect'
 import ErrorBoundary from '@/components/ErrorBoundary'
 import { FiLoader } from 'react-icons/fi'
+
+// Create a client
+const queryClient = new QueryClient()
 
 // Lazy load page components
 const Home = lazy(() => import('@/pages/Home'))
@@ -66,12 +70,14 @@ function AppContent() {
 
 export default function App() {
   return (
-    <Provider store={store}>
-      <ThemeProvider>
-        <Router>
-          <AppContent />
-        </Router>
-      </ThemeProvider>
-    </Provider>
+    <QueryClientProvider client={queryClient}>
+      <Provider store={store}>
+        <ThemeProvider>
+          <Router>
+            <AppContent />
+          </Router>
+        </ThemeProvider>
+      </Provider>
+    </QueryClientProvider>
   )
 }

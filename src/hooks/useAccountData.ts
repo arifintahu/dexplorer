@@ -1,8 +1,7 @@
-import { useEffect, useState } from 'react'
-import { Account, Coin } from '@cosmjs/stargate'
+import { useEffect, useState, useMemo } from 'react'
 import { TxResponse } from '@cosmjs/tendermint-rpc'
 import { Tx } from 'cosmjs-types/cosmos/tx/v1beta1/tx'
-import { toast } from 'sonner'
+import { useQuery } from '@tanstack/react-query'
 import {
   getAccount,
   getAllBalances,
@@ -19,55 +18,46 @@ export interface DecodedTx {
 
 export const useAccountData = (address: string | undefined) => {
   const tmClient = useClientStore((state) => state.tmClient)
-  const [account, setAccount] = useState<Account | null>(null)
-  const [balances, setBalances] = useState<Coin[]>([])
-  const [stakedBalance, setStakedBalance] = useState<Coin | null>(null)
-  const [transactions, setTransactions] = useState<TxResponse[]>([])
-  const [decodedTxs, setDecodedTxs] = useState<DecodedTx[]>([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
 
-  useEffect(() => {
-    if (tmClient && address) {
-      setLoading(true)
-      setError(null)
-      
-      Promise.all([
-        getAccount(tmClient, address).catch((err) => {
-          console.error('Failed to fetch account:', err)
-          return null
-        }),
-        getAllBalances(tmClient, address).catch((err) => {
-          console.error('Failed to fetch balances:', err)
-          return []
-        }),
-        getBalanceStaked(tmClient, address).catch((err) => {
-          // It's common for accounts to not have staked balance or for the query to fail if module not supported
-          console.warn('Failed to fetch staked balance:', err)
-          return null
-        }),
-        getTxsBySender(tmClient, address, 1, 10).catch((err) => {
-          console.error('Failed to fetch transactions:', err)
-          return { txs: [], totalCount: 0 }
-        }),
-      ])
-        .then(([accountData, balanceData, stakedData, txData]) => {
-          setAccount(accountData)
-          setBalances([...balanceData])
-          setStakedBalance(stakedData)
-          // Handle both TxSearchResponse structure and direct array if API differs
-          const txs = Array.isArray(txData) ? txData : (txData.txs || [])
-          setTransactions([...txs])
-          setLoading(false)
-        })
-        .catch((error) => {
-          console.error('Error fetching account data:', error)
-          setError('Failed to fetch account data')
-          toast.error('Failed to fetch account data')
-          setLoading(false)
-        })
-    }
-  }, [tmClient, address])
+  const {
+    data: account,
+    isLoading: isAccountLoading,
+    error: accountError,
+  } = useQuery({
+    queryKey: ['account', address],
+    queryFn: () => (tmClient && address ? getAccount(tmClient, address) : null),
+    enabled: !!tmClient && !!address,
+  })
+
+  const { data: balances = [] } = useQuery({
+    queryKey: ['balances', address],
+    queryFn: () =>
+      tmClient && address ? getAllBalances(tmClient, address) : [],
+    enabled: !!tmClient && !!address,
+  })
+
+  const { data: stakedBalance } = useQuery({
+    queryKey: ['stakedBalance', address],
+    queryFn: () =>
+      tmClient && address ? getBalanceStaked(tmClient, address) : null,
+    enabled: !!tmClient && !!address,
+  })
+
+  const { data: txData } = useQuery({
+    queryKey: ['transactions', address],
+    queryFn: () =>
+      tmClient && address
+        ? getTxsBySender(tmClient, address, 1, 10)
+        : { txs: [], totalCount: 0 },
+    enabled: !!tmClient && !!address,
+  })
+
+  const transactions = useMemo(() => {
+    if (!txData) return []
+    return Array.isArray(txData) ? txData : txData.txs || []
+  }, [txData])
+
+  const [decodedTxs, setDecodedTxs] = useState<DecodedTx[]>([])
 
   useEffect(() => {
     if (transactions.length > 0) {
@@ -100,12 +90,12 @@ export const useAccountData = (address: string | undefined) => {
   }, [transactions])
 
   return {
-    account,
+    account: account || null,
     balances,
-    stakedBalance,
+    stakedBalance: stakedBalance || null,
     transactions,
     decodedTxs,
-    loading,
-    error,
+    loading: isAccountLoading,
+    error: accountError ? (accountError as Error).message : null,
   }
 }

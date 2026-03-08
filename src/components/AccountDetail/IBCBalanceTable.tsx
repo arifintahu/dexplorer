@@ -2,10 +2,16 @@ import React, { useState, useEffect } from 'react'
 import { Coin } from '@cosmjs/stargate'
 import { useTheme } from '@/theme/ThemeProvider'
 import { formatAmount, formatDenom, getConvertedAmount } from '@/utils/cosmos'
-import { FiDollarSign, FiChevronLeft, FiChevronsLeft, FiChevronRight, FiChevronsRight } from 'react-icons/fi'
+import {
+  FiDollarSign,
+  FiChevronLeft,
+  FiChevronsLeft,
+  FiChevronRight,
+  FiChevronsRight,
+} from 'react-icons/fi'
 
 interface IBCBalanceTableProps {
-  ibcTokens: Coin[]
+  ibcTokens: readonly Coin[]
 }
 
 export default function IBCBalanceTable({ ibcTokens }: IBCBalanceTableProps) {
@@ -42,7 +48,10 @@ export default function IBCBalanceTable({ ibcTokens }: IBCBalanceTableProps) {
   }
 
   const formatBalance = (balance: Coin) => {
-    const { converted, base } = getConvertedAmount(balance.amount, balance.denom)
+    const { converted, base } = getConvertedAmount(
+      balance.amount,
+      balance.denom
+    )
 
     return {
       amount: balance.amount,
@@ -53,7 +62,8 @@ export default function IBCBalanceTable({ ibcTokens }: IBCBalanceTableProps) {
       baseDenom: base,
       formattedDenom: formatDenom(balance.denom),
       isIBC: balance.denom.startsWith('ibc/'),
-      isConverted: balance.denom.startsWith('u') || balance.denom.startsWith('a')
+      isConverted:
+        balance.denom.startsWith('u') || balance.denom.startsWith('a'),
     }
   }
 
@@ -76,10 +86,7 @@ export default function IBCBalanceTable({ ibcTokens }: IBCBalanceTableProps) {
         </div>
         <div className="flex items-center gap-4">
           <div className="flex items-center gap-2">
-            <span
-              className="text-sm"
-              style={{ color: colors.text.secondary }}
-            >
+            <span className="text-sm" style={{ color: colors.text.secondary }}>
               Show:
             </span>
             <select
@@ -97,10 +104,7 @@ export default function IBCBalanceTable({ ibcTokens }: IBCBalanceTableProps) {
               <option value={20}>20</option>
             </select>
           </div>
-          <span
-            className="text-sm"
-            style={{ color: colors.text.secondary }}
-          >
+          <span className="text-sm" style={{ color: colors.text.secondary }}>
             Showing {showingStart}-{showingEnd} of {ibcTokens.length}
           </span>
         </div>
@@ -142,7 +146,7 @@ export default function IBCBalanceTable({ ibcTokens }: IBCBalanceTableProps) {
               </tr>
             </thead>
             <tbody>
-            {paginatedIbcTokens.map((balance, index) => {
+              {paginatedIbcTokens.map((balance, index) => {
                 const formatted = formatBalance(balance)
                 return (
                   <tr
@@ -153,7 +157,8 @@ export default function IBCBalanceTable({ ibcTokens }: IBCBalanceTableProps) {
                       backgroundColor: 'transparent',
                     }}
                     onMouseEnter={(e) => {
-                      e.currentTarget.style.backgroundColor = colors.surface + '50'
+                      e.currentTarget.style.backgroundColor =
+                        colors.surface + '50'
                     }}
                     onMouseLeave={(e) => {
                       e.currentTarget.style.backgroundColor = 'transparent'
@@ -200,17 +205,21 @@ export default function IBCBalanceTable({ ibcTokens }: IBCBalanceTableProps) {
             </tbody>
           </table>
         </div>
-        
+
         {/* Pagination Controls */}
         {totalPages > 1 && (
-          <div className="flex items-center justify-between mt-4 pt-4" style={{ borderTop: `1px solid ${colors.border.secondary}` }}>
+          <div
+            className="flex items-center justify-between mt-4 pt-4"
+            style={{ borderTop: `1px solid ${colors.border.secondary}` }}
+          >
             <div className="flex items-center gap-2">
               <button
                 onClick={() => handlePageChange(1)}
                 disabled={currentPage === 1}
                 className="p-2 rounded border disabled:opacity-50 disabled:cursor-not-allowed hover:bg-opacity-80 transition-colors"
                 style={{
-                  backgroundColor: currentPage === 1 ? colors.surface : colors.background,
+                  backgroundColor:
+                    currentPage === 1 ? colors.surface : colors.background,
                   borderColor: colors.border.secondary,
                   color: colors.text.primary,
                 }}
@@ -223,7 +232,8 @@ export default function IBCBalanceTable({ ibcTokens }: IBCBalanceTableProps) {
                 disabled={currentPage === 1}
                 className="p-2 rounded border disabled:opacity-50 disabled:cursor-not-allowed hover:bg-opacity-80 transition-colors"
                 style={{
-                  backgroundColor: currentPage === 1 ? colors.surface : colors.background,
+                  backgroundColor:
+                    currentPage === 1 ? colors.surface : colors.background,
                   borderColor: colors.border.secondary,
                   color: colors.text.primary,
                 }}
@@ -232,7 +242,7 @@ export default function IBCBalanceTable({ ibcTokens }: IBCBalanceTableProps) {
                 <FiChevronLeft className="w-4 h-4" />
               </button>
             </div>
-            
+
             <div className="flex items-center gap-1">
               {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
                 let pageNum
@@ -245,16 +255,25 @@ export default function IBCBalanceTable({ ibcTokens }: IBCBalanceTableProps) {
                 } else {
                   pageNum = currentPage - 2 + i
                 }
-                
+
                 return (
                   <button
                     key={pageNum}
                     onClick={() => handlePageChange(pageNum)}
                     className="px-3 py-1 rounded border text-sm hover:bg-opacity-80 transition-colors"
                     style={{
-                      backgroundColor: currentPage === pageNum ? colors.primary : colors.background,
-                      borderColor: currentPage === pageNum ? colors.primary : colors.border.secondary,
-                      color: currentPage === pageNum ? colors.background : colors.text.primary,
+                      backgroundColor:
+                        currentPage === pageNum
+                          ? colors.primary
+                          : colors.background,
+                      borderColor:
+                        currentPage === pageNum
+                          ? colors.primary
+                          : colors.border.secondary,
+                      color:
+                        currentPage === pageNum
+                          ? colors.background
+                          : colors.text.primary,
                     }}
                   >
                     {pageNum}
@@ -262,14 +281,17 @@ export default function IBCBalanceTable({ ibcTokens }: IBCBalanceTableProps) {
                 )
               })}
             </div>
-            
+
             <div className="flex items-center gap-2">
               <button
                 onClick={() => handlePageChange(currentPage + 1)}
                 disabled={currentPage === totalPages}
                 className="p-2 rounded border disabled:opacity-50 disabled:cursor-not-allowed hover:bg-opacity-80 transition-colors"
                 style={{
-                  backgroundColor: currentPage === totalPages ? colors.surface : colors.background,
+                  backgroundColor:
+                    currentPage === totalPages
+                      ? colors.surface
+                      : colors.background,
                   borderColor: colors.border.secondary,
                   color: colors.text.primary,
                 }}
@@ -282,7 +304,10 @@ export default function IBCBalanceTable({ ibcTokens }: IBCBalanceTableProps) {
                 disabled={currentPage === totalPages}
                 className="p-2 rounded border disabled:opacity-50 disabled:cursor-not-allowed hover:bg-opacity-80 transition-colors"
                 style={{
-                  backgroundColor: currentPage === totalPages ? colors.surface : colors.background,
+                  backgroundColor:
+                    currentPage === totalPages
+                      ? colors.surface
+                      : colors.background,
                   borderColor: colors.border.secondary,
                   color: colors.text.primary,
                 }}

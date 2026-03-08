@@ -46,24 +46,22 @@ import { LS_RPC_ADDRESS, LS_RPC_ADDRESS_LIST } from '@/utils/constant'
 import { removeTrailingSlash } from '@/utils/helper'
 import { toast } from 'sonner'
 import { useClientStore } from '@/store/clientStore'
+import { useTranslation } from 'react-i18next'
 
 interface TopNavigationProps {
   onMenuClick?: () => void
 }
 
 const TopNavigation: React.FC<TopNavigationProps> = ({ onMenuClick }) => {
+  const { t } = useTranslation()
   const { colors, colorScheme, toggleColorScheme } = useTheme()
   const dispatch = useDispatch()
   const navigate = useNavigate()
   const { connectState } = useSelector((state: RootState) => state.connect)
-  
-  const { 
-    setTmClient, 
-    setSubsNewBlock, 
-    setSubsTxEvent,
-    disconnect
-  } = useClientStore()
-  
+
+  const { setTmClient, setSubsNewBlock, setSubsTxEvent, disconnect } =
+    useClientStore()
+
   const address = useSelector(selectRPCAddress)
   const isConnected = connectState
   const [searchQuery, setSearchQuery] = useState('')
@@ -282,6 +280,7 @@ const TopNavigation: React.FC<TopNavigationProps> = ({ onMenuClick }) => {
               onClick={onMenuClick}
               variant="ghost"
               size="sm"
+              aria-label="Open menu"
               className="lg:hidden focus:outline-none focus:ring-0 active:outline-none border-0 focus:border-0 active:border-0"
               style={{
                 color: colors.text.primary,
@@ -354,7 +353,9 @@ const TopNavigation: React.FC<TopNavigationProps> = ({ onMenuClick }) => {
                       ></div>
                     </div>
                     <div className="hidden sm:flex sm:flex-col sm:items-start">
-                      <span className="text-xs font-medium">Connected to:</span>
+                      <span className="text-xs font-medium">
+                        {t('dashboard.connectedTo')}:
+                      </span>
                       <span
                         className="text-xs truncate max-w-32"
                         title={address}
@@ -366,7 +367,9 @@ const TopNavigation: React.FC<TopNavigationProps> = ({ onMenuClick }) => {
                 ) : (
                   <>
                     <FiWifiOff className="h-4 w-4" />
-                    <span className="hidden sm:inline">Disconnected</span>
+                    <span className="hidden sm:inline">
+                      {t('app.disconnected')}
+                    </span>
                   </>
                 )}
               </div>
@@ -376,7 +379,7 @@ const TopNavigation: React.FC<TopNavigationProps> = ({ onMenuClick }) => {
                 onClick={() => setIsRPCModalOpen(true)}
                 variant="ghost"
                 size="sm"
-                title="Change RPC Connection"
+                title={t('app.connect')}
                 className="text-sm focus:outline-none focus:ring-0 active:outline-none border-0 focus:border-0 active:border-0"
                 style={{
                   color: colors.text.primary,
@@ -386,7 +389,9 @@ const TopNavigation: React.FC<TopNavigationProps> = ({ onMenuClick }) => {
                 }}
               >
                 <FiRefreshCcw className="h-4 w-4" />
-                <span className="hidden md:inline ml-1">Change</span>
+                <span className="hidden md:inline ml-1">
+                  {t('app.connect')}
+                </span>
               </Button>
 
               {/* Disconnect Button */}
@@ -395,6 +400,7 @@ const TopNavigation: React.FC<TopNavigationProps> = ({ onMenuClick }) => {
                   onClick={handleDisconnect}
                   variant="ghost"
                   size="sm"
+                  aria-label="Disconnect from RPC"
                   title="Disconnect from RPC"
                   className="focus:outline-none focus:ring-0 active:outline-none border-0 focus:border-0 active:border-0"
                   style={{
@@ -414,8 +420,9 @@ const TopNavigation: React.FC<TopNavigationProps> = ({ onMenuClick }) => {
               onClick={toggleColorScheme}
               variant="ghost"
               size="sm"
+              aria-label={`Switch to ${colorScheme === 'light' ? 'dark' : 'light'} mode`}
               title={`Switch to ${
-                colorScheme === 'dark' ? 'light' : 'dark'
+                colorScheme === 'light' ? 'dark' : 'light'
               } mode`}
               className="focus:outline-none focus:ring-0 active:outline-none border-0 focus:border-0 active:border-0"
               style={{

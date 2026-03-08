@@ -155,16 +155,12 @@ export const getTypeMsg = (typeUrl: string): string => {
 }
 
 export const isValidUrl = (urlString: string): boolean => {
-  const urlPattern = new RegExp(
-    '^(https?:\\/\\/)?' + // validate protocol
-      '((([a-z\\d]([a-z\\d-]*[a-z\\d])*)\\.)+[a-z]{2,}|' + // validate domain name
-      '((\\d{1,3}\\.){3}\\d{1,3}))' + // validate OR ip (v4) address
-      '(\\:\\d+)?(\\/[-a-z\\d%_.~+]*)*' + // validate port and path
-      '(\\?[;&a-z\\d%_.~+=-]*)?' + // validate query string
-      '(\\#[-a-z\\d_]*)?$',
-    'i'
-  ) // validate fragment locator
-  return !!urlPattern.test(urlString)
+  try {
+    const url = new URL(urlString)
+    return ['http:', 'https:'].includes(url.protocol)
+  } catch {
+    return false
+  }
 }
 
 export const normalizeUrl = (urlString: string): string => {
@@ -201,11 +197,15 @@ export function isValidJSON(text: string): boolean {
 }
 
 // Helper function to safely serialize objects with BigInt values
-export const safeStringify = (obj: any, space?: number): string => {
-  return JSON.stringify(obj, (key, value) => {
-    if (typeof value === 'bigint') {
-      return value.toString()
-    }
-    return value
-  }, space)
+export const safeStringify = (obj: unknown, space?: number): string => {
+  return JSON.stringify(
+    obj,
+    (key, value) => {
+      if (typeof value === 'bigint') {
+        return value.toString()
+      }
+      return value
+    },
+    space
+  )
 }

@@ -1,5 +1,4 @@
-.next
 node_modules
-public
-next-env.d.ts
-package-lock.json
+dist
+.next
+coverage
