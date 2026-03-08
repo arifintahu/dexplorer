@@ -199,3 +199,13 @@ export function isValidJSON(text: string): boolean {
     return false
   }
 }
+
+// Helper function to safely serialize objects with BigInt values
+export const safeStringify = (obj: any, space?: number): string => {
+  return JSON.stringify(obj, (key, value) => {
+    if (typeof value === 'bigint') {
+      return value.toString()
+    }
+    return value
+  }, space)
+}

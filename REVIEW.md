@@ -20,16 +20,20 @@ Here's a comprehensive review of the **dexplorer** repository — a lightweight,
   - Refactored `Blocks.tsx` to remove unused state causing type issues.
   - Ran `pnpm check` to verify zero type errors.
 
-### 3. Silent Error Swallowing
-- `AccountDetail.tsx:51-54` — Promise.all catches return `null`/`[]` silently
-- `helper.ts:88-90` — `isJsonValid()` swallows parse errors
-- `rpc/client/index.ts:17` — Connection errors resolve as `false` instead of rejecting
+### 3. Silent Error Swallowing - [RESOLVED]
+- **Status**: ✅ Fixed
+- **Changes**:
+  - Added error logging in `rpc/client/index.ts` for connection validation.
+  - Added proper error handling and logging in `useAccountData` hook.
+  - Verified `helper.ts` logic is intentional.
 
-### 4. Large Page Components
-- `AccountDetail.tsx` — **985 lines**
-- `ProposalDetail.tsx` — **649 lines**
-- `Home.tsx` — **634 lines** (Refactored: Now <100 lines)
-- These mix data fetching, state management, and rendering in one component.
+### 4. Large Page Components - [RESOLVED]
+- **Status**: ✅ Fixed
+- **Changes**:
+  - Refactored `AccountDetail.tsx` (985 lines) -> `useAccountData` hook + sub-components.
+  - Refactored `ProposalDetail.tsx` (649 lines) -> `useProposalData` hook + sub-components.
+  - Refactored `Home.tsx` (634 lines) -> `useHomeData` hook + sub-components.
+  - All main page components are now <150 lines.
 
 ### 5. Code Duplication
 - Identical error-handling patterns (catch → console.error → toast.error → setState) repeated across `Proposals.tsx`, `Parameters.tsx`, `Validators.tsx`, `Home.tsx`
@@ -110,11 +114,11 @@ Here's a comprehensive review of the **dexplorer** repository — a lightweight,
 |----------|--------|
 | **P0** | Add a testing framework (Vitest) and write tests for RPC client, encoding, utils, and Redux slices |
 | **P0** | Replace `any` types with proper interfaces; enable `strict: true` in tsconfig |
-| **P0** | Cache `StargateClient` instead of recreating per query |
-| **P1** | Extract custom hooks (`useBlock`, `useTransaction`, etc.) to separate data fetching from rendering |
-| **P1** | Break down large page components into smaller sub-components |
-| **P1** | Add error boundaries and a 404 route |
-| **P1** | Add CI/CD (GitHub Actions) for lint + type-check + build |
+| **P0** | Cache `StargateClient` instead of recreating per query | [RESOLVED] |
+| **P1** | Extract custom hooks (`useBlock`, `useTransaction`, etc.) to separate data fetching from rendering | [RESOLVED] |
+| **P1** | Break down large page components into smaller sub-components | [RESOLVED] |
+| **P1** | Add error boundaries and a 404 route | [RESOLVED] |
+| **P1** | Add CI/CD (GitHub Actions) for lint + type-check + build | [RESOLVED] |
 | **P2** | Add pre-commit hooks (husky + lint-staged) |
 | **P2** | Fix accessibility issues (ARIA labels, focus trapping, keyboard nav) |
 | **P2** | Add `React.lazy()` code splitting for routes |

@@ -14,7 +14,10 @@ export async function validateConnection(rpcAddress: string): Promise<Boolean> {
     })
 
     socket.connect()
-    socket.connected.then(() => resolve(true)).catch(() => resolve(false))
+    socket.connected.then(() => resolve(true)).catch((err) => {
+      console.error('Connection validation failed:', err)
+      resolve(false)
+    })
   })
 }
 
