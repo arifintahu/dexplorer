@@ -49,8 +49,12 @@ Here's a comprehensive review of the **dexplorer** repository — a lightweight,
   - Fixed `no-unused-vars` and other lint errors.
   - Replaced `any` types in key areas.
 
-### 7. Non-Serializable Redux State
-- `streamSlice.ts` stores `Subscription` objects and the `tmClient` in Redux, requiring extensive middleware workarounds. These should live outside the store.
+### 7. Non-Serializable Redux State - [RESOLVED]
+- **Status**: ✅ Fixed
+- **Changes**:
+  - Moved `Tendermint37Client` and `Subscription` objects out of Redux.
+  - Created `src/store/clientStore.ts` using Zustand for managing non-serializable state.
+  - Updated all components to use `useClientStore` instead of Redux selectors for client/subscriptions.
 
 ---
 
@@ -68,12 +72,16 @@ Here's a comprehensive review of the **dexplorer** repository — a lightweight,
   - Implemented `React.lazy()` and `Suspense` in `App.tsx`.
   - Added loading fallback component.
 
-### 10. Missing Memoization
-- `Home.tsx` `StatCard` and `RecentBlocksCard` re-render on every parent update
-- No `React.memo` on frequently-rendered list items
+### 10. Missing Memoization - [RESOLVED]
+- **Status**: ✅ Fixed
+- **Changes**:
+  - Wrapped `StatCard` and `RecentBlocksCard` in `React.memo` to prevent unnecessary re-renders.
 
-### 11. Memory Leak Risk
-- WebSocket subscriptions in `Connect/index.tsx` may not be properly cleaned up on unmount — `useEffect` cleanup is incomplete.
+### 11. Memory Leak Risk - [RESOLVED]
+- **Status**: ✅ Fixed
+- **Changes**:
+  - Implemented proper `disconnect` logic in `clientStore`.
+  - Updated `Connect/index.tsx` to ensure old connections and subscriptions are cleaned up before new ones are created.
 
 ---
 
@@ -123,9 +131,12 @@ Here's a comprehensive review of the **dexplorer** repository — a lightweight,
 | **P1** | Break down large page components into smaller sub-components | [RESOLVED] |
 | **P1** | Add error boundaries and a 404 route | [RESOLVED] |
 | **P1** | Add CI/CD (GitHub Actions) for lint + type-check + build | [RESOLVED] |
+| **P1** | Move non-serializable state (Client/Subscriptions) out of Redux | [RESOLVED] |
+| **P2** | Fix memory leaks in WebSocket connections | [RESOLVED] |
+| **P2** | Optimize rendering with `React.memo` | [RESOLVED] |
+| **P2** | Add `React.lazy()` code splitting for routes | [RESOLVED] |
 | **P2** | Add pre-commit hooks (husky + lint-staged) |
 | **P2** | Fix accessibility issues (ARIA labels, focus trapping, keyboard nav) |
-| **P2** | Add `React.lazy()` code splitting for routes |
 | **P3** | Add i18n support |
 | **P3** | Implement request caching/deduplication (e.g., TanStack Query) |
 

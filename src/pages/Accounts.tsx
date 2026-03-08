@@ -162,7 +162,7 @@ const Accounts: React.FC = () => {
         </div>
 
         <div className="space-y-3">
-          {accounts.map((account, index) => (
+          {accounts.map((account) => (
             <div
               key={account.address}
               className="p-4 rounded-lg border transition-all duration-200 hover:shadow-md"

@@ -1,10 +1,8 @@
 import { useEffect, useState } from 'react'
-import { useSelector } from 'react-redux'
 import { Account, Coin } from '@cosmjs/stargate'
 import { TxResponse } from '@cosmjs/tendermint-rpc'
 import { Tx } from 'cosmjs-types/cosmos/tx/v1beta1/tx'
 import { toast } from 'sonner'
-import { selectTmClient } from '@/store/connectSlice'
 import {
   getAccount,
   getAllBalances,
@@ -12,6 +10,7 @@ import {
   getTxsBySender,
 } from '@/rpc/query'
 import { decodeMsg, DecodeMsg } from '@/encoding'
+import { useClientStore } from '@/store/clientStore'
 
 export interface DecodedTx {
   tx: TxResponse
@@ -19,7 +18,7 @@ export interface DecodedTx {
 }
 
 export const useAccountData = (address: string | undefined) => {
-  const tmClient = useSelector(selectTmClient)
+  const tmClient = useClientStore((state) => state.tmClient)
   const [account, setAccount] = useState<Account | null>(null)
   const [balances, setBalances] = useState<Coin[]>([])
   const [stakedBalance, setStakedBalance] = useState<Coin | null>(null)

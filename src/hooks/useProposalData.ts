@@ -1,11 +1,10 @@
 import { useEffect, useState } from 'react'
-import { useSelector } from 'react-redux'
 import { Proposal } from 'cosmjs-types/cosmos/gov/v1/gov'
-import { selectTmClient } from '@/store/connectSlice'
 import { queryProposalById } from '@/rpc/abci'
+import { useClientStore } from '@/store/clientStore'
 
 export const useProposalData = (id: string | undefined) => {
-  const tmClient = useSelector(selectTmClient)
+  const tmClient = useClientStore((state) => state.tmClient)
   const [proposal, setProposal] = useState<Proposal | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)

@@ -17,7 +17,7 @@ interface StatCardProps {
   isLoading?: boolean
 }
 
-const StatCard: React.FC<StatCardProps> = ({
+const StatCard: React.FC<StatCardProps> = React.memo(({
   title,
   value,
   icon: Icon,
@@ -31,7 +31,7 @@ const StatCard: React.FC<StatCardProps> = ({
 
   return (
     <div
-      className="group rounded-xl p-6 transition-all duration-300 hover:shadow-lg hover:-translate-y-1 cursor-pointer"
+      className="group rounded-xl p-6 transition-all duration-300 hover:shadow-lg hover:-translate-y-1"
       style={{
         backgroundColor: colors.surface,
         border: `1px solid ${colors.border.primary}`,
@@ -121,6 +121,6 @@ const StatCard: React.FC<StatCardProps> = ({
       </div>
     </div>
   )
-}
+})
 
 export default StatCard

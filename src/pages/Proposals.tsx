@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
-import { useSelector } from 'react-redux'
 import {
   FiChevronRight,
   FiHome,
@@ -12,11 +11,11 @@ import {
   FiAlertCircle,
 } from 'react-icons/fi'
 import { useTheme } from '@/theme/ThemeProvider'
-import { selectTmClient } from '@/store/connectSlice'
 import { queryProposals } from '@/rpc/abci'
 import { getTypeMsg, displayDate } from '@/utils/helper'
 import { proposalStatus, proposalStatusList } from '@/utils/constant'
 import { toast } from 'sonner'
+import { useClientStore } from '@/store/clientStore'
 
 type Proposal = {
   id: bigint
@@ -29,9 +28,9 @@ type Proposal = {
 
 const Proposals: React.FC = () => {
   const { colors } = useTheme()
-  const tmClient = useSelector(selectTmClient)
+  const tmClient = useClientStore((state) => state.tmClient)
   const [page, setPage] = useState(0)
-  const [perPage, setPerPage] = useState(10)
+  const [perPage] = useState(10)
   const [total, setTotal] = useState(0)
   const [proposals, setProposals] = useState<Proposal[]>([])
   const [isLoading, setIsLoading] = useState(true)

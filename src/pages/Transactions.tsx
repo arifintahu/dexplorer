@@ -1,5 +1,5 @@
-import React, { useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import React from 'react'
+import { Link } from 'react-router-dom'
 import { useSelector } from 'react-redux'
 import {
   FiChevronRight,
@@ -22,16 +22,12 @@ import SearchBar from '@/components/ui/SearchBar'
 
 const Transactions: React.FC = () => {
   const { colors } = useTheme()
-  const [searchHash, setSearchHash] = useState('')
-  const [isSearching, setIsSearching] = useState(false)
   // Get persistent transaction data from Redux store
   const transactions = useSelector(selectTransactions)
   const { connectState } = useSelector((state: RootState) => state.connect)
 
-  const navigate = useNavigate()
-
   // Helper function to get transaction status
-  const getTransactionStatus = (result: any): 'success' | 'failed' => {
+  const getTransactionStatus = (result: { code: number } | null | undefined): 'success' | 'failed' => {
     if (!result) return 'failed'
     return result.code === 0 ? 'success' : 'failed'
   }

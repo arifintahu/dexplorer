@@ -7,13 +7,13 @@ import {
   selectTotalActiveValidator,
   setTotalActiveValidator,
 } from '@/store/streamSlice'
-import { selectTmClient } from '@/store/connectSlice'
 import { queryActiveValidators } from '@/rpc/abci'
+import { useClientStore } from '@/store/clientStore'
 
 export const useHomeData = () => {
   const dispatch = useDispatch()
   const { connectState } = useSelector((state: RootState) => state.connect)
-  const tmClient = useSelector(selectTmClient)
+  const tmClient = useClientStore((state) => state.tmClient)
   const totalActiveValidator = useSelector(selectTotalActiveValidator)
   const persistentBlocks = useSelector(selectBlocks)
   const txEvent = useSelector(selectTxEvent)

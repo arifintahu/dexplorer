@@ -14,7 +14,7 @@ interface FormattedBlock {
   validator: string
 }
 
-const RecentBlocksCard: React.FC = () => {
+const RecentBlocksCard: React.FC = React.memo(() => {
   const { colors } = useTheme()
   const navigate = useNavigate()
   const persistentBlocks = useSelector(selectBlocks)
@@ -216,6 +216,6 @@ const RecentBlocksCard: React.FC = () => {
       </Link>
     </div>
   )
-}
+})
 
 export default RecentBlocksCard

@@ -5,18 +5,12 @@ import { RootState } from '@/store'
 import { useNavigate } from 'react-router-dom'
 import {
   setConnectState,
-  setTmClient,
   setRPCAddress,
-  selectTmClient,
   selectRPCAddress,
 } from '@/store/connectSlice'
 import {
   setNewBlock,
   setTxEvent,
-  setSubsNewBlock,
-  setSubsTxEvent,
-  selectSubsNewBlock,
-  selectSubsTxEvent,
   addBlock,
   addTransaction,
   clearPersistentData,
@@ -51,6 +45,7 @@ import { subscribeNewBlock, subscribeTx } from '@/rpc/subscribe'
 import { LS_RPC_ADDRESS, LS_RPC_ADDRESS_LIST } from '@/utils/constant'
 import { removeTrailingSlash } from '@/utils/helper'
 import { toast } from 'sonner'
+import { useClientStore } from '@/store/clientStore'
 
 interface TopNavigationProps {
   onMenuClick?: () => void
@@ -61,10 +56,15 @@ const TopNavigation: React.FC<TopNavigationProps> = ({ onMenuClick }) => {
   const dispatch = useDispatch()
   const navigate = useNavigate()
   const { connectState } = useSelector((state: RootState) => state.connect)
-  const tmClient = useSelector(selectTmClient)
+  
+  const { 
+    setTmClient, 
+    setSubsNewBlock, 
+    setSubsTxEvent,
+    disconnect
+  } = useClientStore()
+  
   const address = useSelector(selectRPCAddress)
-  const subsNewBlock = useSelector(selectSubsNewBlock)
-  const subsTxEvent = useSelector(selectSubsTxEvent)
   const isConnected = connectState
   const [searchQuery, setSearchQuery] = useState('')
 
@@ -113,31 +113,8 @@ const TopNavigation: React.FC<TopNavigationProps> = ({ onMenuClick }) => {
   const resetApplicationData = async () => {
     console.log('Resetting application data...')
 
-    // Clean up subscriptions first
-    if (subsNewBlock) {
-      console.log('Unsubscribing from new block subscription')
-      subsNewBlock.unsubscribe()
-      dispatch(setSubsNewBlock(null))
-    }
-    if (subsTxEvent) {
-      console.log('Unsubscribing from tx event subscription')
-      subsTxEvent.unsubscribe()
-      dispatch(setSubsTxEvent(null))
-    }
-
-    // Disconnect the old WebSocket client
-    if (tmClient) {
-      try {
-        console.log('Disconnecting tmClient...')
-        await tmClient.disconnect()
-        console.log('tmClient disconnected successfully')
-      } catch (error) {
-        console.warn('Error disconnecting tmClient:', error)
-      }
-    }
-
-    // Clear the tmClient from Redux state immediately
-    dispatch(setTmClient(null))
+    // Clean up subscriptions and disconnect using Zustand store
+    disconnect()
 
     // Reset stream data
     dispatch(setNewBlock(null))
@@ -185,7 +162,7 @@ const TopNavigation: React.FC<TopNavigationProps> = ({ onMenuClick }) => {
       const tmClient = await connectWebsocketClient(cleanAddress)
 
       if (tmClient) {
-        dispatch(setTmClient(tmClient))
+        setTmClient(tmClient)
         dispatch(setRPCAddress(cleanAddress))
         dispatch(setConnectState(true))
         setState('success')
@@ -203,8 +180,8 @@ const TopNavigation: React.FC<TopNavigationProps> = ({ onMenuClick }) => {
           dispatch(addTransaction(event))
         })
 
-        dispatch(setSubsNewBlock(newBlockSub))
-        dispatch(setSubsTxEvent(txSub))
+        setSubsNewBlock(newBlockSub)
+        setSubsTxEvent(txSub)
 
         console.log('New subscriptions started successfully')
 
