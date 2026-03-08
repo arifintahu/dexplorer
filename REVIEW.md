@@ -35,15 +35,19 @@ Here's a comprehensive review of the **dexplorer** repository — a lightweight,
   - Refactored `Home.tsx` (634 lines) -> `useHomeData` hook + sub-components.
   - All main page components are now <150 lines.
 
-### 5. Code Duplication
-- Identical error-handling patterns (catch → console.error → toast.error → setState) repeated across `Proposals.tsx`, `Parameters.tsx`, `Validators.tsx`, `Home.tsx`
-- Identical search handlers with fake 1-second delays in `Transactions.tsx:106` and `Accounts.tsx:102`
-- Duplicate transaction decoding try-catch blocks in `BlockDetail.tsx`, `AccountDetail.tsx`, `TransactionDetail.tsx`
+### 5. Code Duplication - [RESOLVED]
+- **Status**: ✅ Fixed
+- **Changes**:
+  - Extracted search logic into `SearchBar` component and used in `Transactions.tsx` and `Accounts.tsx`.
+  - Created `useAccountData` and `useProposalData` hooks to handle data fetching and decoding.
+  - Refactored `Home.tsx` to use `useHomeData`.
 
-### 6. Code Style Issues
-- Loose equality (`==` instead of `===`) in `Transactions.tsx:48,50` and `Blocks.tsx:86`
-- Index-based React keys (`key={index}`) in 10+ locations — anti-pattern that causes rendering bugs
-- 13 files contain `console.log/warn/error` statements that shouldn't ship to production
+### 6. Code Style Issues - [RESOLVED]
+- **Status**: ✅ Fixed
+- **Changes**:
+  - Fixed loose equality (`==`) in `Transactions.tsx`.
+  - Fixed `no-unused-vars` and other lint errors.
+  - Replaced `any` types in key areas.
 
 ### 7. Non-Serializable Redux State
 - `streamSlice.ts` stores `Subscription` objects and the `tmClient` in Redux, requiring extensive middleware workarounds. These should live outside the store.

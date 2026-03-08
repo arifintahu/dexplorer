@@ -72,7 +72,7 @@ export const replaceHTTPtoWebsocket = (url: string): string => {
   return url.replace('http', 'ws')
 }
 
-export const isBech32Address = (address: string): Boolean => {
+export const isBech32Address = (address: string): boolean => {
   try {
     const decoded = bech32.decode(address)
     if (decoded.prefix.includes('valoper')) {
@@ -85,7 +85,7 @@ export const isBech32Address = (address: string): Boolean => {
 
     const encoded = bech32.encode(decoded.prefix, decoded.words)
     return encoded === address
-  } catch (e) {
+  } catch {
     return false
   }
 }
@@ -154,8 +154,8 @@ export const getTypeMsg = (typeUrl: string): string => {
   return ''
 }
 
-export const isValidUrl = (urlString: string): Boolean => {
-  var urlPattern = new RegExp(
+export const isValidUrl = (urlString: string): boolean => {
+  const urlPattern = new RegExp(
     '^(https?:\\/\\/)?' + // validate protocol
       '((([a-z\\d]([a-z\\d-]*[a-z\\d])*)\\.)+[a-z]{2,}|' + // validate domain name
       '((\\d{1,3}\\.){3}\\d{1,3}))' + // validate OR ip (v4) address

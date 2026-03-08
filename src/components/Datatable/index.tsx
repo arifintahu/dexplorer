@@ -1,9 +1,5 @@
 import { useState, useMemo, useEffect } from 'react'
 import {
-  FiChevronLeft,
-  FiChevronRight,
-  FiChevronsLeft,
-  FiChevronsRight,
   FiChevronUp,
   FiChevronDown,
 } from 'react-icons/fi'
@@ -23,7 +19,7 @@ export type DataTableProps<Data extends object> = {
   columns: ColumnDef<Data, any>[]
   total: number
   isLoading?: boolean
-  onChangePagination: Function
+  onChangePagination: (pagination: PaginationState) => void
 }
 
 export default function DataTable<Data extends object>({
@@ -55,7 +51,7 @@ export default function DataTable<Data extends object>({
       setPageCount(totalPage)
     }
     onChangePagination(pagination)
-  }, [total, pagination])
+  }, [total, pagination, onChangePagination])
 
   const table = useReactTable({
     columns,

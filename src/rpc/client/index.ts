@@ -2,7 +2,7 @@ import { replaceHTTPtoWebsocket } from '@/utils/helper'
 import { Tendermint37Client, WebsocketClient } from '@cosmjs/tendermint-rpc'
 import { StreamingSocket } from '@cosmjs/socket'
 
-export async function validateConnection(rpcAddress: string): Promise<Boolean> {
+export async function validateConnection(rpcAddress: string): Promise<boolean> {
   return new Promise((resolve) => {
     const wsUrl = replaceHTTPtoWebsocket(rpcAddress)
     const path = wsUrl.endsWith('/') ? 'websocket' : '/websocket'
@@ -24,23 +24,29 @@ export async function validateConnection(rpcAddress: string): Promise<Boolean> {
 export async function connectWebsocketClient(
   rpcAddress: string
 ): Promise<Tendermint37Client> {
-  return new Promise(async (resolve, reject) => {
+  return new Promise((resolve, reject) => {
     try {
       const wsUrl = replaceHTTPtoWebsocket(rpcAddress)
       const wsClient = new WebsocketClient(wsUrl, (err) => {
         reject(err)
       })
-      const tmClient = await Tendermint37Client.create(wsClient)
-      if (!tmClient) {
-        reject(new Error('cannot create tendermint client'))
-      }
+      Tendermint37Client.create(wsClient).then(async (tmClient) => {
+        if (!tmClient) {
+          reject(new Error('cannot create tendermint client'))
+          return
+        }
 
-      const status = await tmClient.status()
-      if (!status) {
-        reject(new Error('cannot get client status'))
-      }
-
-      resolve(tmClient)
+        try {
+          const status = await tmClient.status()
+          if (!status) {
+            reject(new Error('cannot get client status'))
+            return
+          }
+          resolve(tmClient)
+        } catch (err) {
+          reject(err)
+        }
+      }).catch(reject)
     } catch (err) {
       reject(err)
     }

@@ -5,7 +5,6 @@ import {
   FiChevronRight,
   FiHome,
   FiHash,
-  FiClock,
   FiActivity,
 } from 'react-icons/fi'
 import { useTheme } from '@/theme/ThemeProvider'
@@ -63,7 +62,7 @@ export default function BlockDetail() {
     }
   }, [block, txs.length])
 
-  const renderMessages = (messages: any[]) => {
+  const renderMessages = (messages: { typeUrl: string }[]) => {
     if (messages.length === 1) {
       return (
         <div className="flex items-center gap-2">

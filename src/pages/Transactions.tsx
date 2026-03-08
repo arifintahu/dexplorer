@@ -4,11 +4,10 @@ import { useSelector } from 'react-redux'
 import {
   FiChevronRight,
   FiHome,
-  FiSearch,
   FiActivity,
-  FiHash,
   FiClock,
   FiUser,
+  FiHash,
 } from 'react-icons/fi'
 import { useTheme } from '@/theme/ThemeProvider'
 import {
@@ -17,9 +16,9 @@ import {
   getTypeMsg,
   getActionFromAttributes,
 } from '@/utils/helper'
-import { Button } from '@/components/ui/Button'
 import { RootState } from '@/store'
 import { selectTransactions } from '@/store/streamSlice'
+import SearchBar from '@/components/ui/SearchBar'
 
 const Transactions: React.FC = () => {
   const { colors } = useTheme()
@@ -45,9 +44,9 @@ const Transactions: React.FC = () => {
         return <span className="text-xs opacity-60">No data</span>
 
       const messages = events.filter((e) => {
-        if (e.type == 'message') {
+        if (e.type === 'message') {
           const hasAction = e.attributes.some((a) => {
-            if (a.key == 'action') {
+            if (a.key === 'action') {
               return a.value
             }
           })
@@ -97,17 +96,6 @@ const Transactions: React.FC = () => {
     }
 
     return <span className="text-xs opacity-60">No messages</span>
-  }
-
-  const handleSearch = () => {
-    if (!searchHash.trim()) return
-    setIsSearching(true)
-    // Simulate search delay
-    setTimeout(() => {
-      setIsSearching(false)
-      // Navigate to transaction detail page
-      navigate(`/txs/${searchHash}`)
-    }, 1000)
   }
 
   const getStatusColor = (status: string) => {
@@ -166,37 +154,7 @@ const Transactions: React.FC = () => {
         >
           Search Transaction
         </h2>
-        <div className="flex gap-3">
-          <div className="flex-1 relative">
-            <FiHash
-              className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4"
-              style={{ color: colors.text.tertiary }}
-            />
-            <input
-              type="text"
-              placeholder="Enter transaction hash..."
-              value={searchHash}
-              onChange={(e) => setSearchHash(e.target.value)}
-              onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
-              className="w-full pl-10 pr-4 py-3 rounded-lg border focus:outline-none focus:ring-2 transition-all duration-200"
-              style={{
-                backgroundColor: colors.background,
-                borderColor: colors.border.secondary,
-                color: colors.text.primary,
-              }}
-            />
-          </div>
-          <Button
-            onClick={handleSearch}
-            disabled={!searchHash.trim() || isSearching}
-            variant="primary"
-            size="md"
-            loading={isSearching}
-          >
-            <FiSearch className="w-4 h-4" />
-            {isSearching ? 'Searching...' : 'Search'}
-          </Button>
-        </div>
+        <SearchBar placeholder="Enter transaction hash..." basePath="/txs" />
       </div>
 
       {/* Recent Transactions */}

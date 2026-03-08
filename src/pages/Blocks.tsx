@@ -1,7 +1,7 @@
-import React, { useEffect, useState, useMemo, useCallback } from 'react'
+import React, { useEffect, useState, useMemo } from 'react'
 import { useSelector } from 'react-redux'
 import { Link } from 'react-router-dom'
-import { NewBlockEvent, TxEvent } from '@cosmjs/tendermint-rpc'
+import { NewBlockEvent } from '@cosmjs/tendermint-rpc'
 import {
   FiChevronRight,
   FiHome,
@@ -25,9 +25,9 @@ interface SerializableBlock {
     time: string
     appHash: string
     proposerAddress: string
-    [key: string]: any
+    [key: string]: unknown
   }
-  txs: any[]
+  txs: unknown[]
 }
 
 type BlockType = NewBlockEvent | SerializableBlock

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { useSelector } from 'react-redux'
-import { FiChevronRight, FiHome, FiHash, FiCheck, FiX } from 'react-icons/fi'
+import { FiChevronRight, FiHome, FiCheck, FiX } from 'react-icons/fi'
 import { useTheme } from '@/theme/ThemeProvider'
 import { getTx, getBlock } from '@/rpc/query'
 import { selectTmClient } from '@/store/connectSlice'
@@ -91,7 +91,7 @@ export default function TransactionDetail() {
     return 'N/A'
   }
 
-  const showMsgData = (msgData: any) => {
+  const showMsgData = (msgData: unknown) => {
     if (msgData) {
       if (Array.isArray(msgData)) {
         const data = JSON.stringify(msgData, null, 2)
