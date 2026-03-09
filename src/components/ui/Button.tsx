@@ -1,5 +1,4 @@
 import React from 'react'
-import { useTheme } from '@/theme/ThemeProvider'
 import { cn } from '@/lib/utils'
 
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
@@ -18,8 +17,6 @@ export const Button: React.FC<ButtonProps> = ({
   disabled,
   ...props
 }) => {
-  const { colors } = useTheme()
-
   const baseClasses =
     'inline-flex items-center justify-center gap-2 rounded-lg font-medium transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed'
 
@@ -29,43 +26,30 @@ export const Button: React.FC<ButtonProps> = ({
     lg: 'px-6 py-3 text-base',
   }
 
-  const variantStyles = {
-    primary: {
-      backgroundColor: colors.primary,
-      color: 'white',
-      borderColor: colors.primary,
-    },
-    secondary: {
-      backgroundColor: colors.surface,
-      color: colors.text.primary,
-      borderColor: colors.border.primary,
-    },
-    outline: {
-      backgroundColor: 'transparent',
-      color: colors.primary,
-      borderColor: colors.primary,
-    },
-    ghost: {
-      backgroundColor: 'transparent',
-      color: colors.text.primary,
-      borderColor: 'transparent',
-    },
-    success: {
-      backgroundColor: colors.status.success,
-      color: 'white',
-      borderColor: colors.status.success,
-    },
-    danger: {
-      backgroundColor: colors.status.error,
-      color: 'white',
-      borderColor: colors.status.error,
-    },
+  const variantClasses = {
+    primary:
+      'bg-[var(--color-primary)] text-white border-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] hover:border-[var(--color-primary-hover)]',
+    secondary:
+      'bg-[var(--color-surface)] text-[var(--color-text-primary)] border-[var(--color-border-primary)] hover:bg-[var(--color-surface-hover)]',
+    outline:
+      'bg-transparent text-[var(--color-primary)] border-[var(--color-primary)] hover:bg-[var(--color-primary)] hover:text-white',
+    ghost:
+      'bg-transparent text-[var(--color-text-primary)] border-transparent hover:bg-[var(--color-surface-hover)]',
+    success:
+      'bg-[var(--color-status-success)] text-white border-[var(--color-status-success)] hover:brightness-110',
+    danger:
+      'bg-[var(--color-status-error)] text-white border-[var(--color-status-error)] hover:brightness-110',
   }
 
   return (
     <button
-      className={cn(baseClasses, sizeClasses[size], 'border', className)}
-      style={variantStyles[variant]}
+      className={cn(
+        baseClasses,
+        sizeClasses[size],
+        'border',
+        variantClasses[variant],
+        className
+      )}
       disabled={disabled || loading}
       {...props}
     >
