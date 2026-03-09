@@ -1,5 +1,6 @@
 import { createSlice } from '@reduxjs/toolkit'
 import { NewBlockEvent, TxEvent } from '@cosmjs/tendermint-rpc'
+import { fromUtf8 } from '@cosmjs/encoding'
 
 // Serializable block type
 interface SerializableBlock {
@@ -22,7 +23,6 @@ interface SerializableTransaction {
     code: number
     data: string | null
     log: string
-    info: string
     gasWanted: string
     gasUsed: string
     events: {
@@ -57,6 +57,12 @@ const bufferToHex = (
   )
 }
 
+const ensureString = (val: string | Uint8Array | undefined | null): string => {
+  if (!val) return ''
+  if (typeof val === 'string') return val
+  return fromUtf8(val)
+}
+
 // Helper function to serialize block data
 const serializeBlock = (block: NewBlockEvent): SerializableBlock => {
   return {
@@ -88,7 +94,21 @@ const serializeTransaction = (txEvent: TxEvent): SerializableTransaction => {
     hash: bufferToHex(txEvent.hash),
     height: txEvent.height.toString(),
     tx: bufferToHex(txEvent.tx),
-    result: txEvent.result,
+    result: {
+      ...txEvent.result,
+      data: bufferToHex(txEvent.result.data),
+      log: txEvent.result.log || '',
+      gasWanted: txEvent.result.gasWanted.toString(),
+      gasUsed: txEvent.result.gasUsed.toString(),
+      events: txEvent.result.events.map((e) => ({
+        type: e.type,
+        attributes: e.attributes.map((a) => ({
+          key: ensureString(a.key),
+          value: ensureString(a.value),
+          index: (a as unknown as { index: boolean }).index,
+        })),
+      })),
+    },
     timestamp: new Date().toISOString(),
   }
 }

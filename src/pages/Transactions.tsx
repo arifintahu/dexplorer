@@ -27,13 +27,20 @@ const Transactions: React.FC = () => {
   const { connectState } = useSelector((state: RootState) => state.connect)
 
   // Helper function to get transaction status
-  const getTransactionStatus = (result: { code: number } | null | undefined): 'success' | 'failed' => {
+  const getTransactionStatus = (
+    result: { code: number } | null | undefined
+  ): 'success' | 'failed' => {
     if (!result) return 'failed'
     return result.code === 0 ? 'success' : 'failed'
   }
 
   const renderEventMessages = (
-    events: [{ type: string; attributes: [{ key: string; value: string }] }]
+    events:
+      | {
+          type: string
+          attributes: { key: string; value: string; index: boolean }[]
+        }[]
+      | undefined
   ) => {
     try {
       if (!events || !events.length)

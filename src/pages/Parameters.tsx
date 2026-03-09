@@ -564,9 +564,8 @@ const Parameters: React.FC = () => {
         <ParameterItem
           label="Quorum"
           value={
-            govTallyParams?.quorum &&
-            govTallyParams.quorum instanceof Uint8Array
-              ? fromUtf8(govTallyParams.quorum)
+            govTallyParams?.quorum
+              ? (parseFloat(govTallyParams.quorum) * 100).toFixed(2) + '%'
               : 'N/A'
           }
           tooltip="Minimum percentage of voting power that must participate"
@@ -574,9 +573,8 @@ const Parameters: React.FC = () => {
         <ParameterItem
           label="Threshold"
           value={
-            govTallyParams?.threshold &&
-            govTallyParams.threshold instanceof Uint8Array
-              ? fromUtf8(govTallyParams.threshold)
+            govTallyParams?.threshold
+              ? (parseFloat(govTallyParams.threshold) * 100).toFixed(2) + '%'
               : 'N/A'
           }
           tooltip="Minimum percentage of Yes votes for proposal to pass"
@@ -584,9 +582,9 @@ const Parameters: React.FC = () => {
         <ParameterItem
           label="Veto Threshold"
           value={
-            govTallyParams?.vetoThreshold &&
-            govTallyParams.vetoThreshold instanceof Uint8Array
-              ? fromUtf8(govTallyParams.vetoThreshold)
+            govTallyParams?.vetoThreshold
+              ? (parseFloat(govTallyParams.vetoThreshold) * 100).toFixed(2) +
+                '%'
               : 'N/A'
           }
           tooltip="Percentage of NoWithVeto votes needed to veto a proposal"

@@ -10,7 +10,7 @@ import {
 } from 'react-icons/fi'
 import { queryActiveValidators, queryValidators } from '@/rpc/abci'
 import DataTable from '@/components/Datatable'
-import { createColumnHelper } from '@tanstack/react-table'
+import { createColumnHelper, ColumnDef } from '@tanstack/react-table'
 import { convertRateToPercent, convertVotingPower } from '@/utils/helper'
 import { useTheme } from '@/theme/ThemeProvider'
 import { useClientStore } from '@/store/clientStore'
@@ -34,114 +34,120 @@ const Validators: React.FC = () => {
   const [data, setData] = useState<ValidatorData[]>([])
   const [isLoading, setIsLoading] = useState(true)
 
-  const columns = [
-    columnHelper.accessor('validator', {
-      cell: (info) => (
-        <div className="flex items-center gap-2">
+  const columns = React.useMemo<ColumnDef<ValidatorData, string>[]>(
+    () => [
+      columnHelper.accessor('validator', {
+        cell: (info) => (
+          <div className="flex items-center gap-2">
+            <div
+              className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold"
+              style={{
+                backgroundColor: colors.primary + '20',
+                color: colors.primary,
+              }}
+            >
+              {info.getValue().charAt(0).toUpperCase()}
+            </div>
+            <span
+              className="font-medium"
+              style={{ color: colors.text.primary }}
+            >
+              {info.getValue()}
+            </span>
+          </div>
+        ),
+        header: () => (
           <div
-            className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold"
+            className="flex items-center gap-2"
+            style={{ color: colors.text.secondary }}
+          >
+            <FiUsers className="w-4 h-4" />
+            Validator
+          </div>
+        ),
+      }),
+      columnHelper.accessor('status', {
+        cell: (info) => (
+          <span
+            className="px-2 py-1 rounded-full text-xs font-medium flex items-center gap-1 w-fit"
             style={{
-              backgroundColor: colors.primary + '20',
-              color: colors.primary,
+              backgroundColor:
+                info.getValue() === 'Active'
+                  ? colors.status.success + '20'
+                  : colors.status.error + '20',
+              color:
+                info.getValue() === 'Active'
+                  ? colors.status.success
+                  : colors.status.error,
             }}
           >
-            {info.getValue().charAt(0).toUpperCase()}
+            <FiShield className="w-3 h-3" />
+            {info.getValue()}
+          </span>
+        ),
+        header: () => (
+          <div
+            className="flex items-center gap-2"
+            style={{ color: colors.text.secondary }}
+          >
+            <FiShield className="w-4 h-4" />
+            Status
           </div>
-          <span className="font-medium" style={{ color: colors.text.primary }}>
-            {info.getValue()}
-          </span>
-        </div>
-      ),
-      header: () => (
-        <div
-          className="flex items-center gap-2"
-          style={{ color: colors.text.secondary }}
-        >
-          <FiUsers className="w-4 h-4" />
-          Validator
-        </div>
-      ),
-    }),
-    columnHelper.accessor('status', {
-      cell: (info) => (
-        <span
-          className="px-2 py-1 rounded-full text-xs font-medium flex items-center gap-1 w-fit"
-          style={{
-            backgroundColor:
-              info.getValue() === 'Active'
-                ? colors.status.success + '20'
-                : colors.status.error + '20',
-            color:
-              info.getValue() === 'Active'
-                ? colors.status.success
-                : colors.status.error,
-          }}
-        >
-          <FiShield className="w-3 h-3" />
-          {info.getValue()}
-        </span>
-      ),
-      header: () => (
-        <div
-          className="flex items-center gap-2"
-          style={{ color: colors.text.secondary }}
-        >
-          <FiShield className="w-4 h-4" />
-          Status
-        </div>
-      ),
-    }),
-    columnHelper.accessor('votingPower', {
-      cell: (info) => (
-        <div className="flex items-center gap-2">
-          <FiTrendingUp
-            className="w-4 h-4"
-            style={{ color: colors.status.info }}
-          />
-          <span className="font-mono" style={{ color: colors.text.primary }}>
-            {info.getValue()}
-          </span>
-        </div>
-      ),
-      header: () => (
-        <div
-          className="flex items-center gap-2"
-          style={{ color: colors.text.secondary }}
-        >
-          <FiTrendingUp className="w-4 h-4" />
-          Voting Power
-        </div>
-      ),
-      meta: {
-        isNumeric: true,
-      },
-    }),
-    columnHelper.accessor('commission', {
-      cell: (info) => (
-        <div className="flex items-center gap-2">
-          <FiPercent
-            className="w-4 h-4"
-            style={{ color: colors.status.warning }}
-          />
-          <span className="font-mono" style={{ color: colors.text.primary }}>
-            {info.getValue()}
-          </span>
-        </div>
-      ),
-      header: () => (
-        <div
-          className="flex items-center gap-2"
-          style={{ color: colors.text.secondary }}
-        >
-          <FiPercent className="w-4 h-4" />
-          Commission
-        </div>
-      ),
-      meta: {
-        isNumeric: true,
-      },
-    }),
-  ]
+        ),
+      }),
+      columnHelper.accessor('votingPower', {
+        cell: (info) => (
+          <div className="flex items-center gap-2">
+            <FiTrendingUp
+              className="w-4 h-4"
+              style={{ color: colors.status.info }}
+            />
+            <span className="font-mono" style={{ color: colors.text.primary }}>
+              {info.getValue()}
+            </span>
+          </div>
+        ),
+        header: () => (
+          <div
+            className="flex items-center gap-2"
+            style={{ color: colors.text.secondary }}
+          >
+            <FiTrendingUp className="w-4 h-4" />
+            Voting Power
+          </div>
+        ),
+        meta: {
+          isNumeric: true,
+        },
+      }),
+      columnHelper.accessor('commission', {
+        cell: (info) => (
+          <div className="flex items-center gap-2">
+            <FiPercent
+              className="w-4 h-4"
+              style={{ color: colors.status.warning }}
+            />
+            <span className="font-mono" style={{ color: colors.text.primary }}>
+              {info.getValue()}
+            </span>
+          </div>
+        ),
+        header: () => (
+          <div
+            className="flex items-center gap-2"
+            style={{ color: colors.text.secondary }}
+          >
+            <FiPercent className="w-4 h-4" />
+            Commission
+          </div>
+        ),
+        meta: {
+          isNumeric: true,
+        },
+      }),
+    ],
+    [colors]
+  )
 
   useEffect(() => {
     if (tmClient) {
@@ -350,6 +356,7 @@ const Validators: React.FC = () => {
 
         {tmClient ? (
           <DataTable
+            // @ts-expect-error: ColumnDef type mismatch between TanStack Table versions
             columns={columns}
             data={data}
             total={totalActiveValidator}

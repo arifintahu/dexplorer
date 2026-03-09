@@ -9,6 +9,10 @@ interface ThemeContextType {
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined)
 
+interface ThemeProviderProps {
+  children: React.ReactNode
+}
+
 export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
   const [colorScheme, setColorScheme] = useState<ColorScheme>(() => {
     // Check localStorage first, then system preference
