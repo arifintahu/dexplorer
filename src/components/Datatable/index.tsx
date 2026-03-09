@@ -1,8 +1,5 @@
 import { useState, useMemo, useEffect } from 'react'
-import {
-  FiChevronUp,
-  FiChevronDown,
-} from 'react-icons/fi'
+import { FiChevronUp, FiChevronDown } from 'react-icons/fi'
 import { useTheme } from '@/theme/ThemeProvider'
 import {
   useReactTable,
@@ -16,7 +13,7 @@ import {
 
 export type DataTableProps<Data extends object> = {
   data: Data[]
-  columns: ColumnDef<Data, any>[]
+  columns: ColumnDef<Data, unknown>[]
   total: number
   isLoading?: boolean
   onChangePagination: (pagination: PaginationState) => void
@@ -76,7 +73,9 @@ export default function DataTable<Data extends object>({
             {table.getHeaderGroups().map((headerGroup) => (
               <tr key={headerGroup.id}>
                 {headerGroup.headers.map((header) => {
-                  const meta: any = header.column.columnDef.meta
+                  const meta = header.column.columnDef.meta as
+                    | { isNumeric?: boolean }
+                    | undefined
                   return (
                     <th
                       key={header.id}
@@ -141,7 +140,9 @@ export default function DataTable<Data extends object>({
                   className="hover:opacity-70 transition-opacity"
                 >
                   {row.getVisibleCells().map((cell) => {
-                    const meta: any = cell.column.columnDef.meta
+                    const meta = cell.column.columnDef.meta as
+                      | { isNumeric?: boolean }
+                      | undefined
                     return (
                       <td
                         key={cell.id}

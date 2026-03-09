@@ -3,10 +3,7 @@ import { useDispatch } from 'react-redux'
 import { FiZap, FiCheck } from 'react-icons/fi'
 import { useTheme } from '@/theme/ThemeProvider'
 import { Button } from '@/components/ui/Button'
-import {
-  setConnectState,
-  setRPCAddress,
-} from '@/store/connectSlice'
+import { setConnectState, setRPCAddress } from '@/store/connectSlice'
 import {
   setNewBlock,
   setTxEvent,
@@ -27,6 +24,7 @@ import { validateConnection, connectWebsocketClient } from '@/rpc/client'
 import { subscribeNewBlock, subscribeTx } from '@/rpc/subscribe'
 import { removeTrailingSlash } from '@/utils/helper'
 import { useClientStore } from '@/store/clientStore'
+import { config } from '@/config'
 
 const chainList = [
   {
@@ -49,12 +47,29 @@ export default function Connect() {
   const { colors } = useTheme()
 
   // Use client store
-  const { 
-    setTmClient, 
-    setSubsNewBlock, 
-    setSubsTxEvent,
-    disconnect 
-  } = useClientStore()
+  const { setTmClient, setSubsNewBlock, setSubsTxEvent, disconnect } =
+    useClientStore()
+
+  // Bypass mode check
+  const { rpcAddress: rpcEnv, chainName: chainNameEnv, isBypassMode } = config
+
+  useEffect(() => {
+    const initConnection = async () => {
+      if (isBypassMode && state === 'initial') {
+        await connectClient(rpcEnv)
+      } else if (!isBypassMode && state === 'initial') {
+        // Auto-reconnect if RPC address exists in localStorage
+        const savedRpcAddress = window.localStorage.getItem(LS_RPC_ADDRESS)
+        if (savedRpcAddress) {
+          setAddress(savedRpcAddress)
+          await connectClient(savedRpcAddress)
+        }
+      }
+    }
+
+    initConnection()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   const submitForm = async (e: FormEvent) => {
     e.preventDefault()
@@ -97,43 +112,49 @@ export default function Connect() {
       dispatch(setGovTallyParams(null))
 
       const tmClient = await connectWebsocketClient(rpcAddress)
+      setTmClient(tmClient)
 
-      if (!tmClient) {
-        setError(true)
-        setState('initial')
-        return
+      // Set global state
+      dispatch(setRPCAddress(rpcAddress))
+      dispatch(setConnectState(true))
+
+      // Save to local storage
+      localStorage.setItem(LS_RPC_ADDRESS, rpcAddress)
+
+      // Save to history
+      let savedRPCList = []
+      try {
+        const list = localStorage.getItem(LS_RPC_ADDRESS_LIST)
+        if (list) {
+          savedRPCList = JSON.parse(list)
+        }
+      } catch (e) {
+        console.error('Error parsing RPC list', e)
       }
 
-      dispatch(setConnectState(true))
-      setTmClient(tmClient)
-      dispatch(setRPCAddress(rpcAddress))
-
-      // Start blockchain data subscriptions
-      const newBlockSub = subscribeNewBlock(tmClient, (event) => {
-        dispatch(setNewBlock(event))
-        dispatch(addBlock(event))
-      })
-
-      const txSub = subscribeTx(tmClient, (event) => {
-        dispatch(setTxEvent(event))
-        dispatch(addTransaction(event))
-      })
-
-      setSubsNewBlock(newBlockSub)
-      setSubsTxEvent(txSub)
+      if (!savedRPCList.includes(rpcAddress)) {
+        savedRPCList.push(rpcAddress)
+        localStorage.setItem(LS_RPC_ADDRESS_LIST, JSON.stringify(savedRPCList))
+      }
 
       setState('success')
 
-      window.localStorage.setItem(LS_RPC_ADDRESS, rpcAddress)
-      window.localStorage.setItem(
-        LS_RPC_ADDRESS_LIST,
-        JSON.stringify([rpcAddress])
-      )
-    } catch (err) {
-      console.error(err)
+      // Subscribe to events
+      const subsNewBlock = subscribeNewBlock(tmClient, (block) => {
+        dispatch(setNewBlock(block))
+        dispatch(addBlock(block))
+      })
+      setSubsNewBlock(subsNewBlock)
+
+      const subsTx = subscribeTx(tmClient, (tx) => {
+        dispatch(setTxEvent(tx))
+        dispatch(addTransaction(tx))
+      })
+      setSubsTxEvent(subsTx)
+    } catch (e) {
+      console.error(e)
       setError(true)
       setState('initial')
-      return
     }
   }
 
@@ -142,18 +163,46 @@ export default function Connect() {
     connectClient(rpcAddress)
   }
 
-  useEffect(() => {
-    // Auto-reconnect if RPC address exists in localStorage
-    const savedRpcAddress = window.localStorage.getItem(LS_RPC_ADDRESS)
-    if (savedRpcAddress && state === 'initial') {
-      setAddress(savedRpcAddress)
-      connectClient(savedRpcAddress)
-    }
-  }, [])
+  // Bypass mode render
+  if (isBypassMode) {
+    return (
+      <div
+        className="flex flex-col items-center justify-center min-h-screen"
+        style={{ backgroundColor: colors.background }}
+      >
+        <div
+          className="flex flex-col items-center p-8 rounded-xl"
+          style={{ backgroundColor: colors.surface }}
+        >
+          <FiZap
+            className="w-12 h-12 mb-4 animate-pulse"
+            style={{ color: colors.primary }}
+          />
+          <h2
+            className="text-xl font-bold mb-2"
+            style={{ color: colors.text.primary }}
+          >
+            Connecting to {chainNameEnv || 'Network'}...
+          </h2>
+          <p className="text-sm mb-4" style={{ color: colors.text.secondary }}>
+            {rpcEnv}
+          </p>
+          {error && (
+            <div className="text-red-500 flex items-center gap-2 mt-2">
+              <span>Connection failed. Please check RPC_ADDRESS.</span>
+              <Button size="sm" onClick={() => connectClient(rpcEnv)}>
+                Retry
+              </Button>
+            </div>
+          )}
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div
-      className="min-h-screen flex items-center justify-center px-4"
+      className="flex flex-col items-center justify-center min-h-screen transition-colors duration-300"
       style={{ backgroundColor: colors.background }}
     >
       <div className="max-w-md w-full space-y-8">

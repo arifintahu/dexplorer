@@ -70,15 +70,19 @@ export const {
   setGovTallyParams,
 } = paramsSlice.actions
 
-export const selectStakingParams = (state: any) => state.params.stakingParams
-export const selectMintParams = (state: any) => state.params.mintParams
-export const selectDistributionParams = (state: any) =>
+export const selectStakingParams = (state: { params: ParamsState }) =>
+  state.params.stakingParams
+export const selectMintParams = (state: { params: ParamsState }) =>
+  state.params.mintParams
+export const selectDistributionParams = (state: { params: ParamsState }) =>
   state.params.distributionParams
-export const selectSlashingParams = (state: any) => state.params.slashingParams
-export const selectGovVotingParams = (state: any) =>
+export const selectSlashingParams = (state: { params: ParamsState }) =>
+  state.params.slashingParams
+export const selectGovVotingParams = (state: { params: ParamsState }) =>
   state.params.govVotingParams
-export const selectGovDepositParams = (state: any) =>
+export const selectGovDepositParams = (state: { params: ParamsState }) =>
   state.params.govDepositParams
-export const selectGovTallyParams = (state: any) => state.params.govTallyParams
+export const selectGovTallyParams = (state: { params: ParamsState }) =>
+  state.params.govTallyParams
 
 export default paramsSlice.reducer

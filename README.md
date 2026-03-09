@@ -18,6 +18,9 @@
     <a href="https://github.com/arifintahu/dexplorer/blob/main/LICENSE">
       <img src="https://img.shields.io/github/license/arifintahu/dexplorer.svg" alt="License" />
     </a>
+    <a href="https://github.com/arifintahu/dexplorer/actions/workflows/ci.yml">
+      <img src="https://github.com/arifintahu/dexplorer/actions/workflows/ci.yml/badge.svg" alt="CI Status" />
+    </a>
     <a href="https://github.com/arifintahu/dexplorer/deployments/activity_log">
       <img src="https://vercelbadge.vercel.app/api/arifintahu/dexplorer" alt="Vercel Deploy" />
     </a>
@@ -41,6 +44,7 @@
 - [Tech Stack](#tech-stack)
 - [Prerequisites](#prerequisites)
 - [Installation](#installation)
+- [Configuration](#configuration)
 - [Usage](#usage)
 - [Project Structure](#project-structure)
 - [Contributing](#contributing)
@@ -53,6 +57,7 @@
 **Dexplorer** is a disposable, lightweight blockchain explorer specifically designed for Cosmos-based blockchains. Unlike traditional explorers that require backend infrastructure and databases, Dexplorer operates entirely as a frontend application, connecting directly to any Cosmos SDK chain using only WebSocket RPC connections.
 
 This makes it perfect for:
+
 - 🔧 **Development**: Quick exploration during chain development
 - 🧪 **Testing**: Instant setup for testnets and local chains
 - 📊 **Monitoring**: Real-time blockchain data visualization
@@ -63,18 +68,20 @@ This makes it perfect for:
 ### Screenshots
 
 #### 🏠 Home Dashboard
+
 ![Dexplorer Home Dashboard](./public/dexplorer2.png)
-*Real-time blockchain explorer dashboard showing chain statistics, latest blocks, and transactions*
+_Real-time blockchain explorer dashboard showing chain statistics, latest blocks, and transactions_
 
 #### 🔗 Connect to Blockchain
+
 ![Connect to Blockchain](./public/dexplorer1.png)
-*Simple connection interface to connect to any Cosmos SDK RPC endpoint*
+_Simple connection interface to connect to any Cosmos SDK RPC endpoint_
 
 ### Live Demo
 
 🌐 **[Try Dexplorer Live](https://dexplorer.arifintahu.com)**
 
-*Connect to any Cosmos RPC endpoint and start exploring!*
+_Connect to any Cosmos RPC endpoint and start exploring!_
 
 ## ✨ Features
 
@@ -92,6 +99,7 @@ This makes it perfect for:
 ## 🛠️ Tech Stack
 
 ### Frontend
+
 - **React 18** - Modern React with hooks and concurrent features
 - **TypeScript** - Type-safe development
 - **Vite** - Lightning-fast build tool and dev server
@@ -100,11 +108,13 @@ This makes it perfect for:
 - **React Router** - Client-side routing
 
 ### Blockchain Integration
+
 - **CosmJS** - Cosmos SDK JavaScript library
 - **WebSocket RPC** - Real-time blockchain data
 - **Protobuf** - Message encoding/decoding
 
 ### Development Tools
+
 - **ESLint** - Code linting
 - **Prettier** - Code formatting
 - **Vercel** - Deployment platform
@@ -114,7 +124,7 @@ This makes it perfect for:
 Before running Dexplorer, ensure you have:
 
 - **Node.js** (v18.0.0 or higher)
-- **pnpm** (v8.0.0 or higher) - *Recommended package manager*
+- **pnpm** (v8.0.0 or higher) - _Recommended package manager_
 - **Git** - For cloning the repository
 
 ## 🚀 Installation
@@ -138,12 +148,14 @@ pnpm dev
 ### Alternative Installation Methods
 
 #### Using npm
+
 ```bash
 npm install
 npm run dev
 ```
 
 #### Using yarn
+
 ```bash
 yarn install
 yarn dev
@@ -169,14 +181,41 @@ pnpm test
 pnpm check
 ```
 
+## ⚙️ Configuration
+
+### Bypass Mode (Auto-Connect)
+
+Dexplorer can be configured to automatically connect to a specific blockchain RPC endpoint, bypassing the connection screen. This is useful for deployments targeting a specific chain.
+
+Set the following environment variables:
+
+- `RPC_ADDRESS`: The WebSocket RPC endpoint URL (e.g., `https://rpc.cosmos.nodestake.org`)
+- `CHAIN_NAME`: (Optional) Display name for the chain
+
+**Example usage:**
+
+```bash
+# Run with bypass mode
+RPC_ADDRESS="https://rpc.cosmos.nodestake.org" CHAIN_NAME="Cosmos Hub" pnpm dev
+```
+
+When these variables are set:
+
+1. The application will automatically connect to the specified `RPC_ADDRESS`.
+2. The connection screen will be skipped.
+3. The "Connect" and "Disconnect" buttons in the navigation bar will be hidden.
+4. The `CHAIN_NAME` (if provided) will be displayed in the navigation bar.
+
 ## 📖 Usage
 
 ### Basic Usage
 
 1. **Start the Application**
+
    ```bash
    pnpm dev
    ```
+
    Open [http://localhost:5173](http://localhost:5173) in your browser
 
 2. **Connect to a Blockchain**
@@ -225,12 +264,14 @@ We welcome contributions from the community! Here's how you can help:
 ### Development Workflow
 
 1. **Fork the Repository**
+
    ```bash
    # Fork on GitHub, then clone your fork
    git clone https://github.com/YOUR_USERNAME/dexplorer.git
    ```
 
 2. **Create a Feature Branch**
+
    ```bash
    git checkout -b feature/amazing-feature
    ```
@@ -241,12 +282,14 @@ We welcome contributions from the community! Here's how you can help:
    - Update documentation as needed
 
 4. **Test Your Changes**
+
    ```bash
    pnpm test
    pnpm build
    ```
 
 5. **Commit and Push**
+
    ```bash
    git commit -m 'Add amazing feature'
    git push origin feature/amazing-feature
@@ -275,6 +318,7 @@ Found a bug? Have a feature request?
 4. Add relevant labels
 
 ### Community Requests
+
 - 💡 **Your Ideas**: [Suggest features](https://github.com/arifintahu/dexplorer/issues/new?template=feature_request.md)
 
 ## ❓ FAQ
@@ -321,9 +365,11 @@ Thanks to all the amazing people who have contributed to this project:
 </div>
 
 ### Core Team
+
 - **[@arifintahu](https://github.com/arifintahu)** - Creator & Maintainer
 
 ### How to Become a Contributor
+
 1. Fork the repository
 2. Make meaningful contributions
 3. Submit pull requests

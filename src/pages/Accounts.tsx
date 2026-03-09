@@ -10,7 +10,12 @@ import {
   FiFolder,
 } from 'react-icons/fi'
 import { useTheme } from '@/theme/ThemeProvider'
-import { timeFromNow, getTypeMsg, getActionFromAttributes, getModuleFromAttributes } from '@/utils/helper'
+import {
+  timeFromNow,
+  getTypeMsg,
+  getActionFromAttributes,
+  getModuleFromAttributes,
+} from '@/utils/helper'
 import { getSendersFromEvents } from '@/utils/cosmos'
 import { selectTransactions } from '@/store/streamSlice'
 import { toast } from 'sonner'
@@ -25,28 +30,35 @@ interface Account {
 
 const Accounts: React.FC = () => {
   const { colors } = useTheme()
-  
+
   // Get recent transactions from Redux store
   const transactions = useSelector(selectTransactions)
-  
+
   // Extract recent active accounts from transaction senders
   const recentAccounts: Account[] = useMemo(() => {
     if (!transactions || transactions.length === 0) {
       return []
     }
-    
-    const accountMap = new Map<string, { lastActivity: string; lastMessage: string, module: string }>()
-    
+
+    const accountMap = new Map<
+      string,
+      { lastActivity: string; lastMessage: string; module: string }
+    >()
+
     // Process recent transactions to extract senders and their last message
     transactions.slice(0, 20).forEach((tx) => {
       if (tx.result?.events) {
         const senders = getSendersFromEvents(tx.result.events)
-        
+
         // Get the message type from events
         let messageType = 'Unknown'
         let moduleType = 'Unknown'
-        const messageEvents = tx.result.events.filter((e: any) => e.type === 'message')
-        const messageAction = messageEvents.find((e: any) => e.attributes?.find((attr: any) => attr.key === 'action'))
+        const messageEvents = tx.result.events.filter(
+          (e) => e.type === 'message'
+        )
+        const messageAction = messageEvents.find((e) =>
+          e.attributes?.find((attr) => attr.key === 'action')
+        )
         if (messageAction) {
           const action = getActionFromAttributes(messageAction.attributes)
           if (action) {
@@ -58,34 +70,41 @@ const Accounts: React.FC = () => {
             moduleType = module
           }
         }
-        
+
         senders.forEach((sender) => {
           if (sender && sender.length > 0) {
             const existing = accountMap.get(sender)
-            if (!existing || new Date(tx.timestamp) > new Date(existing.lastActivity)) {
+            if (
+              !existing ||
+              new Date(tx.timestamp) > new Date(existing.lastActivity)
+            ) {
               accountMap.set(sender, {
                 lastActivity: tx.timestamp,
                 lastMessage: messageType,
-                module: moduleType
+                module: moduleType,
               })
             }
           }
         })
       }
     })
-    
+
     // Convert to Account array and limit to 10 most recent
     return Array.from(accountMap.entries())
       .map(([address, data]) => ({
         address,
         module: data.module,
         lastMessage: data.lastMessage,
-        lastActivity: timeFromNow(data.lastActivity)
+        lastActivity: timeFromNow(data.lastActivity),
       }))
-      .sort((a, b) => new Date(accountMap.get(b.address)!.lastActivity).getTime() - new Date(accountMap.get(a.address)!.lastActivity).getTime())
+      .sort(
+        (a, b) =>
+          new Date(accountMap.get(b.address)!.lastActivity).getTime() -
+          new Date(accountMap.get(a.address)!.lastActivity).getTime()
+      )
       .slice(0, 10)
   }, [transactions])
-  
+
   // Use recentAccounts for display, but keep mock data for stats
   const accounts = recentAccounts
 
@@ -137,7 +156,10 @@ const Accounts: React.FC = () => {
         >
           Search Account
         </h2>
-        <SearchBar placeholder="Enter account address..." basePath="/accounts" />
+        <SearchBar
+          placeholder="Enter account address..."
+          basePath="/accounts"
+        />
       </div>
 
       {/* Recent Accounts */}
@@ -187,7 +209,10 @@ const Accounts: React.FC = () => {
                       backgroundColor: colors.primary + '20',
                     }}
                   >
-                    <FiUser className="w-6 h-6" style={{ color: colors.primary }} />
+                    <FiUser
+                      className="w-6 h-6"
+                      style={{ color: colors.primary }}
+                    />
                   </div>
                   <div>
                     <div className="flex items-center gap-3 mb-1">

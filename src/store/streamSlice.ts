@@ -1,5 +1,6 @@
 import { createSlice } from '@reduxjs/toolkit'
 import { NewBlockEvent, TxEvent } from '@cosmjs/tendermint-rpc'
+import { fromUtf8 } from '@cosmjs/encoding'
 
 // Serializable block type
 interface SerializableBlock {
@@ -8,9 +9,9 @@ interface SerializableBlock {
     time: string
     appHash: string
     proposerAddress: string
-    [key: string]: any
+    [key: string]: string | number | boolean | null | undefined
   }
-  txs: any[]
+  txs: Uint8Array[]
 }
 
 // Serializable transaction type
@@ -18,7 +19,21 @@ interface SerializableTransaction {
   hash: string
   height: string
   tx: string
-  result: any
+  result: {
+    code: number
+    data: string | null
+    log: string
+    gasWanted: string
+    gasUsed: string
+    events: {
+      type: string
+      attributes: {
+        key: string
+        value: string
+        index: boolean
+      }[]
+    }[]
+  }
   timestamp: string
 }
 
@@ -32,15 +47,20 @@ export interface StreamState {
 }
 
 // Helper function to convert Buffer to hex string
-const bufferToHex = (buffer: any): string => {
+const bufferToHex = (
+  buffer: Uint8Array | string | null | undefined
+): string => {
   if (!buffer) return ''
   if (typeof buffer === 'string') return buffer
-  if (buffer instanceof Uint8Array) {
-    return Array.from(buffer, (byte) =>
-      byte.toString(16).padStart(2, '0')
-    ).join('')
-  }
-  return ''
+  return Array.from(buffer, (byte) => byte.toString(16).padStart(2, '0')).join(
+    ''
+  )
+}
+
+const ensureString = (val: string | Uint8Array | undefined | null): string => {
+  if (!val) return ''
+  if (typeof val === 'string') return val
+  return fromUtf8(val)
 }
 
 // Helper function to serialize block data
@@ -57,10 +77,10 @@ const serializeBlock = (block: NewBlockEvent): SerializableBlock => {
           value instanceof Date
             ? value.toISOString()
             : value &&
-              typeof value === 'object' &&
-              value.constructor === Uint8Array
-            ? bufferToHex(value)
-            : value,
+                typeof value === 'object' &&
+                value.constructor === Uint8Array
+              ? bufferToHex(value)
+              : value,
         ])
       ),
     },
@@ -74,7 +94,21 @@ const serializeTransaction = (txEvent: TxEvent): SerializableTransaction => {
     hash: bufferToHex(txEvent.hash),
     height: txEvent.height.toString(),
     tx: bufferToHex(txEvent.tx),
-    result: txEvent.result,
+    result: {
+      ...txEvent.result,
+      data: bufferToHex(txEvent.result.data),
+      log: txEvent.result.log || '',
+      gasWanted: txEvent.result.gasWanted.toString(),
+      gasUsed: txEvent.result.gasUsed.toString(),
+      events: txEvent.result.events.map((e) => ({
+        type: e.type,
+        attributes: e.attributes.map((a) => ({
+          key: ensureString(a.key),
+          value: ensureString(a.value),
+          index: (a as unknown as { index: boolean }).index,
+        })),
+      })),
+    },
     timestamp: new Date().toISOString(),
   }
 }
@@ -158,10 +192,12 @@ export const {
   clearPersistentData,
 } = streamSlice.actions
 
-export const selectNewBlock = (state: { stream: StreamState }) => state.stream.newBlock
-export const selectTxEvent = (state: { stream: StreamState }) => state.stream.txEvent
-
-export const selectBlocks = (state: { stream: StreamState }) => state.stream.blocks
+export const selectNewBlock = (state: { stream: StreamState }) =>
+  state.stream.newBlock
+export const selectTxEvent = (state: { stream: StreamState }) =>
+  state.stream.txEvent
+export const selectBlocks = (state: { stream: StreamState }) =>
+  state.stream.blocks
 export const selectTransactions = (state: { stream: StreamState }) =>
   state.stream.transactions
 export const selectTotalActiveValidator = (state: { stream: StreamState }) =>

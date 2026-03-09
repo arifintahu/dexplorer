@@ -47,6 +47,7 @@ import { removeTrailingSlash } from '@/utils/helper'
 import { toast } from 'sonner'
 import { useClientStore } from '@/store/clientStore'
 import { useTranslation } from 'react-i18next'
+import { config } from '@/config'
 
 interface TopNavigationProps {
   onMenuClick?: () => void
@@ -65,6 +66,9 @@ const TopNavigation: React.FC<TopNavigationProps> = ({ onMenuClick }) => {
   const address = useSelector(selectRPCAddress)
   const isConnected = connectState
   const [searchQuery, setSearchQuery] = useState('')
+
+  // Bypass mode check
+  const { chainName: chainNameEnv, isBypassMode } = config
 
   // RPC Management State
   const [state, setState] = useState<'initial' | 'submitting' | 'success'>(
@@ -360,7 +364,8 @@ const TopNavigation: React.FC<TopNavigationProps> = ({ onMenuClick }) => {
                         className="text-xs truncate max-w-32"
                         title={address}
                       >
-                        {address ? new URL(address).hostname : 'Unknown'}
+                        {chainNameEnv ||
+                          (address ? new URL(address).hostname : 'Unknown')}
                       </span>
                     </div>
                   </>
@@ -375,27 +380,29 @@ const TopNavigation: React.FC<TopNavigationProps> = ({ onMenuClick }) => {
               </div>
 
               {/* Change Connection Button */}
-              <Button
-                onClick={() => setIsRPCModalOpen(true)}
-                variant="ghost"
-                size="sm"
-                title={t('app.connect')}
-                className="text-sm focus:outline-none focus:ring-0 active:outline-none border-0 focus:border-0 active:border-0"
-                style={{
-                  color: colors.text.primary,
-                  outline: 'none',
-                  border: 'none',
-                  boxShadow: 'none',
-                }}
-              >
-                <FiRefreshCcw className="h-4 w-4" />
-                <span className="hidden md:inline ml-1">
-                  {t('app.connect')}
-                </span>
-              </Button>
+              {!isBypassMode && (
+                <Button
+                  onClick={() => setIsRPCModalOpen(true)}
+                  variant="ghost"
+                  size="sm"
+                  title={t('app.connect')}
+                  className="text-sm focus:outline-none focus:ring-0 active:outline-none border-0 focus:border-0 active:border-0"
+                  style={{
+                    color: colors.text.primary,
+                    outline: 'none',
+                    border: 'none',
+                    boxShadow: 'none',
+                  }}
+                >
+                  <FiRefreshCcw className="h-4 w-4" />
+                  <span className="hidden md:inline ml-1">
+                    {t('app.connect')}
+                  </span>
+                </Button>
+              )}
 
               {/* Disconnect Button */}
-              {isConnected && (
+              {isConnected && !isBypassMode && (
                 <Button
                   onClick={handleDisconnect}
                   variant="ghost"

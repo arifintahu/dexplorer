@@ -43,22 +43,25 @@ export const getBaseDenom = (denom: string): string => {
  * @param denom - The denomination string
  * @returns Object with converted amount and base denomination
  */
-export const getConvertedAmount = (amount: string, denom: string): { converted: string; base: string } => {
+export const getConvertedAmount = (
+  amount: string,
+  denom: string
+): { converted: string; base: string } => {
   if (denom.startsWith('u')) {
     return {
       converted: convertFromMicroUnits(amount),
-      base: getBaseDenom(denom)
+      base: getBaseDenom(denom),
     }
   }
   if (denom.startsWith('a')) {
     return {
       converted: convertFromAttoUnits(amount),
-      base: getBaseDenom(denom)
+      base: getBaseDenom(denom),
     }
   }
   return {
     converted: amount,
-    base: denom
+    base: denom,
   }
 }
 
@@ -72,7 +75,9 @@ export const formatAmount = (amount: string) => {
   if (num >= 1e9) return (num / 1e9).toFixed(2) + 'B'
   if (num >= 1e6) return (num / 1e6).toFixed(2) + 'M'
   if (num >= 1e3) return (num / 1e3).toFixed(2) + 'K'
-  return parseFloat(amount).toLocaleString(undefined, { maximumFractionDigits: 6 })
+  return parseFloat(amount).toLocaleString(undefined, {
+    maximumFractionDigits: 6,
+  })
 }
 
 /**
@@ -92,7 +97,9 @@ export const formatDenom = (denom: string) => {
  * @param events - Array of transaction events with type and attributes
  * @returns Array of unique sender addresses
  */
-export const getSendersFromEvents = (events: any[]): string[] => {
+export const getSendersFromEvents = (
+  events: { type: string; attributes: { key: string; value: string }[] }[]
+): string[] => {
   if (!events || !Array.isArray(events)) {
     return []
   }
@@ -100,9 +107,17 @@ export const getSendersFromEvents = (events: any[]): string[] => {
   const senders: string[] = []
 
   events.forEach((event) => {
-    if (event?.type === 'message' && event?.attributes && Array.isArray(event.attributes)) {
+    if (
+      event?.type === 'message' &&
+      event?.attributes &&
+      Array.isArray(event.attributes)
+    ) {
       event.attributes.forEach((attr: { key: string; value: string }) => {
-        if (attr?.key === 'sender' && attr?.value && typeof attr.value === 'string') {
+        if (
+          attr?.key === 'sender' &&
+          attr?.value &&
+          typeof attr.value === 'string'
+        ) {
           senders.push(attr.value)
         }
       })

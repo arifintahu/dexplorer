@@ -115,7 +115,7 @@ export const displayCoin = (deposit: Coin) => {
 }
 
 export const getActionFromAttributes = (
-  attributes: [{ key: string; value: string }]
+  attributes: { key: string; value: string; index?: boolean }[]
 ) => {
   const action = attributes.find((a) => {
     if (a.key == 'action') {
@@ -131,7 +131,7 @@ export const getActionFromAttributes = (
 }
 
 export const getModuleFromAttributes = (
-  attributes: [{ key: string; value: string }]
+  attributes: { key: string; value: string; index?: boolean }[]
 ) => {
   const module = attributes.find((a) => {
     if (a.key == 'module') {

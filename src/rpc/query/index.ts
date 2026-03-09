@@ -5,11 +5,7 @@ import {
   IndexedTx,
   StargateClient,
 } from '@cosmjs/stargate'
-import {
-  Tendermint37Client,
-  TxSearchResponse,
-  ValidatorsResponse,
-} from '@cosmjs/tendermint-rpc'
+import { Tendermint37Client, ValidatorsResponse } from '@cosmjs/tendermint-rpc'
 
 const clientCache = new WeakMap<Tendermint37Client, Promise<StargateClient>>()
 
@@ -80,7 +76,7 @@ export async function getTxsBySender(
   address: string,
   page: number,
   perPage: number
-): Promise<TxSearchResponse> {
+) {
   return tmClient.txSearch({
     query: `message.sender='${address}'`,
     prove: true,

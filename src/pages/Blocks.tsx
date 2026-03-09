@@ -9,10 +9,7 @@ import {
   FiHash,
   FiActivity,
 } from 'react-icons/fi'
-import {
-  selectNewBlock,
-  selectBlocks,
-} from '@/store/streamSlice'
+import { selectNewBlock, selectBlocks } from '@/store/streamSlice'
 import { toHex } from '@cosmjs/encoding'
 import { timeFromNow, trimHash } from '@/utils/helper'
 import { useTheme } from '@/theme/ThemeProvider'
@@ -43,7 +40,7 @@ const Blocks: React.FC = () => {
     return persistentBlocks.length > 0
       ? persistentBlocks.slice(0, MAX_ROWS)
       : []
-  }, [persistentBlocks.length])
+  }, [persistentBlocks])
 
   // Set initial data only when length changes (not on every block update)
   useEffect(() => {
@@ -54,6 +51,7 @@ const Blocks: React.FC = () => {
     if (newBlock) {
       updateBlocks(newBlock)
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [newBlock])
 
   const getBlockHeight = (block: BlockType): number => {
