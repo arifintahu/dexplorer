@@ -47,9 +47,13 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
       themeColors.backgroundSecondary
     )
     root.style.setProperty('--color-surface', themeColors.surface)
+    root.style.setProperty('--color-surface-hover', themeColors.surfaceHover)
     root.style.setProperty('--color-text-primary', themeColors.text.primary)
     root.style.setProperty('--color-text-secondary', themeColors.text.secondary)
+    root.style.setProperty('--color-text-inverse', themeColors.text.inverse)
     root.style.setProperty('--color-border-primary', themeColors.border.primary)
+    root.style.setProperty('--color-status-success', themeColors.status.success)
+    root.style.setProperty('--color-status-error', themeColors.status.error)
   }, [colorScheme])
 
   const value = {

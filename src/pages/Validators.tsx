@@ -2,13 +2,16 @@ import React, { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import {
   FiChevronRight,
-  FiHome,
   FiUsers,
   FiShield,
   FiTrendingUp,
   FiPercent,
 } from 'react-icons/fi'
-import { queryActiveValidators, queryValidators } from '@/rpc/abci'
+import {
+  queryActiveValidators,
+  queryValidators,
+  queryStakingPool,
+} from '@/rpc/abci'
 import DataTable from '@/components/Datatable'
 import { createColumnHelper, ColumnDef } from '@tanstack/react-table'
 import { convertRateToPercent, convertVotingPower } from '@/utils/helper'
@@ -19,6 +22,8 @@ type ValidatorData = {
   validator: string
   status: string
   votingPower: string
+  votingPowerRaw: string
+  totalBonded: string
   commission: string
 }
 
@@ -96,17 +101,43 @@ const Validators: React.FC = () => {
         ),
       }),
       columnHelper.accessor('votingPower', {
-        cell: (info) => (
-          <div className="flex items-center gap-2">
-            <FiTrendingUp
-              className="w-4 h-4"
-              style={{ color: colors.status.info }}
-            />
-            <span className="font-mono" style={{ color: colors.text.primary }}>
-              {info.getValue()}
-            </span>
-          </div>
-        ),
+        cell: (info) => {
+          const raw = info.row.original.votingPowerRaw
+          const total = info.row.original.totalBonded
+          const percentage =
+            total && total !== '0' ? (Number(raw) / Number(total)) * 100 : 0
+
+          return (
+            <div className="flex flex-col gap-1 w-full max-w-[200px]">
+              <div className="flex items-center justify-between gap-4">
+                <span
+                  className="font-mono text-sm"
+                  style={{ color: colors.text.primary }}
+                >
+                  {info.getValue()}
+                </span>
+                <span
+                  className="text-xs"
+                  style={{ color: colors.text.secondary }}
+                >
+                  {percentage.toFixed(2)}%
+                </span>
+              </div>
+              <div
+                className="w-full h-1.5 rounded-full overflow-hidden"
+                style={{ backgroundColor: colors.border.secondary }}
+              >
+                <div
+                  className="h-full rounded-full transition-all duration-500"
+                  style={{
+                    width: `${percentage}%`,
+                    backgroundColor: colors.status.info,
+                  }}
+                ></div>
+              </div>
+            </div>
+          )
+        },
         header: () => (
           <div
             className="flex items-center gap-2"
@@ -152,15 +183,22 @@ const Validators: React.FC = () => {
   useEffect(() => {
     if (tmClient) {
       setIsLoading(true)
-      queryActiveValidators(tmClient, page, perPage)
-        .then((response) => {
+      Promise.all([
+        queryActiveValidators(tmClient, page, perPage),
+        queryStakingPool(tmClient),
+      ])
+        .then(([response, poolResponse]) => {
           setTotalActiveValidator(Number(response.pagination?.total))
+          const poolTotal = poolResponse.pool?.bondedTokens || '0'
+
           const validatorData: ValidatorData[] = response.validators.map(
             (val) => {
               return {
                 validator: val.description?.moniker ?? '',
                 status: val.status === 3 ? 'Active' : 'Inactive',
                 votingPower: convertVotingPower(val.tokens),
+                votingPowerRaw: val.tokens,
+                totalBonded: poolTotal,
                 commission: convertRateToPercent(
                   val.commission?.commissionRates?.rate
                 ),
@@ -201,29 +239,21 @@ const Validators: React.FC = () => {
   return (
     <div className="space-y-6">
       {/* Breadcrumb */}
-      <div className="flex items-center gap-2 text-sm">
-        <h1
-          className="text-2xl font-bold"
-          style={{ color: colors.text.primary }}
-        >
-          Validators
-        </h1>
-        <div
-          className="h-4 w-px"
-          style={{ backgroundColor: colors.border.primary }}
-        ></div>
+      <div className="flex items-center gap-2 text-sm mb-4">
         <Link
           to="/"
-          className="flex items-center hover:opacity-70 transition-opacity"
+          className="hover:opacity-70 transition-opacity font-medium"
           style={{ color: colors.text.secondary }}
         >
-          <FiHome className="w-4 h-4" />
+          Home
         </Link>
         <FiChevronRight
           className="w-4 h-4"
           style={{ color: colors.text.tertiary }}
         />
-        <span style={{ color: colors.text.secondary }}>Validators</span>
+        <span className="font-bold" style={{ color: colors.text.primary }}>
+          Validators
+        </span>
       </div>
 
       {/* Stats Cards */}

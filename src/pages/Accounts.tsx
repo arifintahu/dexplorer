@@ -1,14 +1,7 @@
 import React, { useMemo } from 'react'
 import { Link } from 'react-router-dom'
 import { useSelector } from 'react-redux'
-import {
-  FiChevronRight,
-  FiHome,
-  FiUser,
-  FiCopy,
-  FiMail,
-  FiFolder,
-} from 'react-icons/fi'
+import { FiChevronRight, FiUser, FiMail, FiFolder } from 'react-icons/fi'
 import { useTheme } from '@/theme/ThemeProvider'
 import {
   timeFromNow,
@@ -18,8 +11,7 @@ import {
 } from '@/utils/helper'
 import { getSendersFromEvents } from '@/utils/cosmos'
 import { selectTransactions } from '@/store/streamSlice'
-import { toast } from 'sonner'
-import SearchBar from '@/components/ui/SearchBar'
+import Avatar from '@/components/ui/Avatar'
 
 interface Account {
   address: string
@@ -68,6 +60,11 @@ const Accounts: React.FC = () => {
           const module = getModuleFromAttributes(messageAction.attributes)
           if (module) {
             moduleType = module
+          } else if (
+            messageType === 'UpdateClient' ||
+            messageType.includes('IBC')
+          ) {
+            moduleType = 'ibc.client'
           }
         }
 
@@ -108,58 +105,24 @@ const Accounts: React.FC = () => {
   // Use recentAccounts for display, but keep mock data for stats
   const accounts = recentAccounts
 
-  const copyToClipboard = (text: string) => {
-    navigator.clipboard.writeText(text)
-    toast.success('Address copied to clipboard')
-  }
-
   return (
     <div className="space-y-6">
       {/* Breadcrumb */}
-      <div className="flex items-center gap-2 text-sm">
-        <h1
-          className="text-2xl font-bold"
-          style={{ color: colors.text.primary }}
-        >
-          Accounts
-        </h1>
-        <div
-          className="h-4 w-px"
-          style={{ backgroundColor: colors.border.primary }}
-        ></div>
+      <div className="flex items-center gap-2 text-sm mb-4">
         <Link
           to="/"
-          className="flex items-center hover:opacity-70 transition-opacity"
+          className="hover:opacity-70 transition-opacity font-medium"
           style={{ color: colors.text.secondary }}
         >
-          <FiHome className="w-4 h-4" />
+          Home
         </Link>
         <FiChevronRight
           className="w-4 h-4"
           style={{ color: colors.text.tertiary }}
         />
-        <span style={{ color: colors.text.secondary }}>Accounts</span>
-      </div>
-
-      {/* Search Section */}
-      <div
-        className="rounded-xl p-6"
-        style={{
-          backgroundColor: colors.surface,
-          border: `1px solid ${colors.border.primary}`,
-          boxShadow: colors.shadow.sm,
-        }}
-      >
-        <h2
-          className="text-lg font-semibold mb-4"
-          style={{ color: colors.text.primary }}
-        >
-          Search Account
-        </h2>
-        <SearchBar
-          placeholder="Enter account address..."
-          basePath="/accounts"
-        />
+        <span className="font-bold" style={{ color: colors.text.primary }}>
+          Accounts
+        </span>
       </div>
 
       {/* Recent Accounts */}
@@ -203,34 +166,17 @@ const Accounts: React.FC = () => {
             >
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-4">
-                  <div
-                    className="p-3 rounded-lg"
-                    style={{
-                      backgroundColor: colors.primary + '20',
-                    }}
-                  >
-                    <FiUser
-                      className="w-6 h-6"
-                      style={{ color: colors.primary }}
-                    />
-                  </div>
+                  <Avatar address={account.address} size={48} />
                   <div>
-                    <div className="flex items-center gap-3 mb-1">
+                    <div className="flex items-center gap-2 mb-1">
                       <Link
                         to={`/accounts/${account.address}`}
-                        className="font-mono text-sm hover:opacity-70 transition-opacity"
-                        style={{ color: colors.primary }}
+                        className="font-bold text-base hover:opacity-70 transition-opacity truncate max-w-[200px] sm:max-w-xs md:max-w-md"
+                        style={{ color: colors.text.primary }}
+                        title={account.address}
                       >
                         {account.address}
                       </Link>
-                      <button
-                        onClick={() => copyToClipboard(account.address)}
-                        className="p-1 rounded hover:bg-opacity-20 transition-colors"
-                        style={{ color: colors.text.tertiary }}
-                        title="Copy address"
-                      >
-                        <FiCopy className="w-3 h-3" />
-                      </button>
                     </div>
                     <div className="flex items-center gap-4 text-sm">
                       <div className="flex items-center gap-1">

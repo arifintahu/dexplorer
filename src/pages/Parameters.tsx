@@ -3,13 +3,13 @@ import { Link } from 'react-router-dom'
 import { useSelector, useDispatch } from 'react-redux'
 import {
   FiChevronRight,
-  FiHome,
   FiSettings,
   FiInfo,
   FiDollarSign,
   FiShield,
   FiUsers,
   FiCheckCircle,
+  FiPieChart,
 } from 'react-icons/fi'
 import { useTheme } from '@/theme/ThemeProvider'
 import {
@@ -265,41 +265,26 @@ const Parameters: React.FC = () => {
   return (
     <div className="space-y-6">
       {/* Breadcrumb */}
-      <div className="flex items-center gap-2 text-sm">
-        <h1
-          className="text-2xl font-bold"
-          style={{ color: colors.text.primary }}
-        >
-          Network Parameters
-        </h1>
-        <div
-          className="h-4 w-px"
-          style={{ backgroundColor: colors.border.primary }}
-        ></div>
+      <div className="flex items-center gap-2 text-sm mb-4">
         <Link
           to="/"
-          className="flex items-center hover:opacity-70 transition-opacity"
+          className="hover:opacity-70 transition-opacity font-medium"
           style={{ color: colors.text.secondary }}
         >
-          <FiHome className="w-4 h-4" />
+          Home
         </Link>
         <FiChevronRight
           className="w-4 h-4"
           style={{ color: colors.text.tertiary }}
         />
-        <span style={{ color: colors.text.secondary }}>Parameters</span>
+        <span className="font-bold" style={{ color: colors.text.primary }}>
+          Parameters
+        </span>
       </div>
 
       {/* Overview */}
-      <div
-        className="rounded-xl p-6"
-        style={{
-          backgroundColor: colors.surface,
-          border: `1px solid ${colors.border.primary}`,
-          boxShadow: colors.shadow.sm,
-        }}
-      >
-        <div className="flex items-center gap-3 mb-4">
+      <div className="mb-6">
+        <div className="flex items-center gap-3 mb-2">
           <FiSettings className="w-6 h-6" style={{ color: colors.primary }} />
           <h2
             className="text-lg font-semibold"
@@ -420,7 +405,7 @@ const Parameters: React.FC = () => {
       {/* Distribution Parameters */}
       <ParameterCard
         title="Distribution Parameters"
-        icon={<FiUsers />}
+        icon={<FiPieChart />}
         color={colors.status.warning}
         isLoading={loadingStates.distribution}
       >
@@ -479,7 +464,9 @@ const Parameters: React.FC = () => {
           value={
             slashingParams?.minSignedPerWindow &&
             slashingParams.minSignedPerWindow instanceof Uint8Array
-              ? fromUtf8(slashingParams.minSignedPerWindow)
+              ? convertRateToPercent(
+                  fromUtf8(slashingParams.minSignedPerWindow)
+                )
               : 'N/A'
           }
           tooltip="Minimum percentage of blocks that must be signed"
@@ -500,7 +487,9 @@ const Parameters: React.FC = () => {
           value={
             slashingParams?.slashFractionDoubleSign &&
             slashingParams.slashFractionDoubleSign instanceof Uint8Array
-              ? fromUtf8(slashingParams.slashFractionDoubleSign)
+              ? convertRateToPercent(
+                  fromUtf8(slashingParams.slashFractionDoubleSign)
+                )
               : 'N/A'
           }
           tooltip="Percentage slashed for double signing"
@@ -510,7 +499,9 @@ const Parameters: React.FC = () => {
           value={
             slashingParams?.slashFractionDowntime &&
             slashingParams.slashFractionDowntime instanceof Uint8Array
-              ? fromUtf8(slashingParams.slashFractionDowntime)
+              ? convertRateToPercent(
+                  fromUtf8(slashingParams.slashFractionDowntime)
+                )
               : 'N/A'
           }
           tooltip="Percentage slashed for downtime"

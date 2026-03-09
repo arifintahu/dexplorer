@@ -3,7 +3,6 @@ import { Link } from 'react-router-dom'
 import { useSelector } from 'react-redux'
 import {
   FiChevronRight,
-  FiHome,
   FiActivity,
   FiClock,
   FiUser,
@@ -19,6 +18,7 @@ import {
 import { RootState } from '@/store'
 import { selectTransactions } from '@/store/streamSlice'
 import SearchBar from '@/components/ui/SearchBar'
+import CopyText from '@/components/ui/CopyText'
 
 const Transactions: React.FC = () => {
   const { colors } = useTheme()
@@ -73,6 +73,11 @@ const Transactions: React.FC = () => {
           </span>
         )
       } else if (messages.length > 1) {
+        const otherTypes = messages
+          .slice(1)
+          .map((m) => getTypeMsg(getActionFromAttributes(m.attributes)))
+          .join(', ')
+
         return (
           <div className="flex items-center gap-2">
             <span
@@ -85,8 +90,9 @@ const Transactions: React.FC = () => {
               {getTypeMsg(getActionFromAttributes(messages[0].attributes))}
             </span>
             <span
-              className="text-xs font-medium"
+              className="text-xs font-medium cursor-help"
               style={{ color: colors.primary }}
+              title={otherTypes}
             >
               +{messages.length - 1}
             </span>
@@ -117,29 +123,21 @@ const Transactions: React.FC = () => {
   return (
     <div className="space-y-6">
       {/* Breadcrumb */}
-      <div className="flex items-center gap-2 text-sm">
-        <h1
-          className="text-2xl font-bold"
-          style={{ color: colors.text.primary }}
-        >
-          Transactions
-        </h1>
-        <div
-          className="h-4 w-px"
-          style={{ backgroundColor: colors.border.primary }}
-        ></div>
+      <div className="flex items-center gap-2 text-sm mb-4">
         <Link
           to="/"
-          className="flex items-center hover:opacity-70 transition-opacity"
+          className="hover:opacity-70 transition-opacity font-medium"
           style={{ color: colors.text.secondary }}
         >
-          <FiHome className="w-4 h-4" />
+          Home
         </Link>
         <FiChevronRight
           className="w-4 h-4"
           style={{ color: colors.text.tertiary }}
         />
-        <span style={{ color: colors.text.secondary }}>Transactions</span>
+        <span className="font-bold" style={{ color: colors.text.primary }}>
+          Transactions
+        </span>
       </div>
 
       {/* Search Section */}
@@ -252,13 +250,24 @@ const Transactions: React.FC = () => {
                     }}
                   >
                     <td className="py-3 px-4">
-                      <Link
-                        to={`/txs/${tx.hash}`}
-                        className="hover:opacity-70 transition-opacity font-mono text-sm"
-                        style={{ color: colors.primary }}
-                      >
-                        {tx.hash ? trimHash(tx.hash) : 'Unknown'}
-                      </Link>
+                      <div className="flex items-center gap-1">
+                        <Link
+                          to={`/txs/${tx.hash}`}
+                          className="hover:opacity-70 transition-opacity font-mono text-sm"
+                          style={{ color: colors.primary }}
+                        >
+                          {tx.hash ? (
+                            <CopyText
+                              text={tx.hash}
+                              displayText={trimHash(tx.hash)}
+                              className="text-sm"
+                              style={{ color: colors.text.secondary }}
+                            />
+                          ) : (
+                            'Unknown'
+                          )}
+                        </Link>
+                      </div>
                     </td>
                     <td className="py-3 px-4">
                       <Link

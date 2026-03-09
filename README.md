@@ -86,44 +86,60 @@ _Connect to any Cosmos RPC endpoint and start exploring!_
 ## ✨ Features
 
 - 🔗 **Universal Connectivity**: Connect to any Cosmos-based RPC endpoint
-- 📊 **Real-time Dashboard**: Monitor chain activity with live updates
+- 📊 **Real-time Dashboard**: Monitor chain activity with live updates via WebSocket
 - 🔔 **Live Subscriptions**: Subscribe to latest blocks and transactions
 - 🔍 **Powerful Search**: Find blocks, transactions, and accounts instantly
 - 👥 **Validator Insights**: Browse active validators and their details
 - 🗳️ **Governance**: Explore proposals and voting results
 - ⚙️ **Chain Parameters**: View blockchain configuration and parameters
 - 📱 **Responsive Design**: Works seamlessly on desktop and mobile
-- 🎨 **Modern UI**: Clean, intuitive interface with dark/light themes
+- 🎨 **Modern UI**: Clean, intuitive interface with dark/light themes and smooth animations
+- 🌍 **Internationalization**: Multi-language support (i18n)
 - ⚡ **Zero Backend**: No database or server infrastructure needed
 
 ## 🛠️ Tech Stack
 
-### Frontend
+### Frontend Core
 
 - **React 18** - Modern React with hooks and concurrent features
 - **TypeScript** - Type-safe development
 - **Vite** - Lightning-fast build tool and dev server
 - **Tailwind CSS** - Utility-first CSS framework
+
+### State & Data Management
+
+- **Redux Toolkit** - Global application state
 - **Zustand** - Lightweight state management
+- **TanStack Query** - Server state management and caching
 - **React Router** - Client-side routing
 
 ### Blockchain Integration
 
-- **CosmJS** - Cosmos SDK JavaScript library
-- **WebSocket RPC** - Real-time blockchain data
+- **CosmJS** - Cosmos SDK JavaScript library (@cosmjs/stargate, @cosmjs/tendermint-rpc)
+- **WebSocket RPC** - Real-time blockchain data streaming
 - **Protobuf** - Message encoding/decoding
 
-### Development Tools
+### UI Components & UX
 
+- **Framer Motion** - Smooth animations and transitions
+- **Lucide React & React Icons** - Modern icon sets
+- **Sonner** - Toast notifications
+- **TanStack Table** - Headless UI for building powerful tables
+
+### Development & Quality Assurance
+
+- **Vitest** - Blazing fast unit test framework
+- **React Testing Library** - Component testing
 - **ESLint** - Code linting
 - **Prettier** - Code formatting
+- **Husky & Lint-staged** - Git hooks for code quality
 - **Vercel** - Deployment platform
 
 ## 📋 Prerequisites
 
 Before running Dexplorer, ensure you have:
 
-- **Node.js** (v18.0.0 or higher)
+- **Node.js** (v22.0.0 or higher)
 - **pnpm** (v8.0.0 or higher) - _Recommended package manager_
 - **Git** - For cloning the repository
 
@@ -219,7 +235,7 @@ When these variables are set:
    Open [http://localhost:5173](http://localhost:5173) in your browser
 
 2. **Connect to a Blockchain**
-   - Enter a Cosmos RPC endpoint (e.g., `https://rpc.cosmos.network:443`)
+   - Enter a Cosmos RPC endpoint (e.g., `https://rpc.cosmos.nodestake.org`)
    - Click "Connect" to establish connection
 
 3. **Explore the Blockchain**
@@ -233,23 +249,25 @@ When these variables are set:
 dexplorer/
 ├── public/                 # Static assets
 ├── src/
-│   ├── components/         # Reusable UI components
-│   │   ├── CodeBlock/      # Code syntax highlighting
-│   │   ├── Layout/         # App layout components
-│   │   └── ui/             # Basic UI components
-│   ├── encoding/           # Message encoding utilities
-│   │   ├── msg.ts          # Message type definitions
-│   │   └── proposal.ts     # Proposal encoding
-│   ├── hooks/              # Custom React hooks
-│   ├── pages/              # Page components
-│   │   ├── AccountDetail.tsx
-│   │   ├── BlockDetail.tsx
-│   │   ├── Dashboard.tsx
-│   │   ├── ProposalDetail.tsx
-│   │   └── TransactionDetail.tsx
-│   ├── store/              # State management
-│   ├── types/              # TypeScript type definitions
-│   ├── utils/              # Utility functions
+│   ├── assets/             # Images and global styles
+│   ├── components/         # UI Components
+│   │   ├── AccountDetail/  # Account-related components
+│   │   ├── BlockDetail/    # Block-related components
+│   │   ├── Connect/        # Connection screen components
+│   │   ├── Datatable/      # Reusable table components
+│   │   ├── Home/           # Dashboard components
+│   │   ├── Layout/         # App layout (Sidebar, Header)
+│   │   ├── ProposalDetail/ # Governance proposal components
+│   │   └── ui/             # Generic UI primitives (Button, Input, etc.)
+│   ├── encoding/           # Protobuf/Amino encoding utilities
+│   ├── hooks/              # Custom React hooks (useBlock, useTx, etc.)
+│   ├── lib/                # Shared libraries and utilities
+│   ├── locales/            # i18n translation files
+│   ├── pages/              # Route page components
+│   ├── rpc/                # RPC client management
+│   ├── store/              # Redux & Zustand stores
+│   ├── theme/              # Theme configuration (colors, providers)
+│   ├── utils/              # Helper functions
 │   └── main.tsx            # Application entry point
 ├── package.json            # Dependencies and scripts
 ├── tailwind.config.js      # Tailwind CSS configuration

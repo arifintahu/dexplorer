@@ -4,7 +4,6 @@ import { FiBox, FiUsers, FiClock, FiActivity } from 'react-icons/fi'
 import { useHomeData } from '@/hooks/useHomeData'
 import StatCard from '@/components/Home/StatCard'
 import RecentBlocksCard from '@/components/Home/RecentBlocksCard'
-import NetworkStatusCard from '@/components/Home/NetworkStatusCard'
 import QuickActionsCard from '@/components/Home/QuickActionsCard'
 
 const Home: React.FC = () => {
@@ -78,9 +77,8 @@ const Home: React.FC = () => {
           <RecentBlocksCard />
         </div>
 
-        <div className="space-y-6">
-          <NetworkStatusCard isConnected={isConnected} />
-          <QuickActionsCard />
+        <div className="h-full">
+          <QuickActionsCard isConnected={isConnected} />
         </div>
       </div>
     </div>
