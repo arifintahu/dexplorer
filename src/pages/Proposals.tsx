@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import {
   FiChevronRight,
-  FiHome,
   FiFileText,
   FiClock,
   FiUsers,
@@ -115,29 +114,21 @@ const Proposals: React.FC = () => {
   return (
     <div className="space-y-6">
       {/* Breadcrumb */}
-      <div className="flex items-center gap-2 text-sm">
-        <h1
-          className="text-2xl font-bold"
-          style={{ color: colors.text.primary }}
-        >
-          Governance Proposals
-        </h1>
-        <div
-          className="h-4 w-px"
-          style={{ backgroundColor: colors.border.primary }}
-        ></div>
+      <div className="flex items-center gap-2 text-sm mb-4">
         <Link
           to="/"
-          className="flex items-center hover:opacity-70 transition-opacity"
+          className="hover:opacity-70 transition-opacity font-medium"
           style={{ color: colors.text.secondary }}
         >
-          <FiHome className="w-4 h-4" />
+          Home
         </Link>
         <FiChevronRight
           className="w-4 h-4"
           style={{ color: colors.text.tertiary }}
         />
-        <span style={{ color: colors.text.secondary }}>Proposals</span>
+        <span className="font-bold" style={{ color: colors.text.primary }}>
+          Proposals
+        </span>
       </div>
 
       {/* Stats Cards */}
@@ -276,119 +267,134 @@ const Proposals: React.FC = () => {
                 className="animate-pulse p-4 rounded-lg"
                 style={{ backgroundColor: colors.background }}
               >
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-4">
-                    <div
-                      className="w-12 h-12 rounded-lg"
-                      style={{ backgroundColor: colors.border.secondary }}
-                    ></div>
-                    <div className="space-y-2">
-                      <div
-                        className="h-4 w-48 rounded"
-                        style={{ backgroundColor: colors.border.secondary }}
-                      ></div>
-                      <div
-                        className="h-3 w-32 rounded"
-                        style={{ backgroundColor: colors.border.secondary }}
-                      ></div>
-                    </div>
-                  </div>
-                  <div
-                    className="h-6 w-20 rounded-full"
-                    style={{ backgroundColor: colors.border.secondary }}
-                  ></div>
-                </div>
+                <div className="h-6 w-full rounded bg-gray-200 dark:bg-gray-700"></div>
               </div>
             ))}
           </div>
         ) : (
-          <div className="space-y-3">
-            {proposals.map((proposal) => (
-              <Link
-                key={proposal.id.toString()}
-                to={`/proposals/${proposal.id}`}
-                className="block p-4 rounded-lg border transition-all duration-200 hover:shadow-md"
-                style={{
-                  backgroundColor: colors.background,
-                  borderColor: colors.border.secondary,
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.borderColor = colors.primary
-                  e.currentTarget.style.transform = 'translateY(-1px)'
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.borderColor = colors.border.secondary
-                  e.currentTarget.style.transform = 'translateY(0)'
-                }}
-              >
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-4">
-                    <div
-                      className="p-3 rounded-lg"
-                      style={{ backgroundColor: colors.primary + '20' }}
-                    >
-                      <FiFileText
-                        className="w-6 h-6"
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead>
+                <tr
+                  className="border-b"
+                  style={{ borderColor: colors.border.secondary }}
+                >
+                  <th
+                    className="text-left py-3 px-4 font-medium"
+                    style={{ color: colors.text.secondary }}
+                  >
+                    ID
+                  </th>
+                  <th
+                    className="text-left py-3 px-4 font-medium"
+                    style={{ color: colors.text.secondary }}
+                  >
+                    Title
+                  </th>
+                  <th
+                    className="text-left py-3 px-4 font-medium"
+                    style={{ color: colors.text.secondary }}
+                  >
+                    Status
+                  </th>
+                  <th
+                    className="text-left py-3 px-4 font-medium"
+                    style={{ color: colors.text.secondary }}
+                  >
+                    Voting End
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {proposals.map((proposal) => (
+                  <tr
+                    key={proposal.id.toString()}
+                    className="border-b hover:bg-opacity-50 transition-colors duration-200"
+                    style={{
+                      borderColor: colors.border.secondary,
+                      backgroundColor: 'transparent',
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.backgroundColor =
+                        colors.background + '50'
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.backgroundColor = 'transparent'
+                    }}
+                  >
+                    <td className="py-3 px-4">
+                      <Link
+                        to={`/proposals/${proposal.id}`}
+                        className="font-mono text-sm hover:opacity-70 transition-opacity"
                         style={{ color: colors.primary }}
-                      />
-                    </div>
-                    <div>
-                      <div className="flex items-center gap-3 mb-1">
-                        <h3
-                          className="font-semibold"
+                      >
+                        #{proposal.id.toString()}
+                      </Link>
+                    </td>
+                    <td className="py-3 px-4">
+                      <Link
+                        to={`/proposals/${proposal.id}`}
+                        className="block hover:opacity-70 transition-opacity"
+                      >
+                        <div
+                          className="font-semibold text-sm line-clamp-1"
                           style={{ color: colors.text.primary }}
+                          title={proposal.title}
                         >
-                          #{proposal.id.toString()} {proposal.title}
-                        </h3>
-                        <span
-                          className="px-2 py-1 rounded text-xs font-medium"
-                          style={{
-                            backgroundColor: colors.primary + '20',
-                            color: colors.primary,
-                          }}
+                          {proposal.title}
+                        </div>
+                        <div
+                          className="text-xs mt-1"
+                          style={{ color: colors.text.tertiary }}
                         >
                           {proposal.types}
+                        </div>
+                      </Link>
+                    </td>
+                    <td className="py-3 px-4">
+                      <div className="flex items-center gap-2">
+                        <div style={{ color: getStatusColor(proposal.status) }}>
+                          {getStatusIcon(proposal.status)}
+                        </div>
+                        <span
+                          className="px-2 py-1 rounded-full text-xs font-medium capitalize"
+                          style={{
+                            backgroundColor:
+                              getStatusColor(proposal.status) + '20',
+                            color: getStatusColor(proposal.status),
+                          }}
+                        >
+                          {proposal.status?.status || 'Unknown'}
                         </span>
                       </div>
-                      {proposal.description && (
-                        <p
-                          className="text-sm line-clamp-2"
-                          style={{ color: colors.text.secondary }}
-                        >
-                          {proposal.description}
-                        </p>
-                      )}
-                      {proposal.votingEnd && (
-                        <div className="flex items-center gap-2 mt-2">
+                    </td>
+                    <td className="py-3 px-4">
+                      {proposal.votingEnd ? (
+                        <div className="flex items-center gap-2">
                           <FiClock
                             className="w-3 h-3"
                             style={{ color: colors.text.tertiary }}
                           />
                           <span
                             className="text-xs"
-                            style={{ color: colors.text.tertiary }}
+                            style={{ color: colors.text.secondary }}
                           >
-                            Voting ends: {proposal.votingEnd}
+                            {proposal.votingEnd}
                           </span>
                         </div>
+                      ) : (
+                        <span
+                          className="text-xs"
+                          style={{ color: colors.text.tertiary }}
+                        >
+                          -
+                        </span>
                       )}
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    {getStatusIcon(proposal.status)}
-                    <span
-                      className="px-3 py-1 rounded-full text-sm font-medium capitalize"
-                      style={{
-                        backgroundColor: getStatusColor(proposal.status) + '20',
-                        color: getStatusColor(proposal.status),
-                      }}
-                    >
-                      {proposal.status?.status || 'Unknown'}
-                    </span>
-                  </div>
-                </div>
-              </Link>
-            ))}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
 
             {proposals.length === 0 && !isLoading && (
               <div className="text-center py-12">

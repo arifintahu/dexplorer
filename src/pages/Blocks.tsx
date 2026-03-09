@@ -2,17 +2,12 @@ import React, { useEffect, useState, useMemo } from 'react'
 import { useSelector } from 'react-redux'
 import { Link } from 'react-router-dom'
 import { NewBlockEvent } from '@cosmjs/tendermint-rpc'
-import {
-  FiChevronRight,
-  FiHome,
-  FiClock,
-  FiHash,
-  FiActivity,
-} from 'react-icons/fi'
+import { FiChevronRight, FiClock, FiHash, FiActivity } from 'react-icons/fi'
 import { selectNewBlock, selectBlocks } from '@/store/streamSlice'
 import { toHex } from '@cosmjs/encoding'
 import { timeFromNow, trimHash } from '@/utils/helper'
 import { useTheme } from '@/theme/ThemeProvider'
+import CopyText from '@/components/ui/CopyText'
 
 const MAX_ROWS = 50
 
@@ -80,29 +75,21 @@ const Blocks: React.FC = () => {
   return (
     <div className="space-y-6">
       {/* Breadcrumb */}
-      <div className="flex items-center gap-2 text-sm">
-        <h1
-          className="text-2xl font-bold"
-          style={{ color: colors.text.primary }}
-        >
-          Blocks
-        </h1>
-        <div
-          className="h-4 w-px"
-          style={{ backgroundColor: colors.border.primary }}
-        ></div>
+      <div className="flex items-center gap-2 text-sm mb-4">
         <Link
           to="/"
-          className="flex items-center hover:opacity-70 transition-opacity"
+          className="hover:opacity-70 transition-opacity font-medium"
           style={{ color: colors.text.secondary }}
         >
-          <FiHome className="w-4 h-4" />
+          Home
         </Link>
         <FiChevronRight
           className="w-4 h-4"
           style={{ color: colors.text.tertiary }}
         />
-        <span style={{ color: colors.text.secondary }}>Blocks</span>
+        <span className="font-bold" style={{ color: colors.text.primary }}>
+          Blocks
+        </span>
       </div>
 
       {/* Main Content */}
@@ -185,16 +172,20 @@ const Blocks: React.FC = () => {
                       </Link>
                     </td>
                     <td className="py-3 px-4">
-                      <span
-                        className="font-mono text-sm"
-                        style={{ color: colors.text.secondary }}
-                      >
-                        {trimHash(
+                      <CopyText
+                        text={
+                          typeof block.header.appHash === 'string'
+                            ? block.header.appHash
+                            : toHex(block.header.appHash)
+                        }
+                        displayText={trimHash(
                           typeof block.header.appHash === 'string'
                             ? block.header.appHash
                             : toHex(block.header.appHash)
                         )}
-                      </span>
+                        className="text-sm"
+                        style={{ color: colors.text.secondary }}
+                      />
                     </td>
                     <td className="py-3 px-4">
                       <span style={{ color: colors.text.primary }}>

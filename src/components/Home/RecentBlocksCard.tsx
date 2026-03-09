@@ -200,16 +200,11 @@ const RecentBlocksCard: React.FC = React.memo(() => {
 
       <Link
         to="/blocks"
-        className="block w-full mt-6 py-3 px-4 rounded-lg text-sm font-semibold text-center transition-all duration-200 hover:shadow-md hover:-translate-y-0.5 active:translate-y-0"
+        className="block w-full mt-6 py-3 px-4 rounded-lg text-sm font-semibold text-center transition-all duration-200 hover:bg-opacity-10"
         style={{
-          backgroundColor: colors.primary,
-          color: colors.background,
-        }}
-        onMouseEnter={(e) => {
-          e.currentTarget.style.backgroundColor = `${colors.primary}dd`
-        }}
-        onMouseLeave={(e) => {
-          e.currentTarget.style.backgroundColor = colors.primary
+          backgroundColor: 'transparent',
+          border: `1px solid ${colors.primary}`,
+          color: colors.primary,
         }}
       >
         View All Blocks →

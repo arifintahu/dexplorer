@@ -4,6 +4,8 @@ import { PageRequest } from 'cosmjs-types/cosmos/base/query/v1beta1/pagination'
 import {
   QueryValidatorsRequest,
   QueryValidatorsResponse,
+  QueryPoolRequest,
+  QueryPoolResponse,
   QueryParamsRequest as QueryStakingParamsRequest,
   QueryParamsResponse as QueryStakingParamsResponse,
 } from 'cosmjs-types/cosmos/staking/v1beta1/query'
@@ -68,6 +70,18 @@ export async function queryValidators(
     req
   )
   return QueryValidatorsResponse.decode(value)
+}
+
+export async function queryStakingPool(
+  tmClient: Tendermint37Client
+): Promise<QueryPoolResponse> {
+  const queryClient = new QueryClient(tmClient)
+  const req = QueryPoolRequest.encode({}).finish()
+  const { value } = await queryClient.queryAbci(
+    '/cosmos.staking.v1beta1.Query/Pool',
+    req
+  )
+  return QueryPoolResponse.decode(value)
 }
 
 export async function queryProposals(

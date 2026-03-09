@@ -213,7 +213,7 @@ export default function Connect() {
           >
             Connect to <span style={{ color: colors.primary }}>RPC</span>
           </h1>
-          <p className="mb-8" style={{ color: colors.text.secondary }}>
+          <p className="mb-8 font-medium" style={{ color: '#A0AEC0' }}>
             Connect to a Cosmos RPC endpoint to start exploring the blockchain.
           </p>
         </div>
@@ -223,7 +223,7 @@ export default function Connect() {
             <input
               type="url"
               required
-              placeholder="https://rpc.cosmos.network:443"
+              placeholder="https://rpc.cosmos.nodestake.org:443"
               value={address}
               disabled={state !== 'initial'}
               onChange={(e: ChangeEvent<HTMLInputElement>) =>
@@ -251,6 +251,21 @@ export default function Connect() {
               {state === 'success' && 'Connected'}
             </Button>
           </div>
+          <p
+            className="text-xs text-center"
+            style={{ color: colors.text.tertiary }}
+          >
+            Need an RPC URL? Check the{' '}
+            <a
+              href="https://cosmos.directory"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="underline transition-colors hover:text-blue-400"
+              style={{ color: colors.text.secondary }}
+            >
+              Chain Registry
+            </a>
+          </p>
           {error && (
             <p className="text-sm mt-2" style={{ color: colors.status.error }}>
               Failed to connect. Please check the RPC address.
