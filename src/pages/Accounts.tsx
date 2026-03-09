@@ -11,8 +11,7 @@ import {
 } from '@/utils/helper'
 import { getSendersFromEvents } from '@/utils/cosmos'
 import { selectTransactions } from '@/store/streamSlice'
-import SearchBar from '@/components/ui/SearchBar'
-import CopyText from '@/components/ui/CopyText'
+import Avatar from '@/components/ui/Avatar'
 
 interface Account {
   address: string
@@ -61,6 +60,11 @@ const Accounts: React.FC = () => {
           const module = getModuleFromAttributes(messageAction.attributes)
           if (module) {
             moduleType = module
+          } else if (
+            messageType === 'UpdateClient' ||
+            messageType.includes('IBC')
+          ) {
+            moduleType = 'ibc.client'
           }
         }
 
@@ -121,27 +125,6 @@ const Accounts: React.FC = () => {
         </span>
       </div>
 
-      {/* Search Section */}
-      <div
-        className="rounded-xl p-6"
-        style={{
-          backgroundColor: colors.surface,
-          border: `1px solid ${colors.border.primary}`,
-          boxShadow: colors.shadow.sm,
-        }}
-      >
-        <h2
-          className="text-lg font-semibold mb-4"
-          style={{ color: colors.text.primary }}
-        >
-          Search Account
-        </h2>
-        <SearchBar
-          placeholder="Enter account address..."
-          basePath="/accounts"
-        />
-      </div>
-
       {/* Recent Accounts */}
       <div
         className="rounded-xl p-6"
@@ -183,32 +166,17 @@ const Accounts: React.FC = () => {
             >
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-4">
-                  <div
-                    className="p-3 rounded-lg"
-                    style={{
-                      backgroundColor: colors.primary + '20',
-                    }}
-                  >
-                    <FiUser
-                      className="w-6 h-6"
-                      style={{ color: colors.primary }}
-                    />
-                  </div>
+                  <Avatar address={account.address} size={48} />
                   <div>
                     <div className="flex items-center gap-2 mb-1">
                       <Link
                         to={`/accounts/${account.address}`}
-                        className="font-mono text-sm hover:opacity-70 transition-opacity truncate max-w-[200px] sm:max-w-xs md:max-w-md"
-                        style={{ color: colors.primary }}
+                        className="font-bold text-base hover:opacity-70 transition-opacity truncate max-w-[200px] sm:max-w-xs md:max-w-md"
+                        style={{ color: colors.text.primary }}
                         title={account.address}
                       >
                         {account.address}
                       </Link>
-                      <CopyText
-                        text={account.address}
-                        displayText=""
-                        className="text-gray-400"
-                      />
                     </div>
                     <div className="flex items-center gap-4 text-sm">
                       <div className="flex items-center gap-1">
