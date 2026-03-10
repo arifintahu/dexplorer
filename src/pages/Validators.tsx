@@ -17,6 +17,7 @@ import { createColumnHelper, ColumnDef } from '@tanstack/react-table'
 import { convertRateToPercent, convertVotingPower } from '@/utils/helper'
 import { useTheme } from '@/theme/ThemeProvider'
 import { useClientStore } from '@/store/clientStore'
+import ValidatorIcon from '@/components/ValidatorIcon'
 
 type ValidatorData = {
   validator: string
@@ -25,6 +26,7 @@ type ValidatorData = {
   votingPowerRaw: string
   totalBonded: string
   commission: string
+  identity: string
 }
 
 const columnHelper = createColumnHelper<ValidatorData>()
@@ -44,15 +46,11 @@ const Validators: React.FC = () => {
       columnHelper.accessor('validator', {
         cell: (info) => (
           <div className="flex items-center gap-2">
-            <div
-              className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold"
-              style={{
-                backgroundColor: colors.primary + '20',
-                color: colors.primary,
-              }}
-            >
-              {info.getValue().charAt(0).toUpperCase()}
-            </div>
+            <ValidatorIcon
+              moniker={info.getValue()}
+              identity={info.row.original.identity}
+              size="md"
+            />
             <span
               className="font-medium"
               style={{ color: colors.text.primary }}
@@ -202,6 +200,7 @@ const Validators: React.FC = () => {
                 commission: convertRateToPercent(
                   val.commission?.commissionRates?.rate
                 ),
+                identity: val.description?.identity || '',
               }
             }
           )
