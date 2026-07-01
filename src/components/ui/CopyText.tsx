@@ -19,7 +19,7 @@ const CopyText: React.FC<CopyTextProps> = ({
   const { colors } = useTheme()
   const [copied, setCopied] = useState(false)
 
-  const handleCopy = (e: React.MouseEvent) => {
+  const handleCopy = (e: React.MouseEvent | React.KeyboardEvent) => {
     e.stopPropagation()
     navigator.clipboard.writeText(text)
     setCopied(true)
@@ -27,25 +27,45 @@ const CopyText: React.FC<CopyTextProps> = ({
     setTimeout(() => setCopied(false), 2000)
   }
 
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault()
+      handleCopy(e)
+    }
+  }
+
   return (
     <div
-      className={`flex items-center gap-2 group cursor-pointer ${className || ''}`}
-      style={style}
+      className={`flex items-center gap-2 group cursor-pointer rounded focus:outline-none focus-visible:ring-2 ${className || ''}`}
+      style={
+        {
+          ...style,
+          '--tw-ring-color': colors.border.focus,
+        } as React.CSSProperties
+      }
       onClick={handleCopy}
+      onKeyDown={handleKeyDown}
+      role="button"
+      tabIndex={0}
       title="Click to copy"
+      aria-label={`Copy ${displayText || text}`}
     >
       <span className="font-mono">{displayText || text}</span>
-      <button
-        className="opacity-0 group-hover:opacity-100 transition-opacity p-1 rounded hover:bg-gray-100 dark:hover:bg-gray-800"
-        aria-label="Copy"
-        style={{ color: colors.text.secondary }}
+      <span
+        className="opacity-0 group-hover:opacity-100 group-focus-visible:opacity-100 transition-opacity p-1 rounded group-hover:bg-[var(--copy-hover-bg)] group-focus-visible:bg-[var(--copy-hover-bg)]"
+        style={
+          {
+            color: colors.text.secondary,
+            '--copy-hover-bg': colors.surfaceHover,
+          } as React.CSSProperties
+        }
       >
         {copied ? (
           <FiCheck className="w-3 h-3 text-green-500" />
         ) : (
           <FiCopy className="w-3 h-3" />
         )}
-      </button>
+      </span>
     </div>
   )
 }

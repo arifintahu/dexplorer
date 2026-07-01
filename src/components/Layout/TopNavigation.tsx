@@ -1,8 +1,14 @@
-import React, { useState, useEffect, ChangeEvent, FormEvent } from 'react'
+import React, {
+  ChangeEvent,
+  FormEvent,
+  useEffect,
+  useMemo,
+  useState,
+} from 'react'
 import { useTheme } from '@/theme/ThemeProvider'
 import { useSelector, useDispatch } from 'react-redux'
 import { RootState } from '@/store'
-import { useNavigate } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 import {
   setConnectState,
   setRPCAddress,
@@ -25,19 +31,16 @@ import {
   setGovTallyParams,
 } from '@/store/paramsSlice'
 import {
-  FiSearch,
   FiMenu,
-  FiSun,
   FiMoon,
-  FiWifi,
-  FiWifiOff,
-  FiLogOut,
   FiRefreshCcw,
-  FiZap,
-  FiTrash2,
-  FiCheck,
+  FiSearch,
+  FiSun,
   FiX,
   FiRadio,
+  FiCheck,
+  FiTrash2,
+  FiZap,
 } from 'react-icons/fi'
 import { Button } from '@/components/ui/Button'
 import { connectWebsocketClient, validateConnection } from '@/rpc/client'
@@ -46,31 +49,108 @@ import { LS_RPC_ADDRESS, LS_RPC_ADDRESS_LIST } from '@/utils/constant'
 import { removeTrailingSlash } from '@/utils/helper'
 import { toast } from 'sonner'
 import { useClientStore } from '@/store/clientStore'
-import { useTranslation } from 'react-i18next'
 import { config } from '@/config'
 
 interface TopNavigationProps {
   onMenuClick?: () => void
 }
 
+const getPageMeta = (pathname: string) => {
+  if (pathname === '/') {
+    return {
+      title: 'Network Overview',
+      subtitle: 'Real-time Cosmos Hub activity',
+    }
+  }
+
+  if (pathname === '/blocks') {
+    return { title: 'Blocks', subtitle: 'Latest blocks produced on chain' }
+  }
+
+  if (pathname.startsWith('/blocks/')) {
+    return { title: 'Block', subtitle: 'Block details and transactions' }
+  }
+
+  if (pathname === '/txs') {
+    return {
+      title: 'Transactions',
+      subtitle: 'Recent transactions across the chain',
+    }
+  }
+
+  if (pathname.startsWith('/txs/')) {
+    return {
+      title: 'Transaction',
+      subtitle: 'Transaction details and messages',
+    }
+  }
+
+  if (pathname === '/accounts') {
+    return { title: 'Accounts', subtitle: 'Recent account activity' }
+  }
+
+  if (pathname.startsWith('/accounts/')) {
+    return { title: 'Account', subtitle: 'Balances, activity, and holdings' }
+  }
+
+  if (pathname === '/validators') {
+    return { title: 'Validators', subtitle: 'Active validator set' }
+  }
+
+  if (pathname.startsWith('/validators/')) {
+    return { title: 'Validator', subtitle: 'Validator metadata and status' }
+  }
+
+  if (pathname === '/proposals') {
+    return { title: 'Governance', subtitle: 'On-chain proposals and voting' }
+  }
+
+  if (pathname.startsWith('/proposals/')) {
+    return { title: 'Proposal', subtitle: 'Governance proposal details' }
+  }
+
+  if (pathname === '/ibc-transfers') {
+    return { title: 'IBC Transfers', subtitle: 'Cross-chain token transfers' }
+  }
+
+  if (pathname === '/parameters') {
+    return {
+      title: 'Chain Parameters',
+      subtitle: 'Module configuration values',
+    }
+  }
+
+  return { title: 'Dexplorer', subtitle: 'Cosmos network explorer' }
+}
+
+const getConnectionLabel = (address: string, chainName: string) => {
+  if (chainName) {
+    return chainName
+  }
+
+  if (!address) {
+    return 'Not connected'
+  }
+
+  try {
+    return new URL(address).hostname
+  } catch {
+    return address
+  }
+}
+
 const TopNavigation: React.FC<TopNavigationProps> = ({ onMenuClick }) => {
-  const { t } = useTranslation()
   const { colors, colorScheme, toggleColorScheme } = useTheme()
   const dispatch = useDispatch()
   const navigate = useNavigate()
+  const location = useLocation()
   const { connectState } = useSelector((state: RootState) => state.connect)
-
   const { setTmClient, setSubsNewBlock, setSubsTxEvent, disconnect } =
     useClientStore()
-
   const address = useSelector(selectRPCAddress)
-  const isConnected = connectState
-  const [searchQuery, setSearchQuery] = useState('')
-
-  // Bypass mode check
   const { chainName: chainNameEnv, isBypassMode } = config
 
-  // RPC Management State
+  const [searchQuery, setSearchQuery] = useState('')
   const [state, setState] = useState<'initial' | 'submitting' | 'success'>(
     'initial'
   )
@@ -79,25 +159,34 @@ const TopNavigation: React.FC<TopNavigationProps> = ({ onMenuClick }) => {
   const [isRPCModalOpen, setIsRPCModalOpen] = useState(false)
   const [rpcList, setRPCList] = useState<string[]>([])
 
-  // Search patterns
+  const meta = useMemo(() => {
+    if (!connectState) {
+      return {
+        title: 'Connect',
+        subtitle: 'Connect to a Cosmos RPC endpoint',
+      }
+    }
+
+    return getPageMeta(location.pathname)
+  }, [connectState, location.pathname])
+
   const heightRegex = /^\d+$/
   const txhashRegex = /^[A-Za-z\d]{64}$/
   const addrRegex = /^[a-z\d]+1[a-z\d]{38,58}$/
 
-  // Load RPC list from localStorage on component mount
   useEffect(() => {
     const savedRPCList = localStorage.getItem(LS_RPC_ADDRESS_LIST)
     if (savedRPCList) {
       try {
         setRPCList(JSON.parse(savedRPCList))
-      } catch (error) {
-        console.error('Error parsing RPC list from localStorage:', error)
+      } catch (loadError) {
+        console.error('Error parsing RPC list from localStorage:', loadError)
       }
     }
   }, [])
 
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault()
+  const handleSearch = (event: React.FormEvent) => {
+    event.preventDefault()
     if (!searchQuery.trim()) return
 
     if (heightRegex.test(searchQuery)) {
@@ -109,23 +198,15 @@ const TopNavigation: React.FC<TopNavigationProps> = ({ onMenuClick }) => {
     } else {
       toast.error('Invalid search query format')
     }
+
     setSearchQuery('')
   }
 
   const resetApplicationData = async () => {
-    console.log('Resetting application data...')
-
-    // Clean up subscriptions and disconnect using Zustand store
     disconnect()
-
-    // Reset stream data
     dispatch(setNewBlock(null))
     dispatch(setTxEvent(null))
-
-    // Clear persistent blocks and transactions
     dispatch(clearPersistentData())
-
-    // Reset parameters data
     dispatch(setStakingParams(null))
     dispatch(setMintParams(null))
     dispatch(setDistributionParams(null))
@@ -133,8 +214,6 @@ const TopNavigation: React.FC<TopNavigationProps> = ({ onMenuClick }) => {
     dispatch(setGovVotingParams(null))
     dispatch(setGovDepositParams(null))
     dispatch(setGovTallyParams(null))
-
-    console.log('Application data reset complete')
   }
 
   const connectClient = async (rpcAddress: string) => {
@@ -152,124 +231,94 @@ const TopNavigation: React.FC<TopNavigationProps> = ({ onMenuClick }) => {
         return
       }
 
-      console.log('Starting connection to new RPC:', cleanAddress)
-
-      // Reset all application data before connecting to new RPC
       await resetApplicationData()
-
-      // Add a small delay to ensure cleanup is complete
       await new Promise((resolve) => setTimeout(resolve, 100))
 
-      console.log('Creating new tmClient...')
       const tmClient = await connectWebsocketClient(cleanAddress)
 
-      if (tmClient) {
-        setTmClient(tmClient)
-        dispatch(setRPCAddress(cleanAddress))
-        dispatch(setConnectState(true))
-        setState('success')
-
-        console.log('Starting new subscriptions...')
-
-        // Start blockchain data subscriptions with error handling
-        // If an error occurs, the onError callback will be triggered so we can notify the user
-        const newBlockSub = subscribeNewBlock(
-          tmClient,
-          (event) => {
-            dispatch(setNewBlock(event))
-            dispatch(addBlock(event))
-          },
-          (err) => {
-            // Subscription error - log it and notify user
-            console.error('Block subscription failed:', err)
-            toast.error('Block updates stopped. Please check your connection.')
-          }
-        )
-
-        const txSub = subscribeTx(
-          tmClient,
-          (event) => {
-            dispatch(setTxEvent(event))
-            dispatch(addTransaction(event))
-          },
-          (err) => {
-            // Subscription error - log it and notify user
-            console.error('Transaction subscription failed:', err)
-            toast.error(
-              'Transaction updates stopped. Please check your connection.'
-            )
-          }
-        )
-
-        setSubsNewBlock(newBlockSub)
-        setSubsTxEvent(txSub)
-
-        console.log('New subscriptions started successfully')
-
-        // Save current RPC address to localStorage
-        localStorage.setItem(LS_RPC_ADDRESS, cleanAddress)
-
-        // Always save all RPC endpoints to localStorage
-        // Use try-catch because localStorage might contain corrupted JSON from a previous session
-        let currentList: string[] = []
-        try {
-          const stored = localStorage.getItem(LS_RPC_ADDRESS_LIST)
-          if (stored) {
-            currentList = JSON.parse(stored)
-          }
-        } catch {
-          // If JSON is corrupted, start with a fresh list
-          console.warn('RPC list in localStorage was corrupted, starting fresh')
-          currentList = []
-        }
-
-        let updatedList = [...currentList]
-
-        // Add new address if it doesn't exist
-        if (!currentList.includes(cleanAddress)) {
-          updatedList = [cleanAddress, ...currentList]
-        } else {
-          // Move existing address to the front
-          updatedList = [
-            cleanAddress,
-            ...currentList.filter((addr) => addr !== cleanAddress),
-          ]
-        }
-
-        // Always update localStorage with the complete list
-        localStorage.setItem(LS_RPC_ADDRESS_LIST, JSON.stringify(updatedList))
-        setRPCList(updatedList)
-
-        toast.success('Successfully connected to RPC endpoint')
-        setIsRPCModalOpen(false)
-        setNewAddress('')
-      } else {
+      if (!tmClient) {
         setError(true)
         setState('initial')
         toast.error('Failed to establish connection')
+        return
       }
-    } catch (error) {
-      console.error('Connection error:', error)
+
+      setTmClient(tmClient)
+      dispatch(setRPCAddress(cleanAddress))
+      dispatch(setConnectState(true))
+      setState('success')
+
+      const newBlockSub = subscribeNewBlock(
+        tmClient,
+        (event) => {
+          dispatch(setNewBlock(event))
+          dispatch(addBlock(event))
+        },
+        (err) => {
+          console.error('Block subscription failed:', err)
+          toast.error('Block updates stopped. Please check your connection.')
+        }
+      )
+
+      const txSub = subscribeTx(
+        tmClient,
+        (event) => {
+          dispatch(setTxEvent(event))
+          dispatch(addTransaction(event))
+        },
+        (err) => {
+          console.error('Transaction subscription failed:', err)
+          toast.error(
+            'Transaction updates stopped. Please check your connection.'
+          )
+        }
+      )
+
+      setSubsNewBlock(newBlockSub)
+      setSubsTxEvent(txSub)
+
+      localStorage.setItem(LS_RPC_ADDRESS, cleanAddress)
+
+      let currentList: string[] = []
+      try {
+        const stored = localStorage.getItem(LS_RPC_ADDRESS_LIST)
+        if (stored) {
+          currentList = JSON.parse(stored)
+        }
+      } catch {
+        currentList = []
+      }
+
+      const updatedList = currentList.includes(cleanAddress)
+        ? [
+            cleanAddress,
+            ...currentList.filter((entry) => entry !== cleanAddress),
+          ]
+        : [cleanAddress, ...currentList]
+
+      localStorage.setItem(LS_RPC_ADDRESS_LIST, JSON.stringify(updatedList))
+      setRPCList(updatedList)
+      setIsRPCModalOpen(false)
+      setNewAddress('')
+      toast.success('Successfully connected to RPC endpoint')
+    } catch (connectionError) {
+      console.error('Connection error:', connectionError)
       setError(true)
       setState('initial')
       toast.error('Connection failed')
     }
   }
 
-  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
-    e.preventDefault()
+  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault()
     if (newAddress.trim()) {
-      connectClient(newAddress.trim())
+      void connectClient(newAddress.trim())
     }
   }
 
-  const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
-    setNewAddress(e.target.value)
+  const handleInputChange = (event: ChangeEvent<HTMLInputElement>) => {
+    setNewAddress(event.target.value)
     if (error) setError(false)
-  }
-
-  const selectChain = (rpcAddress: string) => {
-    connectClient(rpcAddress)
   }
 
   const removeChain = (rpcAddress: string) => {
@@ -280,170 +329,97 @@ const TopNavigation: React.FC<TopNavigationProps> = ({ onMenuClick }) => {
   }
 
   const handleDisconnect = async () => {
-    console.log('Disconnecting from RPC...')
-
-    // Reset all application data
     await resetApplicationData()
-
-    // Clear connection
     dispatch(setConnectState(false))
     dispatch(setRPCAddress(''))
     localStorage.removeItem(LS_RPC_ADDRESS)
-    // Note: We keep the RPC address list for future connections
     toast.success('Disconnected from RPC endpoint')
-
-    console.log('Disconnection complete')
   }
+
+  const connectionLabel = getConnectionLabel(address, chainNameEnv)
 
   return (
     <>
       <header
-        className="sticky top-0 z-30 border-b backdrop-blur-sm bg-opacity-80"
+        className="sticky top-0 z-30 border-b backdrop-blur-xl"
         style={{
-          backgroundColor: `${colors.surface}cc`,
+          backgroundColor:
+            colorScheme === 'dark'
+              ? 'rgba(7, 9, 13, 0.88)'
+              : 'rgba(244, 247, 251, 0.88)',
           borderColor: colors.border.primary,
         }}
       >
-        <div className="flex items-center justify-between px-4 lg:px-6 py-4">
-          {/* Left Section - Mobile Menu & Search */}
-          <div className="flex items-center gap-4 flex-1">
-            {/* Mobile Menu Button */}
-            <Button
-              onClick={onMenuClick}
-              variant="ghost"
-              size="sm"
-              aria-label="Open menu"
-              className="lg:hidden"
+        <div className="mx-auto flex max-w-[1320px] flex-wrap items-center gap-4 px-4 py-3 lg:px-6">
+          <Button
+            onClick={onMenuClick}
+            variant="ghost"
+            size="sm"
+            aria-label="Open menu"
+            className="lg:hidden"
+            style={{ color: colors.text.primary }}
+          >
+            <FiMenu className="h-5 w-5" />
+          </Button>
+
+          <div className="min-w-0">
+            <h1
+              className="truncate font-heading text-[1.45rem] font-semibold leading-none"
               style={{ color: colors.text.primary }}
             >
-              <FiMenu className="h-5 w-5" />
-            </Button>
+              {meta.title}
+            </h1>
+            <div
+              className="mt-1 text-sm"
+              style={{ color: colors.text.tertiary }}
+            >
+              {meta.subtitle}
+            </div>
+          </div>
 
-            {/* Search Bar */}
-            <form onSubmit={handleSearch} className="flex-1 max-w-md">
+          <div className="ml-auto flex min-w-[170px] flex-1 flex-wrap items-center justify-end gap-3 sm:min-w-0">
+            <form
+              onSubmit={handleSearch}
+              className="order-last w-full max-w-full flex-1 basis-full sm:order-none sm:w-auto sm:max-w-[420px] sm:basis-auto md:min-w-[280px]"
+            >
               <div className="relative">
                 <FiSearch
-                  className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4"
+                  className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2"
                   style={{ color: colors.text.tertiary }}
                 />
                 <input
                   type="text"
                   value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Search transactions, blocks, addresses..."
-                  className="w-full pl-10 pr-4 py-2.5 rounded-lg border transition-all duration-200 focus:outline-none focus:ring-2 text-sm"
+                  onChange={(event) => setSearchQuery(event.target.value)}
+                  placeholder="Search address / tx / block..."
+                  aria-label="Search address, transaction, or block"
+                  className="shell-input h-10 w-full rounded-[14px] py-2 pl-11 pr-4 text-sm outline-none transition-all duration-200 focus:ring-2"
                   style={{
-                    backgroundColor: colors.background,
-                    borderColor: colors.border.secondary,
+                    borderColor: colors.border.primary,
+                    backgroundColor: colors.surface,
                     color: colors.text.primary,
+                    boxShadow: `0 0 0 0 transparent`,
                   }}
-                  onFocus={(e) => {
-                    e.currentTarget.style.borderColor = colors.primary
-                    e.currentTarget.style.boxShadow = `0 0 0 2px ${colors.primary}40`
+                  onFocus={(event) => {
+                    event.currentTarget.style.boxShadow = `0 0 0 4px ${colors.primary}1f`
+                    event.currentTarget.style.borderColor = `${colors.primary}66`
                   }}
-                  onBlur={(e) => {
-                    e.currentTarget.style.borderColor = colors.border.secondary
-                    e.currentTarget.style.boxShadow = 'none'
+                  onBlur={(event) => {
+                    event.currentTarget.style.boxShadow = '0 0 0 0 transparent'
+                    event.currentTarget.style.borderColor =
+                      colors.border.primary
                   }}
                 />
               </div>
             </form>
-          </div>
 
-          {/* Right Section - Connection Status & Theme Toggle */}
-          <div className="flex items-center gap-3">
-            {/* Connection Status */}
-            <div className="flex items-center gap-2">
-              <div
-                className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200"
-                style={{
-                  backgroundColor: isConnected
-                    ? `${colors.status.success}15`
-                    : `${colors.status.error}15`,
-                  color: isConnected
-                    ? colors.status.success
-                    : colors.status.error,
-                  border: `1px solid ${
-                    isConnected
-                      ? `${colors.status.success}30`
-                      : `${colors.status.error}30`
-                  }`,
-                }}
-              >
-                {isConnected ? (
-                  <>
-                    <div className="relative">
-                      <FiWifi className="h-4 w-4" />
-                      <div
-                        className="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full animate-pulse"
-                        style={{ backgroundColor: colors.status.success }}
-                      ></div>
-                    </div>
-                    <div className="hidden sm:flex sm:flex-col sm:items-start">
-                      <span className="text-xs font-medium">
-                        {t('dashboard.connectedTo')}:
-                      </span>
-                      <span
-                        className="text-xs truncate max-w-32"
-                        title={address}
-                      >
-                        {chainNameEnv ||
-                          (address ? new URL(address).hostname : 'Unknown')}
-                      </span>
-                    </div>
-                  </>
-                ) : (
-                  <>
-                    <FiWifiOff className="h-4 w-4" />
-                    <span className="hidden sm:inline">
-                      {t('app.disconnected')}
-                    </span>
-                  </>
-                )}
-              </div>
-
-              {/* Change Connection Button */}
-              {!isBypassMode && (
-                <Button
-                  onClick={() => setIsRPCModalOpen(true)}
-                  variant="ghost"
-                  size="sm"
-                  title={t('app.connect')}
-                  className="text-sm"
-                  style={{ color: colors.text.primary }}
-                >
-                  <FiRefreshCcw className="h-4 w-4" />
-                  <span className="hidden md:inline ml-1">
-                    {t('app.connect')}
-                  </span>
-                </Button>
-              )}
-
-              {/* Disconnect Button */}
-              {isConnected && !isBypassMode && (
-                <Button
-                  onClick={handleDisconnect}
-                  variant="ghost"
-                  size="sm"
-                  aria-label="Disconnect from RPC"
-                  title="Disconnect from RPC"
-                  style={{ color: colors.status.error }}
-                >
-                  <FiLogOut className="h-4 w-4" />
-                </Button>
-              )}
-            </div>
-
-            {/* Theme Toggle */}
             <Button
               onClick={toggleColorScheme}
-              variant="ghost"
+              variant="secondary"
               size="sm"
               aria-label={`Switch to ${colorScheme === 'light' ? 'dark' : 'light'} mode`}
-              title={`Switch to ${
-                colorScheme === 'light' ? 'dark' : 'light'
-              } mode`}
-              style={{ color: colors.text.primary }}
+              title={`Switch to ${colorScheme === 'light' ? 'dark' : 'light'} mode`}
+              className="h-10 w-10 rounded-[14px] p-0"
             >
               {colorScheme === 'dark' ? (
                 <FiSun className="h-4 w-4" />
@@ -451,22 +427,88 @@ const TopNavigation: React.FC<TopNavigationProps> = ({ onMenuClick }) => {
                 <FiMoon className="h-4 w-4" />
               )}
             </Button>
+
+            <button
+              type="button"
+              onClick={() => {
+                if (!isBypassMode) {
+                  setIsRPCModalOpen(true)
+                }
+              }}
+              className="flex min-h-10 items-center gap-2 rounded-[14px] border px-3 py-2.5 text-sm font-semibold sm:px-4"
+              disabled={isBypassMode}
+              style={{
+                borderColor: connectState
+                  ? `${colors.status.success}88`
+                  : `${colors.status.error}88`,
+                backgroundColor: connectState
+                  ? `${colors.status.success}14`
+                  : `${colors.status.error}12`,
+                color: connectState
+                  ? colors.status.success
+                  : colors.status.error,
+                cursor: isBypassMode ? 'default' : 'pointer',
+              }}
+            >
+              <span
+                className="h-2.5 w-2.5 rounded-full"
+                style={{
+                  backgroundColor: connectState
+                    ? colors.status.success
+                    : colors.status.error,
+                }}
+              />
+              <span className="hidden sm:inline">
+                {connectState ? 'Connected' : 'Disconnected'}
+              </span>
+              <span className="sr-only sm:hidden">
+                {connectState ? 'Connected' : 'Disconnected'}
+              </span>
+            </button>
+
+            {connectState && !isBypassMode && (
+              <Button
+                onClick={() => {
+                  void handleDisconnect()
+                }}
+                variant="secondary"
+                size="sm"
+                className="min-h-10 rounded-[14px] px-3 font-semibold sm:px-5"
+              >
+                Disconnect
+              </Button>
+            )}
           </div>
         </div>
       </header>
 
-      {/* RPC Connection Modal */}
       {isRPCModalOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/65 px-4 py-6 backdrop-blur-sm">
           <div
-            className="rounded-lg shadow-lg w-full max-w-md mx-4 p-6"
+            className="w-full max-w-xl rounded-[28px] border p-6"
             style={{
-              backgroundColor: colors.background,
-              color: colors.text.primary,
+              backgroundColor: colors.surface,
+              borderColor: colors.border.primary,
+              boxShadow: colors.shadow.lg,
             }}
           >
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold">RPC Connection</h3>
+            <div className="mb-5 flex items-center justify-between gap-4">
+              <div>
+                <h3
+                  className="font-heading text-2xl font-semibold"
+                  style={{ color: colors.text.primary }}
+                >
+                  RPC Connection
+                </h3>
+                <p
+                  className="mt-1 text-sm"
+                  style={{ color: colors.text.tertiary }}
+                >
+                  {connectState
+                    ? `Connected to ${connectionLabel}. Add, switch, or remove Cosmos RPC endpoints.`
+                    : 'Add, switch, or remove Cosmos RPC endpoints.'}
+                </p>
+              </div>
               <Button
                 variant="ghost"
                 size="sm"
@@ -476,84 +518,112 @@ const TopNavigation: React.FC<TopNavigationProps> = ({ onMenuClick }) => {
               </Button>
             </div>
 
-            {/* Add New RPC Form */}
-            <form onSubmit={handleSubmit} className="mb-6">
-              <div className="mb-4">
-                <label className="block text-sm font-medium mb-2">
-                  RPC Endpoint URL
-                </label>
-                <input
-                  type="url"
-                  value={newAddress}
-                  onChange={handleInputChange}
-                  placeholder="https://rpc.example.com"
-                  className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 ${
-                    error ? 'border-red-500' : ''
-                  }`}
-                  style={{
-                    backgroundColor: colors.background,
-                    borderColor: error ? '#ef4444' : colors.border.secondary,
-                    color: colors.text.primary,
-                  }}
-                  required
-                />
-                {error && (
-                  <p className="text-red-500 text-sm mt-1">
-                    Failed to connect to this RPC endpoint
-                  </p>
-                )}
-              </div>
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <label
+                htmlFor="rpc-endpoint-url"
+                className="block text-sm font-medium"
+                style={{ color: colors.text.secondary }}
+              >
+                RPC Endpoint URL
+              </label>
+              <input
+                id="rpc-endpoint-url"
+                type="url"
+                value={newAddress}
+                onChange={handleInputChange}
+                placeholder="https://rpc.example.com"
+                className="w-full rounded-2xl border px-4 py-3 text-sm outline-none transition-all"
+                style={{
+                  backgroundColor: colors.backgroundSecondary,
+                  borderColor: error
+                    ? colors.status.error
+                    : colors.border.primary,
+                  color: colors.text.primary,
+                }}
+                aria-invalid={error}
+                aria-describedby={error ? 'rpc-endpoint-error' : undefined}
+              />
+              {error && (
+                <p
+                  id="rpc-endpoint-error"
+                  role="alert"
+                  className="text-sm"
+                  style={{ color: colors.status.error }}
+                >
+                  Failed to connect to this RPC endpoint.
+                </p>
+              )}
               <Button
                 type="submit"
                 disabled={state === 'submitting'}
-                className="w-full"
+                className="w-full rounded-2xl"
+                size="lg"
               >
                 {state === 'submitting' ? (
                   <>
-                    <FiRefreshCcw className="mr-2 h-4 w-4 animate-spin" />
+                    <FiRefreshCcw className="h-4 w-4 animate-spin" />
                     Connecting...
                   </>
                 ) : (
                   <>
-                    <FiZap className="mr-2 h-4 w-4" />
+                    <FiZap className="h-4 w-4" />
                     Connect
                   </>
                 )}
               </Button>
             </form>
 
-            {/* Saved RPC List */}
             {rpcList.length > 0 && (
-              <div>
-                <h4 className="text-sm font-medium mb-3">
+              <div className="mt-6">
+                <div
+                  className="mb-3 text-sm font-semibold"
+                  style={{ color: colors.text.secondary }}
+                >
                   Saved RPC Endpoints
-                </h4>
-                <div className="space-y-2 max-h-60 overflow-y-auto">
-                  {rpcList.map((rpc, index) => (
+                </div>
+                <div className="space-y-2">
+                  {rpcList.map((rpc) => (
                     <div
-                      key={index}
-                      className="flex items-center justify-between p-3 border rounded-lg"
+                      key={rpc}
+                      className="flex items-center justify-between gap-3 rounded-2xl border px-4 py-3"
                       style={{
-                        backgroundColor: colors.background,
-                        borderColor: colors.border.secondary,
+                        backgroundColor: colors.backgroundSecondary,
+                        borderColor: colors.border.primary,
                       }}
                     >
-                      <div className="flex items-center space-x-2 flex-1 min-w-0">
-                        <FiRadio className="h-4 w-4 text-blue-500 flex-shrink-0" />
-                        <span className="text-sm truncate" title={rpc}>
-                          {rpc}
-                        </span>
-                        {address === rpc && (
-                          <FiCheck className="h-4 w-4 text-green-500 flex-shrink-0" />
-                        )}
+                      <div className="flex min-w-0 flex-1 items-center gap-3">
+                        <FiRadio
+                          className="h-4 w-4 shrink-0"
+                          style={{ color: colors.primary }}
+                        />
+                        <div className="min-w-0">
+                          <div
+                            className="truncate text-sm font-medium"
+                            style={{ color: colors.text.primary }}
+                            title={rpc}
+                          >
+                            {rpc}
+                          </div>
+                          {address === rpc && (
+                            <div
+                              className="mt-1 flex items-center gap-1 text-xs"
+                              style={{ color: colors.status.success }}
+                            >
+                              <FiCheck className="h-3 w-3" />
+                              Active
+                            </div>
+                          )}
+                        </div>
                       </div>
-                      <div className="flex items-center space-x-1 ml-2">
+
+                      <div className="flex items-center gap-2">
                         {address !== rpc && (
                           <Button
-                            variant="ghost"
+                            variant="outline"
                             size="sm"
-                            onClick={() => selectChain(rpc)}
-                            disabled={state === 'submitting'}
+                            onClick={() => {
+                              void connectClient(rpc)
+                            }}
                           >
                             Connect
                           </Button>
@@ -562,13 +632,29 @@ const TopNavigation: React.FC<TopNavigationProps> = ({ onMenuClick }) => {
                           variant="ghost"
                           size="sm"
                           onClick={() => removeChain(rpc)}
-                          className="text-red-500 hover:text-red-700"
+                          style={{ color: colors.status.error }}
                         >
                           <FiTrash2 className="h-4 w-4" />
                         </Button>
                       </div>
                     </div>
                   ))}
+                </div>
+
+                <div
+                  className="mt-4 text-xs"
+                  style={{ color: colors.text.tertiary }}
+                >
+                  Need an RPC URL? Browse chain metadata in the{' '}
+                  <a
+                    href="https://cosmos.directory"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    style={{ color: colors.primary }}
+                  >
+                    Cosmos Directory
+                  </a>
+                  .
                 </div>
               </div>
             )}

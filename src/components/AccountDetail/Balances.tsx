@@ -29,42 +29,31 @@ export default function Balances({ balances, stakedBalance }: BalancesProps) {
     ibcTokens.length === 0
   ) {
     return (
-      <div
-        className="rounded-xl p-6"
-        style={{
-          backgroundColor: colors.surface,
-          border: `1px solid ${colors.border.primary}`,
-          boxShadow: colors.shadow.sm,
-        }}
-      >
+      <div className="panel-surface px-6 py-5">
         <h2
-          className="text-lg font-semibold mb-4"
+          className="mb-4 text-[14px] font-semibold"
           style={{ color: colors.text.primary }}
         >
           Balances
         </h2>
         <div
-          className="border-b mb-4"
-          style={{ borderColor: colors.border.secondary }}
-        ></div>
-        <div
-          className="text-center py-12 rounded-lg"
+          className="rounded-[11px] py-12 text-center"
           style={{
-            backgroundColor: colors.background,
+            backgroundColor: colors.backgroundSecondary,
             border: `1px solid ${colors.border.secondary}`,
           }}
         >
           <FiDollarSign
-            className="w-16 h-16 mx-auto mb-4"
+            className="mx-auto mb-4 h-12 w-12"
             style={{ color: colors.text.tertiary }}
           />
           <h3
-            className="text-lg font-medium mb-2"
+            className="mb-2 text-[15px] font-medium"
             style={{ color: colors.text.secondary }}
           >
             No Balances Found
           </h3>
-          <p style={{ color: colors.text.tertiary }}>
+          <p className="text-sm" style={{ color: colors.text.tertiary }}>
             This account has no available or staked tokens
           </p>
         </div>
@@ -73,26 +62,15 @@ export default function Balances({ balances, stakedBalance }: BalancesProps) {
   }
 
   return (
-    <div
-      className="rounded-xl p-6"
-      style={{
-        backgroundColor: colors.surface,
-        border: `1px solid ${colors.border.primary}`,
-        boxShadow: colors.shadow.sm,
-      }}
-    >
+    <div className="panel-surface px-6 py-5">
       <h2
-        className="text-lg font-semibold mb-4"
+        className="mb-4 text-[14px] font-semibold"
         style={{ color: colors.text.primary }}
       >
         Balances
       </h2>
-      <div
-        className="border-b mb-4"
-        style={{ borderColor: colors.border.secondary }}
-      ></div>
 
-      <div className="space-y-6">
+      <div className="flex flex-col gap-5">
         <NativeBalanceTable
           nativeTokens={nativeTokens}
           nativeStakedToken={nativeStakedToken}

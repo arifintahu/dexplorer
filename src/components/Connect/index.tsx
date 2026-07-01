@@ -36,6 +36,18 @@ const chainList = [
     name: 'Osmosis',
     rpc: 'https://rpc-osmosis.ecostake.com',
   },
+  {
+    name: 'Juno',
+    rpc: 'https://rpc-juno.itastakers.com',
+  },
+  {
+    name: 'Neutron',
+    rpc: 'https://rpc-kralum.neutron-1.neutron.org',
+  },
+  {
+    name: 'Stride',
+    rpc: 'https://stride-rpc.polkachu.com',
+  },
 ]
 
 export default function Connect() {
@@ -216,25 +228,23 @@ export default function Connect() {
   }
 
   return (
-    <div
-      className="flex flex-col items-center justify-center min-h-screen transition-colors duration-300"
-      style={{ backgroundColor: colors.background }}
-    >
-      <div className="max-w-md w-full space-y-8">
-        <div className="text-center">
-          <h1
-            className="text-4xl font-bold mb-4"
-            style={{ color: colors.text.primary }}
-          >
-            Connect to <span style={{ color: colors.primary }}>RPC</span>
-          </h1>
-          <p className="mb-8 font-medium" style={{ color: '#A0AEC0' }}>
-            Connect to a Cosmos RPC endpoint to start exploring the blockchain.
-          </p>
-        </div>
+    <div className="flex min-h-[calc(100vh-9rem)] items-center justify-center px-4 py-8 transition-colors duration-300 sm:px-6">
+      <div className="mx-auto w-full max-w-[760px] text-center">
+        <h2
+          className="mb-4 font-heading text-4xl font-semibold sm:text-5xl"
+          style={{ color: colors.text.primary }}
+        >
+          Connect to <span style={{ color: colors.primary }}>RPC</span>
+        </h2>
+        <p
+          className="mx-auto mb-8 max-w-xl text-base leading-8 sm:text-lg"
+          style={{ color: colors.text.secondary }}
+        >
+          Connect to a Cosmos RPC endpoint to start exploring the blockchain.
+        </p>
 
         <form onSubmit={submitForm} className="space-y-4">
-          <div className="flex gap-2">
+          <div className="mx-auto flex max-w-[480px] flex-col gap-3 sm:flex-row">
             <input
               type="url"
               required
@@ -244,12 +254,14 @@ export default function Connect() {
               onChange={(e: ChangeEvent<HTMLInputElement>) =>
                 setAddress(e.target.value)
               }
-              className="flex-1 px-4 py-3.5 rounded-xl disabled:opacity-50 transition-all duration-300 connect-input shadow-md focus:shadow-lg focus:scale-[1.02]"
+              aria-label="Cosmos RPC endpoint URL"
+              aria-invalid={error}
+              aria-describedby={error ? 'connect-error' : undefined}
+              className="connect-input h-14 flex-1 rounded-2xl border px-4 text-base disabled:opacity-50 transition-all duration-300"
               style={{
                 backgroundColor: colors.surface,
-                border: `2px solid ${colors.border.primary}`,
+                border: `1px solid ${colors.border.primary}`,
                 color: colors.text.primary,
-                boxShadow: '0 4px 15px rgba(0, 0, 0, 0.1)',
                 outline: 'none',
               }}
             />
@@ -258,6 +270,7 @@ export default function Connect() {
               disabled={state !== 'initial'}
               variant={state === 'success' ? 'success' : 'primary'}
               size="lg"
+              className="min-w-[140px] justify-center"
               loading={state === 'submitting'}
             >
               {state === 'success' && <FiCheck />}
@@ -267,7 +280,7 @@ export default function Connect() {
             </Button>
           </div>
           <p
-            className="text-xs text-center"
+            className="text-center text-sm"
             style={{ color: colors.text.tertiary }}
           >
             Need an RPC URL? Check the{' '}
@@ -275,38 +288,44 @@ export default function Connect() {
               href="https://cosmos.directory"
               target="_blank"
               rel="noopener noreferrer"
-              className="underline transition-colors hover:text-blue-400"
-              style={{ color: colors.text.secondary }}
+              className="underline transition-colors"
+              style={{ color: colors.primary }}
             >
               Chain Registry
             </a>
           </p>
           {error && (
-            <p className="text-sm mt-2" style={{ color: colors.status.error }}>
+            <p
+              id="connect-error"
+              role="alert"
+              className="mt-2 text-sm"
+              style={{ color: colors.status.error }}
+            >
               Failed to connect. Please check the RPC address.
             </p>
           )}
         </form>
 
-        <div className="text-center">
-          <p className="mb-4" style={{ color: colors.text.secondary }}>
-            Or select from popular chains:
-          </p>
-          <div className="flex flex-wrap justify-center gap-3">
-            {chainList.map((chain) => (
-              <Button
-                key={chain.name}
-                onClick={() => selectChain(chain.rpc)}
-                disabled={state !== 'initial'}
-                variant="secondary"
-                size="md"
-                title={chain.name}
-              >
-                <FiZap style={{ color: colors.primary }} />
-                <span className="text-sm font-medium">{chain.name}</span>
-              </Button>
-            ))}
-          </div>
+        <p
+          className="mb-4 mt-12 text-center text-lg font-semibold"
+          style={{ color: colors.text.primary }}
+        >
+          Or select from popular chains:
+        </p>
+        <div className="flex flex-wrap justify-center gap-3">
+          {chainList.map((chain) => (
+            <Button
+              key={chain.name}
+              onClick={() => selectChain(chain.rpc)}
+              disabled={state !== 'initial'}
+              variant="secondary"
+              size="md"
+              title={chain.name}
+            >
+              <FiZap style={{ color: colors.primary }} />
+              <span className="text-sm font-medium">{chain.name}</span>
+            </Button>
+          ))}
         </div>
       </div>
     </div>

@@ -1,23 +1,16 @@
 import React, { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import {
-  FiChevronRight,
-  FiUsers,
-  FiShield,
-  FiTrendingUp,
-  FiPercent,
-} from 'react-icons/fi'
+import { FiUsers, FiShield, FiPercent } from 'react-icons/fi'
 import {
   queryActiveValidators,
   queryValidators,
   queryStakingPool,
 } from '@/rpc/abci'
-import DataTable from '@/components/Datatable'
-import { createColumnHelper, ColumnDef } from '@tanstack/react-table'
 import { convertRateToPercent, convertVotingPower } from '@/utils/helper'
 import { useTheme } from '@/theme/ThemeProvider'
 import { useClientStore } from '@/store/clientStore'
 import ValidatorIcon from '@/components/ValidatorIcon'
+import StatCard from '@/components/Home/StatCard'
 
 type ValidatorData = {
   validator: string
@@ -29,161 +22,17 @@ type ValidatorData = {
   identity: string
 }
 
-const columnHelper = createColumnHelper<ValidatorData>()
-
 const Validators: React.FC = () => {
   const { colors } = useTheme()
   const tmClient = useClientStore((state) => state.tmClient)
   const [page, setPage] = useState(0)
-  const [perPage, setPerPage] = useState(10)
+  const [perPage] = useState(10)
   const [totalValidator, setTotalValidator] = useState(0)
   const [totalActiveValidator, setTotalActiveValidator] = useState(0)
   const [data, setData] = useState<ValidatorData[]>([])
-  const [isLoading, setIsLoading] = useState(true)
-
-  const columns = React.useMemo<ColumnDef<ValidatorData, string>[]>(
-    () => [
-      columnHelper.accessor('validator', {
-        cell: (info) => (
-          <Link
-            to={`/validators/${encodeURIComponent(info.row.original.identity || info.getValue())}`}
-            className="flex items-center gap-2 hover:opacity-70 transition-opacity"
-          >
-            <ValidatorIcon
-              moniker={info.getValue()}
-              identity={info.row.original.identity}
-              size="md"
-            />
-            <span
-              className="font-medium"
-              style={{ color: colors.text.primary }}
-            >
-              {info.getValue()}
-            </span>
-          </Link>
-        ),
-        header: () => (
-          <div
-            className="flex items-center gap-2"
-            style={{ color: colors.text.secondary }}
-          >
-            <FiUsers className="w-4 h-4" />
-            Validator
-          </div>
-        ),
-      }),
-      columnHelper.accessor('status', {
-        cell: (info) => (
-          <span
-            className="px-2 py-1 rounded-full text-xs font-medium flex items-center gap-1 w-fit"
-            style={{
-              backgroundColor:
-                info.getValue() === 'Active'
-                  ? colors.status.success + '20'
-                  : colors.status.error + '20',
-              color:
-                info.getValue() === 'Active'
-                  ? colors.status.success
-                  : colors.status.error,
-            }}
-          >
-            <FiShield className="w-3 h-3" />
-            {info.getValue()}
-          </span>
-        ),
-        header: () => (
-          <div
-            className="flex items-center gap-2"
-            style={{ color: colors.text.secondary }}
-          >
-            <FiShield className="w-4 h-4" />
-            Status
-          </div>
-        ),
-      }),
-      columnHelper.accessor('votingPower', {
-        cell: (info) => {
-          const raw = info.row.original.votingPowerRaw
-          const total = info.row.original.totalBonded
-          const percentage =
-            total && total !== '0' ? (Number(raw) / Number(total)) * 100 : 0
-
-          return (
-            <div className="flex flex-col gap-1 w-full max-w-[200px]">
-              <div className="flex items-center justify-between gap-4">
-                <span
-                  className="font-mono text-sm"
-                  style={{ color: colors.text.primary }}
-                >
-                  {info.getValue()}
-                </span>
-                <span
-                  className="text-xs"
-                  style={{ color: colors.text.secondary }}
-                >
-                  {percentage.toFixed(2)}%
-                </span>
-              </div>
-              <div
-                className="w-full h-1.5 rounded-full overflow-hidden"
-                style={{ backgroundColor: colors.border.secondary }}
-              >
-                <div
-                  className="h-full rounded-full transition-all duration-500"
-                  style={{
-                    width: `${percentage}%`,
-                    backgroundColor: colors.status.info,
-                  }}
-                ></div>
-              </div>
-            </div>
-          )
-        },
-        header: () => (
-          <div
-            className="flex items-center gap-2"
-            style={{ color: colors.text.secondary }}
-          >
-            <FiTrendingUp className="w-4 h-4" />
-            Voting Power
-          </div>
-        ),
-        meta: {
-          isNumeric: true,
-        },
-      }),
-      columnHelper.accessor('commission', {
-        cell: (info) => (
-          <div className="flex items-center gap-2">
-            <FiPercent
-              className="w-4 h-4"
-              style={{ color: colors.status.warning }}
-            />
-            <span className="font-mono" style={{ color: colors.text.primary }}>
-              {info.getValue()}
-            </span>
-          </div>
-        ),
-        header: () => (
-          <div
-            className="flex items-center gap-2"
-            style={{ color: colors.text.secondary }}
-          >
-            <FiPercent className="w-4 h-4" />
-            Commission
-          </div>
-        ),
-        meta: {
-          isNumeric: true,
-        },
-      }),
-    ],
-    [colors]
-  )
 
   useEffect(() => {
     if (tmClient) {
-      setIsLoading(true)
       Promise.all([
         queryActiveValidators(tmClient, page, perPage),
         queryStakingPool(tmClient),
@@ -208,11 +57,9 @@ const Validators: React.FC = () => {
             }
           )
           setData(validatorData)
-          setIsLoading(false)
         })
         .catch((error) => {
           console.error('Failed to fetch validators:', error)
-          setIsLoading(false)
         })
     }
   }, [tmClient, page, perPage])
@@ -230,186 +77,211 @@ const Validators: React.FC = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tmClient])
 
-  const onChangePagination = (value: {
-    pageIndex: number
-    pageSize: number
-  }) => {
-    setPage(value.pageIndex)
-    setPerPage(value.pageSize)
-  }
+  const avgCommission =
+    data.length > 0
+      ? (
+          data.reduce(
+            (acc, v) => acc + parseFloat(v.commission.replace('%', '')),
+            0
+          ) / data.length
+        ).toFixed(1) + '%'
+      : '0%'
 
   return (
-    <div className="space-y-6">
-      {/* Breadcrumb */}
-      <div className="flex items-center gap-2 text-sm mb-4">
-        <Link
-          to="/"
-          className="hover:opacity-70 transition-opacity font-medium"
-          style={{ color: colors.text.secondary }}
-        >
-          Home
-        </Link>
-        <FiChevronRight
-          className="w-4 h-4"
-          style={{ color: colors.text.tertiary }}
+    <div className="space-y-5">
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+        <StatCard
+          title="Active Validators"
+          value={totalActiveValidator}
+          icon={FiShield}
+          subtitle="Currently bonded"
+          index={0}
         />
-        <span className="font-bold" style={{ color: colors.text.primary }}>
-          Validators
-        </span>
+        <StatCard
+          title="Total Validators"
+          value={totalValidator}
+          icon={FiUsers}
+          subtitle="Registered on chain"
+          index={1}
+        />
+        <StatCard
+          title="Avg Commission"
+          value={avgCommission}
+          icon={FiPercent}
+          subtitle="Across active set"
+          index={2}
+        />
       </div>
 
-      {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div
-          className="rounded-xl p-6"
-          style={{
-            backgroundColor: colors.surface,
-            border: `1px solid ${colors.border.primary}`,
-            boxShadow: colors.shadow.sm,
-          }}
-        >
-          <div className="flex items-center gap-3">
-            <div
-              className="w-12 h-12 rounded-lg flex items-center justify-center"
-              style={{ backgroundColor: colors.status.success + '20' }}
-            >
-              <FiShield
-                className="w-6 h-6"
-                style={{ color: colors.status.success }}
-              />
-            </div>
-            <div>
-              <p className="text-sm" style={{ color: colors.text.secondary }}>
-                Active Validators
-              </p>
-              <p
-                className="text-2xl font-bold"
-                style={{ color: colors.text.primary }}
-              >
-                {totalActiveValidator}
-              </p>
-            </div>
-          </div>
-        </div>
-
-        <div
-          className="rounded-xl p-6"
-          style={{
-            backgroundColor: colors.surface,
-            border: `1px solid ${colors.border.primary}`,
-            boxShadow: colors.shadow.sm,
-          }}
-        >
-          <div className="flex items-center gap-3">
-            <div
-              className="w-12 h-12 rounded-lg flex items-center justify-center"
-              style={{ backgroundColor: colors.status.info + '20' }}
-            >
-              <FiUsers
-                className="w-6 h-6"
-                style={{ color: colors.status.info }}
-              />
-            </div>
-            <div>
-              <p className="text-sm" style={{ color: colors.text.secondary }}>
-                Total Validators
-              </p>
-              <p
-                className="text-2xl font-bold"
-                style={{ color: colors.text.primary }}
-              >
-                {totalValidator}
-              </p>
-            </div>
-          </div>
-        </div>
-
-        <div
-          className="rounded-xl p-6"
-          style={{
-            backgroundColor: colors.surface,
-            border: `1px solid ${colors.border.primary}`,
-            boxShadow: colors.shadow.sm,
-          }}
-        >
-          <div className="flex items-center gap-3">
-            <div
-              className="w-12 h-12 rounded-lg flex items-center justify-center"
-              style={{ backgroundColor: colors.status.warning + '20' }}
-            >
-              <FiTrendingUp
-                className="w-6 h-6"
-                style={{ color: colors.status.warning }}
-              />
-            </div>
-            <div>
-              <p className="text-sm" style={{ color: colors.text.secondary }}>
-                Avg Commission
-              </p>
-              <p
-                className="text-2xl font-bold"
-                style={{ color: colors.text.primary }}
-              >
-                {data.length > 0
-                  ? (
-                      data.reduce(
-                        (acc, v) =>
-                          acc + parseFloat(v.commission.replace('%', '')),
-                        0
-                      ) / data.length
-                    ).toFixed(1) + '%'
-                  : '0%'}
-              </p>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Validators Table */}
-      <div
-        className="rounded-xl p-6"
-        style={{
-          backgroundColor: colors.surface,
-          border: `1px solid ${colors.border.primary}`,
-          boxShadow: colors.shadow.sm,
-        }}
-      >
-        <div className="mb-6">
-          <h2
-            className="text-lg font-semibold"
-            style={{ color: colors.text.primary }}
+      {tmClient ? (
+        <div className="reference-table-shell">
+          <div
+            className="hidden gap-3 border-b px-5 py-3 text-[10.5px] font-semibold uppercase tracking-[0.06em] md:grid md:grid-cols-[44px_1.6fr_1.1fr_100px_84px]"
+            style={{
+              borderColor: colors.border.primary,
+              color: colors.text.tertiary,
+            }}
           >
-            Validator List
-          </h2>
-          <p className="text-sm mt-1" style={{ color: colors.text.secondary }}>
-            Active validators securing the network
+            <span>#</span>
+            <span>Validator</span>
+            <span>Voting Power</span>
+            <span>Commission</span>
+            <span className="text-right">Status</span>
+          </div>
+
+          {data.map((v, index) => {
+            const percentage =
+              v.totalBonded && v.totalBonded !== '0'
+                ? (Number(v.votingPowerRaw) / Number(v.totalBonded)) * 100
+                : 0
+            const isActive = v.status === 'Active'
+
+            return (
+              <Link
+                key={`${v.identity || v.validator}-${index}`}
+                to={`/validators/${encodeURIComponent(v.identity || v.validator)}`}
+                className="reference-table-row grid gap-3 border-b px-5 py-4 md:grid-cols-[44px_1.6fr_1.1fr_100px_84px] md:items-center"
+                style={{ borderColor: colors.border.primary }}
+              >
+                <span
+                  className="font-mono text-[13px]"
+                  style={{ color: colors.text.tertiary }}
+                >
+                  {page * perPage + index + 1}
+                </span>
+
+                <div className="flex min-w-0 items-center gap-2.5">
+                  <ValidatorIcon
+                    moniker={v.validator}
+                    identity={v.identity}
+                    size="md"
+                  />
+                  <span
+                    className="truncate text-[13px] font-semibold"
+                    style={{ color: colors.text.primary }}
+                  >
+                    {v.validator}
+                  </span>
+                </div>
+
+                <div className="flex flex-col gap-[5px]">
+                  <div className="flex items-center justify-between gap-4">
+                    <span
+                      className="font-mono text-[12px]"
+                      style={{ color: colors.text.primary }}
+                    >
+                      {v.votingPower}
+                    </span>
+                    <span
+                      className="text-[11px]"
+                      style={{ color: colors.text.tertiary }}
+                    >
+                      {percentage.toFixed(2)}%
+                    </span>
+                  </div>
+                  <div
+                    className="h-[5px] overflow-hidden rounded-[3px]"
+                    style={{ backgroundColor: colors.backgroundSecondary }}
+                  >
+                    <div
+                      className="h-full rounded-[3px]"
+                      style={{
+                        width: `${percentage}%`,
+                        background: `linear-gradient(90deg, ${colors.primary}, ${colors.accent})`,
+                      }}
+                    />
+                  </div>
+                </div>
+
+                <span
+                  className="text-[12.5px]"
+                  style={{ color: colors.text.secondary }}
+                >
+                  {v.commission}
+                </span>
+
+                <span
+                  className="reference-pill w-fit justify-self-end"
+                  style={{
+                    backgroundColor: isActive
+                      ? `${colors.status.success}20`
+                      : `${colors.status.error}20`,
+                    color: isActive
+                      ? colors.status.success
+                      : colors.status.error,
+                  }}
+                >
+                  {v.status}
+                </span>
+              </Link>
+            )
+          })}
+
+          {data.length === 0 && (
+            <div className="px-5 py-12 text-center">
+              <FiUsers
+                className="mx-auto mb-4 h-12 w-12 opacity-50"
+                style={{ color: colors.text.tertiary }}
+              />
+              <p style={{ color: colors.text.secondary }}>
+                No validators available
+              </p>
+            </div>
+          )}
+
+          <div
+            className="flex items-center justify-between border-t px-5 py-[14px]"
+            style={{ borderColor: colors.border.primary }}
+          >
+            <span className="text-xs" style={{ color: colors.text.tertiary }}>
+              Showing {page * perPage + 1}–
+              {Math.min((page + 1) * perPage, totalActiveValidator)} of{' '}
+              {totalActiveValidator} validators
+            </span>
+            <div className="flex gap-2">
+              <button
+                type="button"
+                disabled={page === 0}
+                onClick={() => setPage(page - 1)}
+                className="rounded-[8px] border px-[13px] py-[7px] text-[12.5px] font-medium disabled:cursor-not-allowed disabled:opacity-50"
+                style={{
+                  backgroundColor: colors.backgroundSecondary,
+                  borderColor: colors.border.primary,
+                  color: colors.text.tertiary,
+                }}
+              >
+                Prev
+              </button>
+              <button
+                type="button"
+                disabled={(page + 1) * perPage >= totalActiveValidator}
+                onClick={() => setPage(page + 1)}
+                className="rounded-[8px] border px-[13px] py-[7px] text-[12.5px] font-semibold disabled:cursor-not-allowed disabled:opacity-50"
+                style={{
+                  backgroundColor: `${colors.primary}18`,
+                  borderColor: `${colors.primary}66`,
+                  color: colors.primary,
+                }}
+              >
+                Next
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : (
+        <div className="reference-table-shell px-5 py-12 text-center">
+          <FiUsers
+            className="mx-auto mb-4 h-12 w-12 opacity-50"
+            style={{ color: colors.text.tertiary }}
+          />
+          <p style={{ color: colors.text.secondary }}>
+            No connection to blockchain
+          </p>
+          <p className="mt-1 text-sm" style={{ color: colors.text.tertiary }}>
+            Please connect to view validators
           </p>
         </div>
-
-        {tmClient ? (
-          <DataTable
-            // @ts-expect-error: ColumnDef type mismatch between TanStack Table versions
-            columns={columns}
-            data={data}
-            total={totalActiveValidator}
-            isLoading={isLoading}
-            onChangePagination={onChangePagination}
-          />
-        ) : (
-          <div className="text-center py-12">
-            <FiUsers
-              className="w-12 h-12 mx-auto mb-4 opacity-50"
-              style={{ color: colors.text.tertiary }}
-            />
-            <p style={{ color: colors.text.secondary }}>
-              No connection to blockchain
-            </p>
-            <p className="text-sm mt-1" style={{ color: colors.text.tertiary }}>
-              Please connect to view validators
-            </p>
-          </div>
-        )}
-      </div>
+      )}
     </div>
   )
 }

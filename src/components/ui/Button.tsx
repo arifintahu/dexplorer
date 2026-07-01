@@ -18,21 +18,21 @@ export const Button: React.FC<ButtonProps> = ({
   ...props
 }) => {
   const baseClasses =
-    'inline-flex items-center justify-center gap-2 rounded-lg font-medium transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[var(--color-primary)] disabled:opacity-50 disabled:cursor-not-allowed'
+    'inline-flex items-center justify-center gap-2 rounded-2xl font-medium transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] disabled:opacity-50 disabled:cursor-not-allowed'
 
   const sizeClasses = {
-    sm: 'px-3 py-1.5 text-sm',
-    md: 'px-4 py-2 text-sm',
-    lg: 'px-6 py-3 text-base',
+    sm: 'px-3 py-2 text-sm',
+    md: 'px-4 py-2.5 text-sm',
+    lg: 'px-6 py-3.5 text-base',
   }
 
   const variantClasses = {
     primary:
-      'bg-[var(--color-primary)] text-white border-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] hover:border-[var(--color-primary-hover)]',
+      'bg-[var(--color-primary)] text-white border-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] hover:border-[var(--color-primary-hover)] shadow-[var(--color-shadow-glow)]',
     secondary:
       'bg-[var(--color-surface)] text-[var(--color-text-primary)] border-[var(--color-border-primary)] hover:bg-[var(--color-surface-hover)]',
     outline:
-      'bg-transparent text-[var(--color-primary)] border-[var(--color-primary)] hover:bg-[var(--color-primary)] hover:text-white',
+      'bg-transparent text-[var(--color-primary)] border-[var(--color-border-primary)] hover:border-[var(--color-primary)] hover:bg-[var(--color-surface-hover)]',
     ghost:
       'bg-transparent text-[var(--color-text-primary)] border-transparent hover:bg-[var(--color-surface-hover)]',
     success:

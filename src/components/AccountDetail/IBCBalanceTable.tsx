@@ -2,13 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { Coin } from '@cosmjs/stargate'
 import { useTheme } from '@/theme/ThemeProvider'
 import { formatAmount, formatDenom, getConvertedAmount } from '@/utils/cosmos'
-import {
-  FiDollarSign,
-  FiChevronLeft,
-  FiChevronsLeft,
-  FiChevronRight,
-  FiChevronsRight,
-} from 'react-icons/fi'
+import { FiChevronsLeft, FiChevronsRight } from 'react-icons/fi'
 
 interface IBCBalanceTableProps {
   ibcTokens: readonly Coin[]
@@ -69,179 +63,177 @@ export default function IBCBalanceTable({ ibcTokens }: IBCBalanceTableProps) {
 
   if (ibcTokens.length === 0) return null
 
+  const pageButtonStyle = (active: boolean) => ({
+    backgroundColor: active
+      ? `${colors.primary}18`
+      : colors.backgroundSecondary,
+    borderColor: active ? `${colors.primary}66` : colors.border.primary,
+    color: active ? colors.primary : colors.text.tertiary,
+  })
+
   return (
-    <div>
-      <div className="flex items-center justify-between mb-4">
+    <div className="reference-table-shell">
+      <div
+        className="flex flex-wrap items-center justify-between gap-3 border-b px-5 py-[15px]"
+        style={{ borderColor: colors.border.primary }}
+      >
         <div className="flex items-center gap-2">
-          <FiDollarSign
-            className="w-5 h-5"
-            style={{ color: colors.status.info }}
-          />
-          <h3
-            className="text-lg font-medium"
+          <span
+            className="text-sm font-semibold"
             style={{ color: colors.text.primary }}
           >
-            Other Available Tokens ({ibcTokens.length})
-          </h3>
-        </div>
-        <div className="flex items-center gap-4">
-          <div className="flex items-center gap-2">
-            <span className="text-sm" style={{ color: colors.text.secondary }}>
-              Show:
-            </span>
-            <select
-              value={itemsPerPage}
-              onChange={(e) => handleItemsPerPageChange(Number(e.target.value))}
-              className="px-2 py-1 rounded text-sm border focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
-              style={{
-                backgroundColor: colors.surface,
-                borderColor: colors.border.secondary,
-                color: colors.text.primary,
-              }}
-            >
-              <option value={5}>5</option>
-              <option value={10}>10</option>
-              <option value={20}>20</option>
-            </select>
-          </div>
-          <span className="text-sm" style={{ color: colors.text.secondary }}>
-            Showing {showingStart}-{showingEnd} of {ibcTokens.length}
+            Other Available Tokens
+          </span>
+          <span
+            className="reference-pill"
+            style={{
+              backgroundColor: `${colors.accent}20`,
+              color: colors.accent,
+            }}
+          >
+            {ibcTokens.length} tokens
           </span>
         </div>
-      </div>
-      <div
-        className="rounded-lg overflow-hidden"
-        style={{
-          backgroundColor: colors.background,
-          border: `1px solid ${colors.border.secondary}`,
-        }}
-      >
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead
-              style={{
-                backgroundColor: colors.surface,
-                borderBottom: `1px solid ${colors.border.secondary}`,
-              }}
-            >
-              <tr>
-                <th
-                  className="text-left py-3 px-4 font-medium text-sm"
-                  style={{ color: colors.text.secondary }}
-                >
-                  Token
-                </th>
-                <th
-                  className="text-right py-3 px-4 font-medium text-sm"
-                  style={{ color: colors.text.secondary }}
-                >
-                  Amount
-                </th>
-                <th
-                  className="text-right py-3 px-4 font-medium text-sm"
-                  style={{ color: colors.text.secondary }}
-                >
-                  Raw Amount
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {paginatedIbcTokens.map((balance, index) => {
-                const formatted = formatBalance(balance)
-                return (
-                  <tr
-                    key={index}
-                    className="border-b hover:bg-opacity-50 transition-colors"
-                    style={{
-                      borderColor: colors.border.secondary,
-                      backgroundColor: 'transparent',
-                    }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.backgroundColor =
-                        colors.surface + '50'
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.backgroundColor = 'transparent'
-                    }}
-                  >
-                    <td className="py-3 px-4">
-                      <div className="flex items-center gap-2">
-                        <span
-                          className="px-2 py-1 rounded text-xs font-medium"
-                          style={{
-                            backgroundColor: colors.status.info + '20',
-                            color: colors.status.info,
-                          }}
-                        >
-                          IBC
-                        </span>
-                        <span
-                          className="font-mono text-sm"
-                          style={{ color: colors.text.primary }}
-                          title={formatted.denom}
-                        >
-                          {formatted.formattedDenom}
-                        </span>
-                      </div>
-                    </td>
-                    <td
-                      className="py-3 px-4 text-right font-semibold"
-                      style={{ color: colors.text.primary }}
-                    >
-                      {formatted.formattedAmount}
-                    </td>
-                    <td
-                      className="py-3 px-4 text-right font-mono text-sm"
-                      style={{ color: colors.text.secondary }}
-                      title={formatted.amount}
-                    >
-                      {formatted.amount.length > 12
-                        ? formatted.amount.slice(0, 12) + '...'
-                        : formatted.amount}
-                    </td>
-                  </tr>
-                )
-              })}
-            </tbody>
-          </table>
-        </div>
-
-        {/* Pagination Controls */}
-        {totalPages > 1 && (
-          <div
-            className="flex items-center justify-between mt-4 pt-4"
-            style={{ borderTop: `1px solid ${colors.border.secondary}` }}
+        <div className="flex items-center gap-2">
+          <label
+            htmlFor="ibc-items-per-page"
+            className="text-xs"
+            style={{ color: colors.text.tertiary }}
           >
-            <div className="flex items-center gap-2">
-              <button
-                onClick={() => handlePageChange(1)}
-                disabled={currentPage === 1}
-                className="p-2 rounded border disabled:opacity-50 disabled:cursor-not-allowed hover:bg-opacity-80 transition-colors"
+            Show:
+          </label>
+          <select
+            id="ibc-items-per-page"
+            value={itemsPerPage}
+            onChange={(e) => handleItemsPerPageChange(Number(e.target.value))}
+            className="rounded-[8px] border px-2 py-1 text-xs focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
+            style={{
+              backgroundColor: colors.backgroundSecondary,
+              borderColor: colors.border.primary,
+              color: colors.text.primary,
+            }}
+          >
+            <option value={5}>5</option>
+            <option value={10}>10</option>
+            <option value={20}>20</option>
+          </select>
+        </div>
+      </div>
+
+      <div
+        className="reference-table-header hidden gap-3 border-b px-5 py-3 md:grid md:grid-cols-[1fr_160px_200px]"
+        style={{ borderColor: colors.border.primary }}
+      >
+        <span>Token</span>
+        <span className="text-right">Amount</span>
+        <span className="text-right">Raw</span>
+      </div>
+
+      {paginatedIbcTokens.map((balance, index) => {
+        const formatted = formatBalance(balance)
+        return (
+          <div
+            key={index}
+            className="reference-table-row grid gap-3 border-b px-5 py-4 md:grid-cols-[1fr_160px_200px] md:items-center"
+            style={{ borderColor: colors.border.primary }}
+          >
+            <div className="flex min-w-0 items-center gap-2">
+              <span
+                className="inline-flex h-[22px] w-8 flex-shrink-0 items-center justify-center rounded-[6px] text-[9.5px] font-bold tracking-[0.03em]"
                 style={{
-                  backgroundColor:
-                    currentPage === 1 ? colors.surface : colors.background,
-                  borderColor: colors.border.secondary,
-                  color: colors.text.primary,
+                  backgroundColor: `${colors.accent}20`,
+                  color: colors.accent,
                 }}
-                title="First page"
               >
-                <FiChevronsLeft className="w-4 h-4" />
-              </button>
-              <button
-                onClick={() => handlePageChange(currentPage - 1)}
-                disabled={currentPage === 1}
-                className="p-2 rounded border disabled:opacity-50 disabled:cursor-not-allowed hover:bg-opacity-80 transition-colors"
-                style={{
-                  backgroundColor:
-                    currentPage === 1 ? colors.surface : colors.background,
-                  borderColor: colors.border.secondary,
-                  color: colors.text.primary,
-                }}
-                title="Previous page"
+                IBC
+              </span>
+              <span
+                className="truncate font-mono text-[12.5px]"
+                style={{ color: colors.text.primary }}
+                title={formatted.denom}
               >
-                <FiChevronLeft className="w-4 h-4" />
-              </button>
+                {formatted.formattedDenom}
+              </span>
             </div>
+            <span
+              className="font-mono text-[12.5px] font-semibold md:text-right"
+              style={{ color: colors.text.primary }}
+            >
+              {formatted.formattedAmount}
+            </span>
+            <span
+              className="font-mono text-[12px] md:text-right"
+              style={{ color: colors.text.tertiary }}
+              title={formatted.amount}
+            >
+              {formatted.amount.length > 12
+                ? formatted.amount.slice(0, 12) + '...'
+                : formatted.amount}
+            </span>
+          </div>
+        )
+      })}
+
+      {/* Pagination Controls */}
+      {totalPages > 1 && (
+        <div
+          className="flex flex-wrap items-center justify-between gap-3 px-5 py-[14px]"
+          style={{ borderColor: colors.border.primary }}
+        >
+          <span className="text-xs" style={{ color: colors.text.tertiary }}>
+            Showing {showingStart}-{showingEnd} of {ibcTokens.length}
+          </span>
+
+          {/* Mobile: simplified Prev / Page X of Y / Next */}
+          <div className="flex items-center gap-2 sm:hidden">
+            <button
+              type="button"
+              onClick={() => handlePageChange(currentPage - 1)}
+              disabled={currentPage === 1}
+              className="rounded-[8px] border px-[13px] py-[7px] text-[12.5px] font-medium disabled:cursor-not-allowed disabled:opacity-50"
+              style={pageButtonStyle(false)}
+            >
+              Prev
+            </button>
+            <span
+              className="text-xs font-medium"
+              style={{ color: colors.text.tertiary }}
+            >
+              Page {currentPage} of {totalPages}
+            </span>
+            <button
+              type="button"
+              onClick={() => handlePageChange(currentPage + 1)}
+              disabled={currentPage === totalPages}
+              className="rounded-[8px] border px-[13px] py-[7px] text-[12.5px] font-semibold disabled:cursor-not-allowed disabled:opacity-50"
+              style={pageButtonStyle(false)}
+            >
+              Next
+            </button>
+          </div>
+
+          {/* Desktop: full First/Prev/page-numbers/Next/Last */}
+          <div className="hidden items-center gap-2 sm:flex">
+            <button
+              type="button"
+              onClick={() => handlePageChange(1)}
+              disabled={currentPage === 1}
+              className="rounded-[8px] border p-[7px] disabled:cursor-not-allowed disabled:opacity-50"
+              style={pageButtonStyle(false)}
+              title="First page"
+              aria-label="First page"
+            >
+              <FiChevronsLeft className="h-4 w-4" />
+            </button>
+            <button
+              type="button"
+              onClick={() => handlePageChange(currentPage - 1)}
+              disabled={currentPage === 1}
+              className="rounded-[8px] border px-[13px] py-[7px] text-[12.5px] font-medium disabled:cursor-not-allowed disabled:opacity-50"
+              style={pageButtonStyle(false)}
+            >
+              Prev
+            </button>
 
             <div className="flex items-center gap-1">
               {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
@@ -258,23 +250,11 @@ export default function IBCBalanceTable({ ibcTokens }: IBCBalanceTableProps) {
 
                 return (
                   <button
+                    type="button"
                     key={pageNum}
                     onClick={() => handlePageChange(pageNum)}
-                    className="px-3 py-1 rounded border text-sm hover:bg-opacity-80 transition-colors"
-                    style={{
-                      backgroundColor:
-                        currentPage === pageNum
-                          ? colors.primary
-                          : colors.background,
-                      borderColor:
-                        currentPage === pageNum
-                          ? colors.primary
-                          : colors.border.secondary,
-                      color:
-                        currentPage === pageNum
-                          ? colors.background
-                          : colors.text.primary,
-                    }}
+                    className="rounded-[8px] border px-[10px] py-[7px] text-[12.5px] font-medium"
+                    style={pageButtonStyle(currentPage === pageNum)}
                   >
                     {pageNum}
                   </button>
@@ -282,43 +262,29 @@ export default function IBCBalanceTable({ ibcTokens }: IBCBalanceTableProps) {
               })}
             </div>
 
-            <div className="flex items-center gap-2">
-              <button
-                onClick={() => handlePageChange(currentPage + 1)}
-                disabled={currentPage === totalPages}
-                className="p-2 rounded border disabled:opacity-50 disabled:cursor-not-allowed hover:bg-opacity-80 transition-colors"
-                style={{
-                  backgroundColor:
-                    currentPage === totalPages
-                      ? colors.surface
-                      : colors.background,
-                  borderColor: colors.border.secondary,
-                  color: colors.text.primary,
-                }}
-                title="Next page"
-              >
-                <FiChevronRight className="w-4 h-4" />
-              </button>
-              <button
-                onClick={() => handlePageChange(totalPages)}
-                disabled={currentPage === totalPages}
-                className="p-2 rounded border disabled:opacity-50 disabled:cursor-not-allowed hover:bg-opacity-80 transition-colors"
-                style={{
-                  backgroundColor:
-                    currentPage === totalPages
-                      ? colors.surface
-                      : colors.background,
-                  borderColor: colors.border.secondary,
-                  color: colors.text.primary,
-                }}
-                title="Last page"
-              >
-                <FiChevronsRight className="w-4 h-4" />
-              </button>
-            </div>
+            <button
+              type="button"
+              onClick={() => handlePageChange(currentPage + 1)}
+              disabled={currentPage === totalPages}
+              className="rounded-[8px] border px-[13px] py-[7px] text-[12.5px] font-semibold disabled:cursor-not-allowed disabled:opacity-50"
+              style={pageButtonStyle(false)}
+            >
+              Next
+            </button>
+            <button
+              type="button"
+              onClick={() => handlePageChange(totalPages)}
+              disabled={currentPage === totalPages}
+              className="rounded-[8px] border p-[7px] disabled:cursor-not-allowed disabled:opacity-50"
+              style={pageButtonStyle(false)}
+              title="Last page"
+              aria-label="Last page"
+            >
+              <FiChevronsRight className="h-4 w-4" />
+            </button>
           </div>
-        )}
-      </div>
+        </div>
+      )}
     </div>
   )
 }

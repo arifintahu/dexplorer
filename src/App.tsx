@@ -2,7 +2,7 @@ import React, { Suspense, lazy } from 'react'
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 import { Provider, useSelector } from 'react-redux'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { ThemeProvider } from '@/theme/ThemeProvider'
+import { ThemeProvider, useTheme } from '@/theme/ThemeProvider'
 import { store, RootState } from '@/store'
 import Layout from '@/components/Layout/Layout'
 import Connect from '@/components/Connect'
@@ -28,11 +28,17 @@ const AccountDetail = lazy(() => import('@/pages/AccountDetail'))
 const ProposalDetail = lazy(() => import('@/pages/ProposalDetail'))
 const NotFound = lazy(() => import('@/pages/NotFound'))
 
-const LoadingFallback = () => (
-  <div className="flex items-center justify-center min-h-[50vh]">
-    <FiLoader className="w-8 h-8 animate-spin text-blue-500" />
-  </div>
-)
+const LoadingFallback: React.FC = () => {
+  const { colors } = useTheme()
+  return (
+    <div className="flex items-center justify-center min-h-[50vh]">
+      <FiLoader
+        className="w-8 h-8 animate-spin"
+        style={{ color: colors.primary }}
+      />
+    </div>
+  )
+}
 
 function AppContent() {
   const isConnected = useSelector(
@@ -42,7 +48,11 @@ function AppContent() {
   // Auto-reconnection is handled in the Connect component
 
   if (!isConnected) {
-    return <Connect />
+    return (
+      <Layout>
+        <Connect />
+      </Layout>
+    )
   }
 
   return (

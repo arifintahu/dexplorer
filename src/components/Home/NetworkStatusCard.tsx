@@ -20,33 +20,26 @@ const NetworkStatusCard: React.FC<NetworkStatusCardProps> = ({
   const { colors } = useTheme()
 
   return (
-    <div
-      className="rounded-xl p-6 transition-all duration-300 hover:shadow-lg"
-      style={{
-        backgroundColor: colors.surface,
-        border: `1px solid ${colors.border.primary}`,
-        boxShadow: colors.shadow.sm,
-      }}
-    >
+    <div className="panel-surface rounded-[14px] p-5">
       <h3
-        className="text-lg font-bold mb-4 tracking-tight"
+        className="mb-6 text-[1.05rem] font-semibold tracking-tight"
         style={{ color: colors.text.primary }}
       >
         Network Status
       </h3>
 
-      <div className="space-y-4">
+      <div className="space-y-[0.95rem]">
         {/* Network Health / Sync Status */}
         <div className="flex items-center justify-between">
           <span
             className="text-sm font-medium"
             style={{ color: colors.text.secondary }}
           >
-            Sync Status
+            Sync status
           </span>
           <div className="flex items-center gap-2">
             <div
-              className="w-2 h-2 rounded-full animate-pulse"
+              className="h-2.5 w-2.5 rounded-full animate-pulse"
               style={{
                 backgroundColor: !isConnected
                   ? colors.status.error
@@ -80,7 +73,7 @@ const NetworkStatusCard: React.FC<NetworkStatusCardProps> = ({
             className="text-sm font-medium"
             style={{ color: colors.text.secondary }}
           >
-            Block Height
+            Synced height
           </span>
           <span
             className="text-sm font-semibold font-mono"
@@ -96,7 +89,7 @@ const NetworkStatusCard: React.FC<NetworkStatusCardProps> = ({
             className="text-sm font-medium"
             style={{ color: colors.text.secondary }}
           >
-            Connected Peers
+            Connected peers
           </span>
           <span
             className="text-sm font-semibold"
@@ -115,7 +108,7 @@ const NetworkStatusCard: React.FC<NetworkStatusCardProps> = ({
             Chain ID
           </span>
           <span
-            className="text-xs font-mono truncate max-w-[180px]"
+            className="max-w-[180px] truncate text-xs font-mono"
             style={{ color: colors.text.tertiary }}
             title={isConnected ? chainId : undefined}
           >
@@ -125,11 +118,11 @@ const NetworkStatusCard: React.FC<NetworkStatusCardProps> = ({
 
         {isConnected && (
           <div
-            className="flex items-center gap-2 pt-2 border-t"
+            className="flex items-center gap-2 border-t pt-4"
             style={{ borderColor: colors.border.secondary }}
           >
             <FiRefreshCw
-              className="w-4 h-4"
+              className="h-4 w-4"
               style={{ color: colors.status.success }}
             />
             <span className="text-xs" style={{ color: colors.text.tertiary }}>

@@ -1,21 +1,27 @@
 import React, { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import {
-  FiChevronRight,
+  FiChevronLeft,
   FiShield,
-  FiTrendingUp,
-  FiPercent,
-  FiUser,
-  FiActivity,
   FiKey,
   FiCheckCircle,
   FiXCircle,
   FiLoader,
 } from 'react-icons/fi'
+import { toHex } from '@cosmjs/encoding'
 import { useTheme } from '@/theme/ThemeProvider'
-import { queryActiveValidators, queryStakingPool } from '@/rpc/abci'
+import {
+  queryActiveValidators,
+  queryStakingPool,
+  querySlashingParams,
+  querySigningInfo,
+} from '@/rpc/abci'
 import { useClientStore } from '@/store/clientStore'
-import { convertRateToPercent, convertVotingPower } from '@/utils/helper'
+import {
+  convertRateToPercent,
+  convertVotingPower,
+  pubkeyToValconsAddress,
+} from '@/utils/helper'
 import ValidatorIcon from '@/components/ValidatorIcon'
 import CopyText from '@/components/ui/CopyText'
 
@@ -27,10 +33,22 @@ type ValidatorDetail = {
   status: number
   tokens: string
   commission: string
+  operatorAddress: string
   minSelfDelegation: string
   delegatorShares: string
   unbondingHeight: string
-  pubkey: string
+  pubkey: string | null
+  uptime: string | null
+}
+
+const formatUptime = (
+  missedBlocksCounter: bigint,
+  signedBlocksWindow: bigint
+): string | null => {
+  if (signedBlocksWindow <= 0n) return null
+  const percent =
+    (1 - Number(missedBlocksCounter) / Number(signedBlocksWindow)) * 100
+  return `${percent.toFixed(2)}%`
 }
 
 const ValidatorDetail: React.FC = () => {
@@ -60,50 +78,62 @@ const ValidatorDetail: React.FC = () => {
         const pool = poolResponse.pool?.bondedTokens || '0'
         setPoolTotal(pool)
 
-        // Find the validator by identity (keybase identity)
+        // Find the validator by identity (keybase identity), falling back to moniker
         const foundValidator = validatorsResponse.validators.find(
           (v) => v.description?.identity === decodeURIComponent(identity)
         )
-
-        if (!foundValidator) {
-          // Try to find by moniker as fallback
-          const fallback = validatorsResponse.validators.find(
+        const resolvedValidator =
+          foundValidator ||
+          validatorsResponse.validators.find(
             (v) => v.description?.moniker === decodeURIComponent(identity)
           )
-          if (fallback) {
-            setValidator({
-              moniker: fallback.description?.moniker || 'Unknown',
-              identity: fallback.description?.identity || '',
-              website: fallback.description?.website || '',
-              details: fallback.description?.details || '',
-              status: fallback.status,
-              tokens: fallback.tokens,
-              commission: convertRateToPercent(
-                fallback.commission?.commissionRates?.rate
-              ),
-              minSelfDelegation: fallback.minSelfDelegation || '1',
-              delegatorShares: fallback.delegatorShares || '0',
-              unbondingHeight: fallback.unbondingHeight?.toString() || '0',
-              pubkey: 'N/A',
-            })
-          } else {
-            setError('Validator not found')
-          }
+
+        if (!resolvedValidator) {
+          setError('Validator not found')
         } else {
+          // Uptime relies on the slashing module's SigningInfo query, which
+          // some nodes prune or reject for jailed/unbonded validators. Fetch
+          // it independently so a failure here doesn't break the rest of the page.
+          let uptime: string | null = null
+          try {
+            const valconsAddress = pubkeyToValconsAddress(
+              resolvedValidator.consensusPubkey,
+              resolvedValidator.operatorAddress
+            )
+            if (valconsAddress) {
+              const [signingInfoResponse, slashingParamsResponse] =
+                await Promise.all([
+                  querySigningInfo(tmClient, valconsAddress),
+                  querySlashingParams(tmClient),
+                ])
+              uptime = formatUptime(
+                signingInfoResponse.valSigningInfo.missedBlocksCounter,
+                slashingParamsResponse.params?.signedBlocksWindow ?? 0n
+              )
+            }
+          } catch (uptimeErr) {
+            console.error('Failed to fetch validator uptime:', uptimeErr)
+          }
+
           setValidator({
-            moniker: foundValidator.description?.moniker || 'Unknown',
-            identity: foundValidator.description?.identity || '',
-            website: foundValidator.description?.website || '',
-            details: foundValidator.description?.details || '',
-            status: foundValidator.status,
-            tokens: foundValidator.tokens,
+            moniker: resolvedValidator.description?.moniker || 'Unknown',
+            identity: resolvedValidator.description?.identity || '',
+            website: resolvedValidator.description?.website || '',
+            details: resolvedValidator.description?.details || '',
+            status: resolvedValidator.status,
+            tokens: resolvedValidator.tokens,
             commission: convertRateToPercent(
-              foundValidator.commission?.commissionRates?.rate
+              resolvedValidator.commission?.commissionRates?.rate
             ),
-            minSelfDelegation: foundValidator.minSelfDelegation || '1',
-            delegatorShares: foundValidator.delegatorShares || '0',
-            unbondingHeight: foundValidator.unbondingHeight?.toString() || '0',
-            pubkey: 'N/A',
+            operatorAddress: resolvedValidator.operatorAddress || '',
+            minSelfDelegation: resolvedValidator.minSelfDelegation || '1',
+            delegatorShares: resolvedValidator.delegatorShares || '0',
+            unbondingHeight:
+              resolvedValidator.unbondingHeight?.toString() || '0',
+            pubkey: resolvedValidator.consensusPubkey?.value
+              ? toHex(resolvedValidator.consensusPubkey.value)
+              : null,
+            uptime,
           })
         }
       } catch (err) {
@@ -143,54 +173,34 @@ const ValidatorDetail: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-[50vh]">
-        <FiLoader className="w-8 h-8 animate-spin text-blue-500" />
+      <div className="flex min-h-[50vh] items-center justify-center">
+        <FiLoader
+          className="h-8 w-8 animate-spin"
+          style={{ color: colors.primary }}
+        />
       </div>
     )
   }
 
   if (error || !validator) {
     return (
-      <div className="space-y-6">
-        <div className="flex items-center gap-2 text-sm mb-4">
-          <Link
-            to="/"
-            className="hover:opacity-70 transition-opacity font-medium"
-            style={{ color: colors.text.secondary }}
-          >
-            Home
-          </Link>
-          <FiChevronRight
-            className="w-4 h-4"
-            style={{ color: colors.text.tertiary }}
-          />
-          <Link
-            to="/validators"
-            className="hover:opacity-70 transition-opacity font-medium"
-            style={{ color: colors.text.secondary }}
-          >
-            Validators
-          </Link>
-          <FiChevronRight
-            className="w-4 h-4"
-            style={{ color: colors.text.tertiary }}
-          />
-          <span style={{ color: colors.text.primary }}>Not Found</span>
-        </div>
-
-        <div
-          className="rounded-xl p-12 text-center"
-          style={{
-            backgroundColor: colors.surface,
-            border: `1px solid ${colors.border.primary}`,
-          }}
+      <div className="flex flex-col gap-[18px]">
+        <Link
+          to="/validators"
+          className="inline-flex items-center gap-1.5 text-sm font-medium"
+          style={{ color: colors.text.secondary }}
         >
+          <FiChevronLeft className="h-4 w-4" />
+          Back to validators
+        </Link>
+
+        <div className="panel-surface rounded-[14px] p-12 text-center">
           <FiXCircle
-            className="w-16 h-16 mx-auto mb-4"
+            className="mx-auto mb-4 h-16 w-16"
             style={{ color: colors.status.error }}
           />
           <h2
-            className="text-xl font-semibold mb-2"
+            className="mb-2 text-xl font-semibold"
             style={{ color: colors.text.primary }}
           >
             {error || 'Validator Not Found'}
@@ -201,7 +211,7 @@ const ValidatorDetail: React.FC = () => {
           </p>
           <Link
             to="/validators"
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-lg"
+            className="inline-flex items-center gap-2 rounded-lg px-4 py-2"
             style={{
               backgroundColor: colors.primary,
               color: colors.background,
@@ -221,387 +231,335 @@ const ValidatorDetail: React.FC = () => {
       : '0'
 
   return (
-    <div className="space-y-6">
-      {/* Breadcrumb */}
-      <div className="flex items-center gap-2 text-sm mb-4">
-        <Link
-          to="/"
-          className="hover:opacity-70 transition-opacity font-medium"
-          style={{ color: colors.text.secondary }}
-        >
-          Home
-        </Link>
-        <FiChevronRight
-          className="w-4 h-4"
-          style={{ color: colors.text.tertiary }}
-        />
-        <Link
-          to="/validators"
-          className="hover:opacity-70 transition-opacity font-medium"
-          style={{ color: colors.text.secondary }}
-        >
-          Validators
-        </Link>
-        <FiChevronRight
-          className="w-4 h-4"
-          style={{ color: colors.text.tertiary }}
-        />
-        <span style={{ color: colors.text.primary }}>{validator.moniker}</span>
-      </div>
-
-      {/* Header Card */}
-      <div
-        className="rounded-xl p-6"
-        style={{
-          backgroundColor: colors.surface,
-          border: `1px solid ${colors.border.primary}`,
-          boxShadow: colors.shadow.sm,
-        }}
+    <div className="flex flex-col gap-[18px]">
+      <Link
+        to="/validators"
+        className="inline-flex items-center gap-1.5 text-sm font-medium"
+        style={{ color: colors.text.secondary }}
       >
-        <div className="flex items-start gap-4">
+        <FiChevronLeft className="h-4 w-4" />
+        Back to validators
+      </Link>
+
+      {/* Header */}
+      <div className="panel-surface flex flex-col gap-[14px] rounded-[14px] px-6 py-[22px]">
+        <div className="flex flex-wrap items-start gap-[15px]">
           <ValidatorIcon
             moniker={validator.moniker}
             identity={validator.identity}
             size="lg"
           />
-          <div className="flex-1">
-            <div className="flex items-center gap-3 mb-2">
-              <h1
-                className="text-2xl font-bold"
+          <div className="flex min-w-0 flex-1 flex-col gap-[5px]">
+            <div className="flex flex-wrap items-center gap-[11px]">
+              <span
+                className="text-[21px] font-semibold tracking-[-0.01em]"
                 style={{ color: colors.text.primary }}
               >
                 {validator.moniker}
-              </h1>
+              </span>
               <span
-                className="px-3 py-1 rounded-full text-xs font-medium flex items-center gap-1"
+                className="reference-pill"
                 style={{
                   backgroundColor: isActive
-                    ? colors.status.success + '20'
-                    : colors.status.error + '20',
+                    ? `${colors.status.success}20`
+                    : `${colors.status.error}20`,
                   color: isActive ? colors.status.success : colors.status.error,
                 }}
               >
                 {isActive ? (
                   <>
-                    <FiCheckCircle className="w-3 h-3" />
+                    <FiCheckCircle className="mr-1 h-3 w-3" />
                     Active
                   </>
                 ) : (
                   <>
-                    <FiXCircle className="w-3 h-3" />
+                    <FiXCircle className="mr-1 h-3 w-3" />
                     Inactive
                   </>
                 )}
               </span>
             </div>
             {validator.identity && (
-              <p className="text-sm" style={{ color: colors.text.secondary }}>
-                Identity: {validator.identity}
-              </p>
+              <div className="flex flex-wrap items-center gap-2">
+                <CopyText
+                  text={validator.identity}
+                  className="font-mono text-[12px]"
+                  style={{ color: colors.text.tertiary }}
+                />
+              </div>
             )}
             {validator.website && (
               <a
                 href={validator.website}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-sm hover:underline"
+                className="text-[13px] hover:underline"
                 style={{ color: colors.primary }}
               >
                 {validator.website}
               </a>
             )}
-            {validator.details && (
-              <p
-                className="mt-2 text-sm"
-                style={{ color: colors.text.secondary }}
-              >
-                {validator.details}
-              </p>
-            )}
           </div>
         </div>
+        {validator.details && (
+          <p
+            className="text-[13.5px] leading-[1.55]"
+            style={{ color: colors.text.secondary }}
+          >
+            {validator.details}
+          </p>
+        )}
       </div>
 
-      {/* Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        {/* Voting Power */}
-        <div
-          className="rounded-xl p-5"
-          style={{
-            backgroundColor: colors.surface,
-            border: `1px solid ${colors.border.primary}`,
-            boxShadow: colors.shadow.sm,
-          }}
-        >
-          <div className="flex items-center gap-2 mb-2">
-            <FiTrendingUp
-              className="w-5 h-5"
-              style={{ color: colors.status.info }}
-            />
-            <span
-              className="text-sm font-medium"
-              style={{ color: colors.text.secondary }}
-            >
-              Voting Power
-            </span>
-          </div>
-          <p
-            className="text-2xl font-bold"
+      {/* Metric Cards */}
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
+        <div className="panel-surface flex flex-col gap-[7px] rounded-[14px] px-[19px] py-[17px]">
+          <span
+            className="text-[11px] font-semibold uppercase tracking-[0.06em]"
+            style={{ color: colors.text.tertiary }}
+          >
+            Voting Power
+          </span>
+          <span
+            className="font-mono text-[20px] font-semibold"
             style={{ color: colors.text.primary }}
           >
             {convertVotingPower(validator.tokens)}
-          </p>
-          <p className="text-sm" style={{ color: colors.text.tertiary }}>
+          </span>
+          <span
+            className="text-[11.5px]"
+            style={{ color: colors.text.secondary }}
+          >
             {votingPowerPercent}% of bonded
-          </p>
+          </span>
         </div>
 
-        {/* Commission */}
-        <div
-          className="rounded-xl p-5"
-          style={{
-            backgroundColor: colors.surface,
-            border: `1px solid ${colors.border.primary}`,
-            boxShadow: colors.shadow.sm,
-          }}
-        >
-          <div className="flex items-center gap-2 mb-2">
-            <FiPercent
-              className="w-5 h-5"
-              style={{ color: colors.status.warning }}
-            />
-            <span
-              className="text-sm font-medium"
-              style={{ color: colors.text.secondary }}
-            >
-              Commission
-            </span>
-          </div>
-          <p
-            className="text-2xl font-bold"
+        <div className="panel-surface flex flex-col gap-[7px] rounded-[14px] px-[19px] py-[17px]">
+          <span
+            className="text-[11px] font-semibold uppercase tracking-[0.06em]"
+            style={{ color: colors.text.tertiary }}
+          >
+            Commission
+          </span>
+          <span
+            className="font-mono text-[20px] font-semibold"
             style={{ color: colors.text.primary }}
           >
             {validator.commission}
-          </p>
-          <p className="text-sm" style={{ color: colors.text.tertiary }}>
+          </span>
+          <span
+            className="text-[11.5px]"
+            style={{ color: colors.text.secondary }}
+          >
             Commission rate
-          </p>
+          </span>
         </div>
 
-        {/* Delegator Shares */}
-        <div
-          className="rounded-xl p-5"
-          style={{
-            backgroundColor: colors.surface,
-            border: `1px solid ${colors.border.primary}`,
-            boxShadow: colors.shadow.sm,
-          }}
-        >
-          <div className="flex items-center gap-2 mb-2">
-            <FiUser
-              className="w-5 h-5"
-              style={{ color: colors.status.success }}
-            />
+        <div className="panel-surface flex flex-col gap-[7px] rounded-[14px] px-[19px] py-[17px]">
+          <span
+            className="text-[11px] font-semibold uppercase tracking-[0.06em]"
+            style={{ color: colors.text.tertiary }}
+          >
+            Uptime
+          </span>
+          <span
+            className="font-mono text-[20px] font-semibold"
+            style={{ color: colors.text.primary }}
+          >
+            {validator.uptime ?? 'N/A'}
+          </span>
+          <span
+            className="text-[11.5px]"
+            style={{ color: colors.text.secondary }}
+          >
+            Signed blocks
+          </span>
+        </div>
+
+        <div className="panel-surface flex flex-col gap-[7px] rounded-[14px] px-[19px] py-[17px]">
+          <span
+            className="text-[11px] font-semibold uppercase tracking-[0.06em]"
+            style={{ color: colors.text.tertiary }}
+          >
+            Status
+          </span>
+          <span
+            className="text-[20px] font-semibold"
+            style={{ color: colors.text.primary }}
+          >
+            {isActive ? 'Bonded' : 'Unbonded'}
+          </span>
+          <span
+            className="text-[11.5px]"
+            style={{ color: colors.text.secondary }}
+          >
+            Validator status
+          </span>
+        </div>
+      </div>
+
+      {/* Info Cards */}
+      <div className="grid grid-cols-1 items-start gap-4 lg:grid-cols-2">
+        <div className="reference-table-shell rounded-[14px]">
+          <div
+            className="border-b px-5 py-[15px] text-[14px] font-semibold"
+            style={{
+              borderColor: colors.border.primary,
+              color: colors.text.primary,
+            }}
+          >
+            Validator Information
+          </div>
+          <div
+            className="flex items-center justify-between border-b px-5 py-3"
+            style={{ borderColor: colors.border.primary }}
+          >
             <span
-              className="text-sm font-medium"
+              className="text-[12.5px]"
               style={{ color: colors.text.secondary }}
             >
               Delegator Shares
             </span>
-          </div>
-          <p
-            className="text-2xl font-bold"
-            style={{ color: colors.text.primary }}
-          >
-            {convertVotingPower(validator.delegatorShares)}
-          </p>
-          <p className="text-sm" style={{ color: colors.text.tertiary }}>
-            Total delegated
-          </p>
-        </div>
-
-        {/* Uptime / Status */}
-        <div
-          className="rounded-xl p-5"
-          style={{
-            backgroundColor: colors.surface,
-            border: `1px solid ${colors.border.primary}`,
-            boxShadow: colors.shadow.sm,
-          }}
-        >
-          <div className="flex items-center gap-2 mb-2">
-            <FiActivity className="w-5 h-5" style={{ color: colors.primary }} />
             <span
-              className="text-sm font-medium"
-              style={{ color: colors.text.secondary }}
+              className="font-mono text-[12.5px]"
+              style={{ color: colors.text.primary }}
             >
-              Status
+              {convertVotingPower(validator.delegatorShares)}
             </span>
           </div>
-          <p
-            className="text-2xl font-bold"
-            style={{ color: colors.text.primary }}
+          <div
+            className="flex items-center justify-between border-b px-5 py-3"
+            style={{ borderColor: colors.border.primary }}
           >
-            {isActive ? 'Bonded' : 'Unbonded'}
-          </p>
-          <p className="text-sm" style={{ color: colors.text.tertiary }}>
-            Validator status
-          </p>
-        </div>
-      </div>
-
-      {/* Additional Details */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Validator Info */}
-        <div
-          className="rounded-xl p-6"
-          style={{
-            backgroundColor: colors.surface,
-            border: `1px solid ${colors.border.primary}`,
-            boxShadow: colors.shadow.sm,
-          }}
-        >
-          <h3
-            className="text-lg font-semibold mb-4"
-            style={{ color: colors.text.primary }}
-          >
-            Validator Information
-          </h3>
-          <div className="space-y-4">
-            <div className="flex justify-between items-center">
-              <span
-                className="text-sm"
-                style={{ color: colors.text.secondary }}
-              >
-                Min Self Delegation
-              </span>
-              <span
-                className="font-medium"
-                style={{ color: colors.text.primary }}
-              >
-                {validator.minSelfDelegation}
-              </span>
-            </div>
-            <div className="flex justify-between items-center">
-              <span
-                className="text-sm"
-                style={{ color: colors.text.secondary }}
-              >
-                Unbonding Height
-              </span>
-              <span
-                className="font-medium"
-                style={{ color: colors.text.primary }}
-              >
-                {validator.unbondingHeight}
-              </span>
-            </div>
-            <div className="flex justify-between items-center">
-              <span
-                className="text-sm"
-                style={{ color: colors.text.secondary }}
-              >
-                PubKey Type
-              </span>
-              <span
-                className="font-medium"
-                style={{ color: colors.text.primary }}
-              >
-                {validator.pubkey !== 'N/A' ? (
-                  <CopyText
-                    text={validator.pubkey}
-                    displayText={validator.pubkey.substring(0, 20) + '...'}
-                  />
-                ) : (
-                  'N/A'
-                )}
-              </span>
-            </div>
+            <span
+              className="text-[12.5px]"
+              style={{ color: colors.text.secondary }}
+            >
+              Min Self Delegation
+            </span>
+            <span
+              className="font-mono text-[12.5px]"
+              style={{ color: colors.text.primary }}
+            >
+              {validator.minSelfDelegation}
+            </span>
           </div>
-        </div>
-
-        {/* Security Info */}
-        <div
-          className="rounded-xl p-6"
-          style={{
-            backgroundColor: colors.surface,
-            border: `1px solid ${colors.border.primary}`,
-            boxShadow: colors.shadow.sm,
-          }}
-        >
-          <h3
-            className="text-lg font-semibold mb-4"
-            style={{ color: colors.text.primary }}
+          <div
+            className="flex items-center justify-between border-b px-5 py-3"
+            style={{ borderColor: colors.border.primary }}
           >
-            Security
-          </h3>
-          <div className="space-y-4">
-            <div className="flex items-center gap-2">
-              <FiShield
-                className="w-4 h-4"
-                style={{ color: colors.status.success }}
+            <span
+              className="text-[12.5px]"
+              style={{ color: colors.text.secondary }}
+            >
+              Unbonding Height
+            </span>
+            <span
+              className="font-mono text-[12.5px]"
+              style={{ color: colors.text.primary }}
+            >
+              {validator.unbondingHeight}
+            </span>
+          </div>
+          <div className="flex items-center justify-between gap-4 px-5 py-3">
+            <span
+              className="shrink-0 text-[12.5px]"
+              style={{ color: colors.text.secondary }}
+            >
+              PubKey
+            </span>
+            {validator.pubkey ? (
+              <CopyText
+                text={validator.pubkey}
+                displayText={validator.pubkey.substring(0, 20) + '...'}
+                className="font-mono text-[12px] text-right"
+                style={{ color: colors.text.primary }}
               />
+            ) : (
               <span
-                className="text-sm"
-                style={{ color: colors.text.secondary }}
+                className="font-mono text-[12px]"
+                style={{ color: colors.text.primary }}
               >
-                Validator signed last block
+                N/A
               </span>
-            </div>
-            {validator.identity && (
-              <div className="flex items-start gap-2">
-                <FiKey
-                  className="w-4 h-4 mt-0.5"
-                  style={{ color: colors.status.info }}
-                />
-                <div>
-                  <span
-                    className="text-sm"
-                    style={{ color: colors.text.secondary }}
-                  >
-                    Keybase Identity
-                  </span>
-                  {keybaseUsername ? (
-                    <a
-                      href={`https://keybase.io/${encodeURIComponent(keybaseUsername)}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="block text-sm hover:underline"
-                      style={{ color: colors.primary }}
-                    >
-                      {keybaseUsername}
-                    </a>
-                  ) : (
-                    <span
-                      className="block text-sm"
-                      style={{ color: colors.text.secondary }}
-                    >
-                      {validator.identity}
-                    </span>
-                  )}
-                </div>
-              </div>
             )}
           </div>
         </div>
+
+        <div className="reference-table-shell rounded-[14px]">
+          <div
+            className="border-b px-5 py-[15px] text-[14px] font-semibold"
+            style={{
+              borderColor: colors.border.primary,
+              color: colors.text.primary,
+            }}
+          >
+            Security
+          </div>
+          <div
+            className="flex items-center gap-[10px] border-b px-5 py-[13px]"
+            style={{ borderColor: colors.border.primary }}
+          >
+            <FiShield
+              className="h-4 w-4"
+              style={{ color: colors.status.success }}
+            />
+            <span
+              className="text-[12.5px]"
+              style={{ color: colors.text.secondary }}
+            >
+              Validator signed the last block
+            </span>
+          </div>
+          {validator.identity && (
+            <div className="flex items-start gap-[10px] px-5 py-[13px]">
+              <FiKey
+                className="mt-0.5 h-4 w-4"
+                style={{ color: colors.status.info }}
+              />
+              <div className="flex flex-col gap-[2px]">
+                <span
+                  className="text-[12.5px]"
+                  style={{ color: colors.text.secondary }}
+                >
+                  Keybase Identity
+                </span>
+                {keybaseUsername ? (
+                  <a
+                    href={`https://keybase.io/${encodeURIComponent(keybaseUsername)}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="font-mono text-[12.5px] hover:underline"
+                    style={{ color: colors.primary }}
+                  >
+                    {keybaseUsername}
+                  </a>
+                ) : (
+                  <span
+                    className="font-mono text-[12.5px]"
+                    style={{ color: colors.text.primary }}
+                  >
+                    {validator.identity}
+                  </span>
+                )}
+              </div>
+            </div>
+          )}
+        </div>
       </div>
 
-      {/* Delegator Actions Note */}
-      <div
-        className="rounded-xl p-6"
-        style={{
-          backgroundColor: colors.surface,
-          border: `1px solid ${colors.border.primary}`,
-          boxShadow: colors.shadow.sm,
-        }}
-      >
-        <h3
-          className="text-lg font-semibold mb-2"
+      {/* Delegator Info */}
+      <div className="panel-surface flex flex-col gap-[6px] rounded-[14px] px-[22px] py-[18px]">
+        <span
+          className="text-[14px] font-semibold"
           style={{ color: colors.text.primary }}
         >
           Delegator Info
-        </h3>
-        <p className="text-sm" style={{ color: colors.text.secondary }}>
+        </span>
+        <p
+          className="text-[13px] leading-[1.55]"
+          style={{ color: colors.text.secondary }}
+        >
           To delegate or undelegate to this validator, please use a wallet
           application like Keplr Wallet or Cosmostation. Dexplorer is a
           read-only block explorer.

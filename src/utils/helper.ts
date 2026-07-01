@@ -1,9 +1,11 @@
 import dayjs from 'dayjs'
 import relativeTime from 'dayjs/plugin/relativeTime'
 import duration from 'dayjs/plugin/duration'
-import { toHex } from '@cosmjs/encoding'
+import { toHex, toBech32, fromBech32 } from '@cosmjs/encoding'
+import { sha256 } from '@cosmjs/crypto'
 import { bech32 } from 'bech32'
 import { Coin } from 'cosmjs-types/cosmos/base/v1beta1/coin'
+import { PubKey as Ed25519PubKey } from 'cosmjs-types/cosmos/crypto/ed25519/keys'
 
 export const timeFromNow = (date: string): string => {
   dayjs.extend(relativeTime)
@@ -92,6 +94,26 @@ export const isBech32Address = (address: string): boolean => {
 
 export const convertVotingPower = (tokens: string): string => {
   return Math.round(Number(tokens) / 10 ** 6).toLocaleString(undefined)
+}
+
+// Derive a validator's bech32 "valcons" consensus address from its
+// consensusPubkey (Cosmos SDK: sha256(rawEd25519Key)[0:20], bech32-encoded
+// with the chain's valcons prefix).
+export const pubkeyToValconsAddress = (
+  consensusPubkey: { typeUrl: string; value: Uint8Array } | undefined,
+  operatorAddress: string
+): string | null => {
+  if (
+    !consensusPubkey ||
+    consensusPubkey.typeUrl !== '/cosmos.crypto.ed25519.PubKey'
+  ) {
+    return null
+  }
+  const { key } = Ed25519PubKey.decode(consensusPubkey.value)
+  const addressBytes = sha256(key).slice(0, 20)
+  const { prefix } = fromBech32(operatorAddress)
+  const valconsPrefix = prefix.replace(/valoper$/, 'valcons')
+  return toBech32(valconsPrefix, addressBytes)
 }
 
 export const convertRateToPercent = (rate: string | undefined): string => {
@@ -211,7 +233,10 @@ export const safeStringify = (obj: unknown, space?: number): string => {
 }
 
 // Convert array of objects to CSV string
-export const convertToCSV = <T>(data: T[], headers?: Record<keyof T, string>): string => {
+export const convertToCSV = <T>(
+  data: T[],
+  headers?: Record<keyof T, string>
+): string => {
   if (!data || data.length === 0) return ''
 
   // Get column headers from first object or use provided headers
@@ -222,14 +247,19 @@ export const convertToCSV = <T>(data: T[], headers?: Record<keyof T, string>): s
 
   // Create data rows
   const rows = data.map((item) => {
-    return keys.map((key) => {
-      const value = item[key as keyof T]
-      // Handle values that need quoting
-      if (typeof value === 'string' && (value.includes(',') || value.includes('"'))) {
-        return `"${value.replace(/"/g, '""')}"`
-      }
-      return String(value ?? '')
-    }).join(',')
+    return keys
+      .map((key) => {
+        const value = item[key as keyof T]
+        // Handle values that need quoting
+        if (
+          typeof value === 'string' &&
+          (value.includes(',') || value.includes('"'))
+        ) {
+          return `"${value.replace(/"/g, '""')}"`
+        }
+        return String(value ?? '')
+      })
+      .join(',')
   })
 
   return [headerRow, ...rows].join('\n')
