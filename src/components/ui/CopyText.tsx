@@ -8,6 +8,11 @@ interface CopyTextProps {
   displayText?: string
   className?: string
   style?: React.CSSProperties
+  /**
+   * Set to -1 when nesting CopyText inside another interactive element (e.g.
+   * a Link/button) so it doesn't create a second, redundant tab stop.
+   */
+  tabIndex?: number
 }
 
 const CopyText: React.FC<CopyTextProps> = ({
@@ -15,12 +20,14 @@ const CopyText: React.FC<CopyTextProps> = ({
   displayText,
   className,
   style,
+  tabIndex = 0,
 }) => {
   const { colors } = useTheme()
   const [copied, setCopied] = useState(false)
 
   const handleCopy = (e: React.MouseEvent | React.KeyboardEvent) => {
     e.stopPropagation()
+    e.preventDefault()
     navigator.clipboard.writeText(text)
     setCopied(true)
     toast.success('Copied to clipboard')
@@ -46,7 +53,7 @@ const CopyText: React.FC<CopyTextProps> = ({
       onClick={handleCopy}
       onKeyDown={handleKeyDown}
       role="button"
-      tabIndex={0}
+      tabIndex={tabIndex}
       title="Click to copy"
       aria-label={`Copy ${displayText || text}`}
     >

@@ -143,6 +143,7 @@ const Transactions: React.FC = () => {
                         displayText={trimHash(tx.hash, 14)}
                         className="text-sm"
                         style={{ color: colors.text.secondary }}
+                        tabIndex={-1}
                       />
                     </Link>
                   </td>
