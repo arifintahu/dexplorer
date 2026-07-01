@@ -105,7 +105,27 @@ export async function getBlock(
   height: number
 ): Promise<Block> {
   const client = await getClient(tmClient)
-  return client.getBlock(height)
+  const [block, rawBlock] = await Promise.all([
+    client.getBlock(height),
+    tmClient.block(height),
+  ])
+
+  // StargateClient's typed BlockHeader omits appHash/proposerAddress even
+  // though the raw Tendermint response always carries them — merge the real
+  // bytes in so consumers reading block.header.appHash/proposerAddress get
+  // actual data instead of undefined. The extra fields aren't part of the
+  // BlockHeader type, so this is cast back to Block; existing consumers
+  // already read them via their own `as unknown as {...}` cast.
+  const header: Block['header'] & {
+    appHash: Uint8Array
+    proposerAddress: Uint8Array
+  } = {
+    ...block.header,
+    appHash: rawBlock.block.header.appHash,
+    proposerAddress: rawBlock.block.header.proposerAddress,
+  }
+
+  return { ...block, header } as Block
 }
 
 export async function getTx(

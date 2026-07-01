@@ -28,6 +28,8 @@ import {
 import {
   QueryParamsRequest as QuerySlashingParamsRequest,
   QueryParamsResponse as QuerySlashingParamsResponse,
+  QuerySigningInfoRequest,
+  QuerySigningInfoResponse,
 } from 'cosmjs-types/cosmos/slashing/v1beta1/query'
 
 // Cache QueryClient instances per Tendermint37Client to avoid creating a new one for every query
@@ -193,4 +195,17 @@ export async function querySlashingParams(
     req
   )
   return QuerySlashingParamsResponse.decode(value)
+}
+
+export async function querySigningInfo(
+  tmClient: Tendermint37Client,
+  consAddress: string
+): Promise<QuerySigningInfoResponse> {
+  const queryClient = getQueryClient(tmClient)
+  const req = QuerySigningInfoRequest.encode({ consAddress }).finish()
+  const { value } = await queryClient.queryAbci(
+    '/cosmos.slashing.v1beta1.Query/SigningInfo',
+    req
+  )
+  return QuerySigningInfoResponse.decode(value)
 }

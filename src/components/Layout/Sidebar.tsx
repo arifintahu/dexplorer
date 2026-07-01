@@ -3,38 +3,42 @@ import { Link, useLocation } from 'react-router-dom'
 import { useTheme } from '@/theme/ThemeProvider'
 import { cn } from '@/lib/utils'
 import {
-  FiHome,
-  FiBox,
-  FiUsers,
-  FiFileText,
   FiActivity,
+  FiBox,
+  FiFileText,
+  FiGithub,
+  FiHome,
+  FiLink,
   FiSettings,
   FiUser,
-  FiWifi,
-  FiWifiOff,
-  FiGithub,
-  FiLink,
+  FiUsers,
 } from 'react-icons/fi'
 import { useSelector } from 'react-redux'
 import { RootState } from '@/store'
+import { selectBlocks } from '@/store/streamSlice'
+import { config } from '@/config'
 
-const navigation = [
-  { name: 'Home', href: '/', icon: FiHome },
-  { name: 'Blocks', href: '/blocks', icon: FiBox },
-  { name: 'Transactions', href: '/txs', icon: FiActivity },
-  { name: 'IBC Transfers', href: '/ibc-transfers', icon: FiLink },
-  { name: 'Validators', href: '/validators', icon: FiUsers },
-  { name: 'Proposals', href: '/proposals', icon: FiFileText },
-  { name: 'Accounts', href: '/accounts', icon: FiUser },
-  { name: 'Parameters', href: '/parameters', icon: FiSettings },
-]
-
-const externalLinks = [
+const navigationGroups = [
   {
-    name: 'Github',
-    href: 'https://github.com/arifintahu/dexplorer',
-    icon: FiGithub,
-    isExternal: true,
+    title: 'Network',
+    items: [{ name: 'Dashboard', href: '/', icon: FiHome }],
+  },
+  {
+    title: 'Chain Data',
+    items: [
+      { name: 'Blocks', href: '/blocks', icon: FiBox },
+      { name: 'Transactions', href: '/txs', icon: FiActivity },
+      { name: 'IBC Transfers', href: '/ibc-transfers', icon: FiLink },
+      { name: 'Validators', href: '/validators', icon: FiUsers },
+    ],
+  },
+  {
+    title: 'Governance & Accounts',
+    items: [
+      { name: 'Proposals', href: '/proposals', icon: FiFileText },
+      { name: 'Accounts', href: '/accounts', icon: FiUser },
+      { name: 'Parameters', href: '/parameters', icon: FiSettings },
+    ],
   },
 ]
 
@@ -43,208 +47,212 @@ interface SidebarProps {
   onMobileClose?: () => void
 }
 
+const getConnectionLabel = (address: string) => {
+  if (config.chainName) {
+    return config.chainName
+  }
+
+  if (!address) {
+    return 'Not connected'
+  }
+
+  try {
+    return new URL(address).hostname
+  } catch {
+    return address
+  }
+}
+
 const Sidebar: React.FC<SidebarProps> = ({
   isMobileOpen = false,
   onMobileClose,
 }) => {
   const { colors } = useTheme()
   const location = useLocation()
-  const { connectState } = useSelector((state: RootState) => state.connect)
+  const { connectState, rpcAddress } = useSelector(
+    (state: RootState) => state.connect
+  )
+  const blocks = useSelector(selectBlocks)
+
+  const latestHeight = blocks[0]?.header.height
+    ? Number(blocks[0].header.height).toLocaleString()
+    : '--'
+  const chainLabel = getConnectionLabel(rpcAddress)
+
   const isConnected = connectState
 
   const handleMobileLinkClick = () => {
-    if (onMobileClose) {
-      onMobileClose()
-    }
+    onMobileClose?.()
   }
 
   const SidebarContent = () => (
     <div
-      className="flex grow flex-col gap-y-6 overflow-y-auto border-r px-6 py-6 transition-colors duration-200"
+      className="flex h-full flex-col overflow-y-auto border-r px-3 py-4"
       style={{
         backgroundColor: colors.surface,
         borderColor: colors.border.primary,
         boxShadow: colors.shadow.sm,
       }}
     >
-      {/* Logo with Orbitron heading font */}
-      <div className="flex h-16 shrink-0 items-center">
+      <div className="px-3 pb-5 pt-1">
         <div className="flex items-center gap-3">
-          <div
-            className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0"
-            style={{
-              background: `linear-gradient(135deg, ${colors.primary}, ${colors.accent})`,
-              boxShadow: `0 4px 12px ${colors.primary}40`,
-            }}
-          >
-            <span className="text-white font-bold text-base font-heading">
-              D
-            </span>
+          <img
+            src="/brand-mark.svg"
+            alt="Dexplorer logo"
+            className="h-10 w-10 shrink-0"
+            style={{ filter: `drop-shadow(${colors.shadow.glow})` }}
+          />
+          <div className="min-w-0">
+            <div
+              className="truncate font-heading text-lg font-semibold"
+              style={{ color: colors.text.primary }}
+            >
+              Dexplorer
+            </div>
+            <div
+              className="text-xs font-medium"
+              style={{ color: colors.text.tertiary }}
+            >
+              Cosmos Explorer
+            </div>
           </div>
-          <h1
-            className="text-base font-bold tracking-wide font-heading"
-            style={{
-              background: `linear-gradient(135deg, ${colors.primary} 0%, ${colors.accent} 100%)`,
-              WebkitBackgroundClip: 'text',
-              WebkitTextFillColor: 'transparent',
-              backgroundClip: 'text',
-            }}
-          >
-            Dexplorer
-          </h1>
         </div>
       </div>
 
-      {/* Connection Status with modern styling */}
-      <div
-        className="flex items-center gap-3 rounded-lg px-4 py-3 transition-all duration-200"
-        style={{
-          backgroundColor: isConnected
-            ? colors.status.success + '10'
-            : colors.status.error + '10',
-          border: `1px solid ${
-            isConnected
-              ? colors.status.success + '30'
-              : colors.status.error + '30'
-          }`,
-        }}
-      >
-        {isConnected ? (
-          <>
+      <nav className="flex flex-1 flex-col gap-4">
+        {navigationGroups.map((group) => (
+          <div key={group.title}>
             <div
-              className="w-2 h-2 rounded-full animate-pulse"
-              style={{ backgroundColor: colors.status.success }}
-            />
-            <FiWifi
-              className="h-4 w-4"
-              style={{ color: colors.status.success }}
-            />
-            <span
-              className="text-sm font-medium"
-              style={{ color: colors.status.success }}
-            >
-              Connected
-            </span>
-          </>
-        ) : (
-          <>
-            <div
-              className="w-2 h-2 rounded-full"
-              style={{ backgroundColor: colors.status.error }}
-            />
-            <FiWifiOff
-              className="h-4 w-4"
-              style={{ color: colors.status.error }}
-            />
-            <span
-              className="text-sm font-medium"
-              style={{ color: colors.status.error }}
-            >
-              Disconnected
-            </span>
-          </>
-        )}
-      </div>
-
-      {/* Navigation */}
-      <nav className="flex flex-1 flex-col">
-        <ul role="list" className="flex flex-1 flex-col gap-y-7">
-          <li>
-            <ul role="list" className="-mx-2 space-y-1">
-              {navigation.map((item) => {
-                const isActive = location.pathname === item.href
-                return (
-                  <li key={item.name}>
-                    <Link
-                      to={item.href}
-                      onClick={handleMobileLinkClick}
-                      className={cn(
-                        'group flex gap-x-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200 relative font-ui',
-                        !isActive &&
-                          'hover:bg-[var(--color-background-secondary)] hover:text-[var(--color-text-primary)] hover:translate-x-1'
-                      )}
-                      style={{
-                        backgroundColor: isActive
-                          ? `${colors.primary}18`
-                          : undefined,
-                        color: isActive
-                          ? colors.primary
-                          : colors.text.secondary,
-                        border: isActive
-                          ? `1px solid ${colors.primary}30`
-                          : '1px solid transparent',
-                      }}
-                    >
-                      {isActive && (
-                        <div
-                          className="absolute left-0 top-1 bottom-1 w-0.5 rounded-r-full"
-                          style={{
-                            background: `linear-gradient(180deg, ${colors.primary}, ${colors.accent})`,
-                          }}
-                        />
-                      )}
-                      <item.icon className="h-5 w-5 shrink-0" />
-                      {item.name}
-                    </Link>
-                  </li>
-                )
-              })}
-            </ul>
-          </li>
-          <li>
-            <div
-              className="text-xs font-semibold leading-6 mb-2 px-3"
+              className="px-3 pb-2 text-[11px] font-semibold uppercase tracking-[0.16em]"
               style={{ color: colors.text.tertiary }}
             >
-              Links
+              {group.title}
             </div>
-            <ul role="list" className="-mx-2 space-y-1">
-              {externalLinks.map((item) => (
-                <li key={item.name}>
-                  <a
-                    href={item.href}
-                    target="_blank"
-                    rel="noopener noreferrer"
+            <div className="space-y-1">
+              {group.items.map((item) => {
+                const isActive =
+                  item.href === '/'
+                    ? location.pathname === '/'
+                    : location.pathname.startsWith(item.href)
+
+                return (
+                  <Link
+                    key={item.name}
+                    to={item.href}
                     onClick={handleMobileLinkClick}
-                    className="group flex gap-x-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200 hover:translate-x-1 hover:bg-[var(--color-background-secondary)]"
-                    style={{ color: colors.text.primary }}
+                    className={cn(
+                      'group flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-medium transition-all duration-200',
+                      !isActive && 'hover:translate-x-0.5'
+                    )}
+                    style={{
+                      backgroundColor: isActive
+                        ? `${colors.primary}18`
+                        : 'transparent',
+                      border: `1px solid ${
+                        isActive ? `${colors.primary}4d` : 'transparent'
+                      }`,
+                      color: isActive ? colors.primary : colors.text.secondary,
+                    }}
                   >
-                    <item.icon className="h-5 w-5 shrink-0" />
-                    {item.name}
-                  </a>
-                </li>
-              ))}
-            </ul>
-          </li>
-        </ul>
+                    <item.icon className="h-4 w-4 shrink-0" />
+                    <span>{item.name}</span>
+                  </Link>
+                )
+              })}
+            </div>
+          </div>
+        ))}
+
+        <div className="mt-auto space-y-3 pt-4">
+          <a
+            href="https://github.com/arifintahu/dexplorer"
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={handleMobileLinkClick}
+            className="flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-medium transition-colors"
+            style={{
+              color: colors.text.secondary,
+              border: `1px solid transparent`,
+            }}
+          >
+            <FiGithub className="h-4 w-4 shrink-0" />
+            <span>GitHub</span>
+          </a>
+
+          <div
+            className="rounded-2xl border px-4 py-4"
+            style={{
+              backgroundColor: colors.backgroundSecondary,
+              borderColor: colors.border.primary,
+            }}
+          >
+            <div className="mb-3 flex items-center gap-2">
+              <span
+                className={cn(
+                  'h-2.5 w-2.5 rounded-full',
+                  isConnected && 'animate-status-pulse'
+                )}
+                style={{
+                  backgroundColor: isConnected
+                    ? colors.status.success
+                    : colors.status.error,
+                }}
+              />
+              <span
+                className="truncate text-sm font-semibold"
+                style={{ color: colors.text.primary }}
+              >
+                {chainLabel}
+              </span>
+            </div>
+
+            <div className="space-y-2 text-xs">
+              <div className="flex items-center justify-between gap-3">
+                <span style={{ color: colors.text.tertiary }}>Height</span>
+                <span
+                  className="font-mono"
+                  style={{ color: colors.text.secondary }}
+                >
+                  {latestHeight}
+                </span>
+              </div>
+              <div className="flex items-center justify-between gap-3">
+                <span style={{ color: colors.text.tertiary }}>Peers</span>
+                <span
+                  className="font-mono"
+                  style={{ color: colors.text.secondary }}
+                >
+                  {isConnected ? 'Live' : '--'}
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
       </nav>
     </div>
   )
 
   return (
     <>
-      {/* Mobile sidebar overlay */}
       {isMobileOpen && (
-        <div className="fixed inset-0 z-40 lg:hidden" onClick={onMobileClose}>
-          <div
-            className="fixed inset-0 bg-black bg-opacity-25 transition-opacity duration-300"
-            style={{ backgroundColor: 'rgba(0, 0, 0, 0.25)' }}
-          />
-        </div>
+        <button
+          type="button"
+          aria-label="Close sidebar"
+          className="fixed inset-0 z-40 bg-black/50 lg:hidden"
+          onClick={onMobileClose}
+        />
       )}
 
-      {/* Mobile sidebar */}
       <div
         className={cn(
-          'fixed inset-y-0 z-50 flex w-60 flex-col transition-transform duration-300 lg:hidden',
+          'fixed inset-y-0 left-0 z-50 w-[236px] transition-transform duration-300 lg:hidden',
           isMobileOpen ? 'translate-x-0' : '-translate-x-full'
         )}
       >
         <SidebarContent />
       </div>
 
-      {/* Desktop sidebar - Fixed 240px width */}
-      <div className="hidden lg:fixed lg:inset-y-0 lg:z-50 lg:flex lg:w-60 lg:flex-col">
+      <div className="hidden lg:fixed lg:inset-y-0 lg:left-0 lg:z-40 lg:block lg:w-[236px]">
         <SidebarContent />
       </div>
     </>

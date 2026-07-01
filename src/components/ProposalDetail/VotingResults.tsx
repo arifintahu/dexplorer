@@ -18,94 +18,94 @@ export default function VotingResults({ proposal }: VotingResultsProps) {
   const totalVotes = yesCount + noCount + abstainCount + noWithVetoCount
 
   const calculatePercentage = (count: number) => {
-    return totalVotes > 0 ? ((count / totalVotes) * 100).toFixed(1) : '0.0'
+    return totalVotes > 0 ? (count / totalVotes) * 100 : 0
   }
 
   const voteTypes = [
     {
-      label: 'Yes Votes',
+      label: 'Yes',
       count: yesCount,
       percentage: calculatePercentage(yesCount),
       color: colors.status.success,
-      bgColor: colors.status.success + '20'
     },
     {
-      label: 'No Votes',
+      label: 'No',
       count: noCount,
       percentage: calculatePercentage(noCount),
       color: colors.status.error,
-      bgColor: colors.status.error + '20'
     },
     {
-      label: 'Abstain Votes',
+      label: 'Abstain',
       count: abstainCount,
       percentage: calculatePercentage(abstainCount),
       color: colors.text.tertiary,
-      bgColor: colors.text.tertiary + '20'
     },
     {
-      label: 'No With Veto',
+      label: 'No w/ Veto',
       count: noWithVetoCount,
       percentage: calculatePercentage(noWithVetoCount),
       color: colors.status.warning,
-      bgColor: colors.status.warning + '20'
-    }
+    },
   ]
 
   return (
-    <div
-      className="rounded-xl p-6"
-      style={{
-        backgroundColor: colors.surface,
-        border: `1px solid ${colors.border.primary}`,
-        boxShadow: colors.shadow.sm,
-      }}
-    >
-      <h3
-        className="text-lg font-semibold mb-4"
+    <div className="panel-surface flex flex-col gap-4 rounded-[14px] px-[22px] py-5">
+      <span
+        className="text-[14px] font-semibold"
         style={{ color: colors.text.primary }}
       >
         Voting Results
-      </h3>
-      <div className="space-y-6">
-        {voteTypes.map((voteType, index) => (
-          <div key={index} className="space-y-2">
-            <div className="flex justify-between items-center">
-              <span style={{ color: colors.text.secondary }}>{voteType.label}:</span>
-              <div className="flex items-center gap-2">
-                <span style={{ color: voteType.color, fontWeight: '600' }}>
-                  {voteType.count.toLocaleString()}
-                </span>
-                <span style={{ color: colors.text.secondary, fontSize: '0.875rem' }}>
-                  ({voteType.percentage}%)
-                </span>
-              </div>
-            </div>
-            <div
-              className="w-full h-3 rounded-full overflow-hidden"
-              style={{ backgroundColor: colors.border.secondary }}
-            >
-              <div
-                className="h-full rounded-full transition-all duration-300 ease-out"
-                style={{
-                  width: `${voteType.percentage}%`,
-                  backgroundColor: voteType.color,
-                  background: `linear-gradient(90deg, ${voteType.color}, ${voteType.color}dd)`
-                }}
-              />
-            </div>
-          </div>
+      </span>
+
+      <div
+        className="flex h-3 overflow-hidden rounded-[6px]"
+        style={{ backgroundColor: colors.backgroundSecondary }}
+      >
+        {voteTypes.map((voteType) => (
+          <div
+            key={voteType.label}
+            style={{
+              width: `${voteType.percentage}%`,
+              backgroundColor: voteType.color,
+            }}
+          />
         ))}
-        
-        {/* Total Votes Summary */}
-        <div className="pt-4 border-t" style={{ borderColor: colors.border.secondary }}>
-          <div className="flex justify-between items-center">
-            <span style={{ color: colors.text.secondary, fontWeight: '600' }}>Total Votes:</span>
-            <span style={{ color: colors.text.primary, fontWeight: '700', fontSize: '1.125rem' }}>
-              {totalVotes.toLocaleString()}
+      </div>
+
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+        {voteTypes.map((voteType) => (
+          <div
+            key={voteType.label}
+            className="flex flex-col gap-1.5 rounded-[10px] border px-[15px] py-[13px]"
+            style={{
+              backgroundColor: colors.backgroundSecondary,
+              borderColor: colors.border.primary,
+            }}
+          >
+            <span
+              className="flex items-center gap-1.5 text-xs"
+              style={{ color: colors.text.secondary }}
+            >
+              <span
+                className="h-[9px] w-[9px] rounded-[2px]"
+                style={{ backgroundColor: voteType.color }}
+              />
+              {voteType.label}
+            </span>
+            <span
+              className="font-mono text-[18px] font-semibold"
+              style={{ color: colors.text.primary }}
+            >
+              {voteType.percentage.toFixed(1)}%
+            </span>
+            <span
+              className="text-[11.5px]"
+              style={{ color: colors.text.tertiary }}
+            >
+              {voteType.count.toLocaleString()} votes
             </span>
           </div>
-        </div>
+        ))}
       </div>
     </div>
   )

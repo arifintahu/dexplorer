@@ -1,9 +1,10 @@
 import dayjs from 'dayjs'
 import relativeTime from 'dayjs/plugin/relativeTime'
 import duration from 'dayjs/plugin/duration'
-import { toHex } from '@cosmjs/encoding'
+import { toHex, toBech32, fromBech32 } from '@cosmjs/encoding'
+import { sha256 } from '@cosmjs/crypto'
 import { bech32 } from 'bech32'
-import { Coin } from 'cosmjs-types/cosmos/base/v1beta1/coin'
+import { PubKey as Ed25519PubKey } from 'cosmjs-types/cosmos/crypto/ed25519/keys'
 
 export const timeFromNow = (date: string): string => {
   dayjs.extend(relativeTime)
@@ -94,6 +95,26 @@ export const convertVotingPower = (tokens: string): string => {
   return Math.round(Number(tokens) / 10 ** 6).toLocaleString(undefined)
 }
 
+// Derive a validator's bech32 "valcons" consensus address from its
+// consensusPubkey (Cosmos SDK: sha256(rawEd25519Key)[0:20], bech32-encoded
+// with the chain's valcons prefix).
+export const pubkeyToValconsAddress = (
+  consensusPubkey: { typeUrl: string; value: Uint8Array } | undefined,
+  operatorAddress: string
+): string | null => {
+  if (
+    !consensusPubkey ||
+    consensusPubkey.typeUrl !== '/cosmos.crypto.ed25519.PubKey'
+  ) {
+    return null
+  }
+  const { key } = Ed25519PubKey.decode(consensusPubkey.value)
+  const addressBytes = sha256(key).slice(0, 20)
+  const { prefix } = fromBech32(operatorAddress)
+  const valconsPrefix = prefix.replace(/valoper$/, 'valcons')
+  return toBech32(valconsPrefix, addressBytes)
+}
+
 export const convertRateToPercent = (rate: string | undefined): string => {
   if (!rate) {
     return ``
@@ -103,15 +124,6 @@ export const convertRateToPercent = (rate: string | undefined): string => {
     maximumFractionDigits: 2,
   })
   return `${commission}%`
-}
-
-export const displayCoin = (deposit: Coin) => {
-  if (deposit.denom.startsWith('u')) {
-    const amount = Math.round(Number(deposit.amount) / 10 ** 6)
-    const symbol = deposit.denom.slice(1).toUpperCase()
-    return `${amount.toLocaleString()} ${symbol}`
-  }
-  return `${Number(deposit.amount).toLocaleString()} ${deposit.denom}`
 }
 
 export const getActionFromAttributes = (
@@ -163,20 +175,6 @@ export const isValidUrl = (urlString: string): boolean => {
   }
 }
 
-export const normalizeUrl = (urlString: string): string => {
-  if (!urlString.startsWith('https://') && !urlString.startsWith('http://')) {
-    return `https://${urlString}`
-  }
-
-  return urlString
-}
-
-export const getUrlFromPath = (pathString: string): string => {
-  const regex = /(?:\?|&)rpc=([^&]+)/
-  const match = regex.exec(pathString)
-  return match ? decodeURIComponent(match[1]) : ''
-}
-
 export function removeTrailingSlash(url: string): string {
   // Check if the URL ends with a trailing slash
   if (url.endsWith('/')) {
@@ -208,130 +206,4 @@ export const safeStringify = (obj: unknown, space?: number): string => {
     },
     space
   )
-}
-
-// Convert array of objects to CSV string
-export const convertToCSV = <T>(data: T[], headers?: Record<keyof T, string>): string => {
-  if (!data || data.length === 0) return ''
-
-  // Get column headers from first object or use provided headers
-  const keys = headers ? Object.keys(headers) : Object.keys(data[0] as object)
-  const headerRow = headers
-    ? keys.map((k) => headers[k as keyof T]).join(',')
-    : keys.join(',')
-
-  // Create data rows
-  const rows = data.map((item) => {
-    return keys.map((key) => {
-      const value = item[key as keyof T]
-      // Handle values that need quoting
-      if (typeof value === 'string' && (value.includes(',') || value.includes('"'))) {
-        return `"${value.replace(/"/g, '""')}"`
-      }
-      return String(value ?? '')
-    }).join(',')
-  })
-
-  return [headerRow, ...rows].join('\n')
-}
-
-// Download data as a file
-export const downloadData = (
-  data: string,
-  filename: string,
-  mimeType: string
-) => {
-  const blob = new Blob([data], { type: mimeType })
-  const url = URL.createObjectURL(blob)
-  const link = document.createElement('a')
-  link.href = url
-  link.download = filename
-  document.body.appendChild(link)
-  link.click()
-  document.body.removeChild(link)
-  URL.revokeObjectURL(url)
-}
-
-// Export transactions to CSV
-export const exportTransactionsToCSV = (
-  transactions: Array<{
-    hash: string
-    height: string
-    timestamp: string
-    result: { code: number; data: string | null }
-  }>
-) => {
-  const data = transactions.map((tx) => ({
-    hash: tx.hash,
-    height: tx.height,
-    timestamp: tx.timestamp,
-    status: tx.result.code === 0 ? 'success' : 'failed',
-  }))
-
-  const csv = convertToCSV(data, {
-    hash: 'Hash',
-    height: 'Block Height',
-    timestamp: 'Timestamp',
-    status: 'Status',
-  })
-
-  const filename = `transactions_${new Date().toISOString().split('T')[0]}.csv`
-  downloadData(csv, filename, 'text/csv')
-}
-
-// Export transactions to JSON
-export const exportTransactionsToJSON = (
-  transactions: Array<{
-    hash: string
-    height: string
-    timestamp: string
-    result: { code: number; data: string | null }
-  }>
-) => {
-  const data = transactions.map((tx) => ({
-    hash: tx.hash,
-    height: tx.height,
-    timestamp: tx.timestamp,
-    status: tx.result.code === 0 ? 'success' : 'failed',
-  }))
-
-  const json = safeStringify(data, 2)
-  const filename = `transactions_${new Date().toISOString().split('T')[0]}.json`
-  downloadData(json, filename, 'application/json')
-}
-
-// Export blocks to CSV
-export const exportBlocksToCSV = (
-  blocks: Array<{
-    header: { height: string; time: string }
-  }>
-) => {
-  const data = blocks.map((block) => ({
-    height: block.header.height,
-    timestamp: block.header.time,
-  }))
-
-  const csv = convertToCSV(data, {
-    height: 'Block Height',
-    timestamp: 'Timestamp',
-  })
-
-  const filename = `blocks_${new Date().toISOString().split('T')[0]}.csv`
-  downloadData(csv, filename, 'text/csv')
-}
-
-// Export blocks to JSON
-export const exportBlocksToJSON = (
-  blocks: Array<{
-    header: { height: string; time: string }
-  }>
-) => {
-  const data = blocks.map((block) => ({
-    height: block.header.height,
-    timestamp: block.header.time,
-  }))
-
-  const json = safeStringify(data, 2)
-  const filename = `blocks_${new Date().toISOString().split('T')[0]}.json`
-  downloadData(json, filename, 'application/json')
 }

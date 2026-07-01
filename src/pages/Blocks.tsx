@@ -1,12 +1,12 @@
-import React, { useEffect, useState, useMemo } from 'react'
-import { useSelector } from 'react-redux'
+import React, { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
+import { useSelector } from 'react-redux'
 import { NewBlockEvent } from '@cosmjs/tendermint-rpc'
-import { FiChevronRight, FiClock, FiHash, FiActivity } from 'react-icons/fi'
-import { selectNewBlock, selectBlocks } from '@/store/streamSlice'
 import { toHex } from '@cosmjs/encoding'
-import { timeFromNow, trimHash } from '@/utils/helper'
+import { FiHash } from 'react-icons/fi'
 import { useTheme } from '@/theme/ThemeProvider'
+import { selectBlocks, selectNewBlock } from '@/store/streamSlice'
+import { timeFromNow, trimHash } from '@/utils/helper'
 import CopyText from '@/components/ui/CopyText'
 
 const MAX_ROWS = 50
@@ -29,170 +29,150 @@ const Blocks: React.FC = () => {
   const newBlock = useSelector(selectNewBlock)
   const persistentBlocks = useSelector(selectBlocks)
   const [blocks, setBlocks] = useState<BlockType[]>([])
+  const [announcement, setAnnouncement] = useState('')
 
-  // Initialize blocks from persistent store with memoization
-  const initialBlocks = useMemo(() => {
-    return persistentBlocks.length > 0
-      ? persistentBlocks.slice(0, MAX_ROWS)
-      : []
-  }, [persistentBlocks])
+  const initialBlocks = useMemo(
+    () =>
+      persistentBlocks.length > 0 ? persistentBlocks.slice(0, MAX_ROWS) : [],
+    [persistentBlocks]
+  )
 
-  // Set initial data only when length changes (not on every block update)
   useEffect(() => {
     setBlocks(initialBlocks)
   }, [initialBlocks])
 
   useEffect(() => {
-    if (newBlock) {
-      updateBlocks(newBlock)
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    if (!newBlock) return
+
+    setBlocks((currentBlocks) => {
+      if (!currentBlocks.length) {
+        return [newBlock]
+      }
+
+      return newBlock.header.height > getBlockHeight(currentBlocks[0])
+        ? [newBlock, ...currentBlocks.slice(0, MAX_ROWS - 1)]
+        : currentBlocks
+    })
   }, [newBlock])
 
-  const getBlockHeight = (block: BlockType): number => {
-    return typeof block.header.height === 'string'
+  useEffect(() => {
+    if (!newBlock) return
+
+    setAnnouncement((current) => {
+      const height = getBlockHeight(newBlock)
+      const nextText = `New block ${height.toLocaleString()} added`
+      return current === nextText ? current : nextText
+    })
+  }, [newBlock])
+
+  const getBlockHeight = (block: BlockType): number =>
+    typeof block.header.height === 'string'
       ? parseInt(block.header.height)
       : block.header.height
-  }
 
-  const getBlockTime = (block: BlockType): string => {
-    if (typeof block.header.time === 'string') {
-      return block.header.time
-    }
-    return block.header.time.toISOString()
-  }
-
-  const updateBlocks = (block: NewBlockEvent) => {
-    if (blocks.length) {
-      if (block.header.height > getBlockHeight(blocks[0])) {
-        setBlocks((prevBlocks) => [block, ...prevBlocks.slice(0, MAX_ROWS - 1)])
-      }
-    } else {
-      setBlocks([block])
-    }
-  }
+  const getBlockTime = (block: BlockType): string =>
+    typeof block.header.time === 'string'
+      ? block.header.time
+      : block.header.time.toISOString()
 
   return (
-    <div className="space-y-6">
-      {/* Breadcrumb */}
-      <div className="flex items-center gap-2 text-sm mb-4">
-        <Link
-          to="/"
-          className="hover:opacity-70 transition-opacity font-medium"
-          style={{ color: colors.text.secondary }}
-        >
-          Home
-        </Link>
-        <FiChevronRight
-          className="w-4 h-4"
-          style={{ color: colors.text.tertiary }}
-        />
-        <span className="font-bold" style={{ color: colors.text.primary }}>
-          Blocks
-        </span>
+    <div className="space-y-5">
+      <div className="sr-only" aria-live="polite" aria-atomic="true">
+        {announcement}
       </div>
+      <div className="reference-table-shell">
+        <div className="overflow-x-auto">
+          <table className="w-full">
+            <thead>
+              <tr
+                className="border-b"
+                style={{ borderColor: colors.border.primary }}
+              >
+                <th className="reference-table-header px-5 py-4 text-left">
+                  Height
+                </th>
+                <th className="reference-table-header px-5 py-4 text-left">
+                  Block Hash
+                </th>
+                <th className="reference-table-header px-5 py-4 text-left">
+                  Proposer
+                </th>
+                <th className="reference-table-header px-5 py-4 text-left">
+                  Txns
+                </th>
+                <th className="reference-table-header px-5 py-4 text-left">
+                  Gas
+                </th>
+                <th className="reference-table-header px-5 py-4 text-right">
+                  Age
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {blocks.map((block, index) => {
+                const proposerAddress =
+                  typeof block.header.proposerAddress === 'string'
+                    ? block.header.proposerAddress
+                    : toHex(block.header.proposerAddress)
+                const proposerDisplay = trimHash(proposerAddress, 8)
+                const appHash =
+                  typeof block.header.appHash === 'string'
+                    ? block.header.appHash
+                    : toHex(block.header.appHash)
 
-      {/* Main Content */}
-      <div
-        className="rounded-xl p-6"
-        style={{
-          backgroundColor: colors.surface,
-          border: `1px solid ${colors.border.primary}`,
-          boxShadow: colors.shadow.sm,
-        }}
-      >
-        {/* Blocks Content */}
-        {
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead>
-                <tr
-                  className="border-b"
-                  style={{ borderColor: colors.border.secondary }}
-                >
-                  <th
-                    className="text-left py-3 px-4 font-medium"
-                    style={{ color: colors.text.secondary }}
-                  >
-                    <div className="flex items-center gap-2">
-                      <FiHash className="w-4 h-4" />
-                      Height
-                    </div>
-                  </th>
-                  <th
-                    className="text-left py-3 px-4 font-medium"
-                    style={{ color: colors.text.secondary }}
-                  >
-                    App Hash
-                  </th>
-                  <th
-                    className="text-left py-3 px-4 font-medium"
-                    style={{ color: colors.text.secondary }}
-                  >
-                    <div className="flex items-center gap-2">
-                      <FiActivity className="w-4 h-4" />
-                      Txs
-                    </div>
-                  </th>
-                  <th
-                    className="text-left py-3 px-4 font-medium"
-                    style={{ color: colors.text.secondary }}
-                  >
-                    <div className="flex items-center gap-2">
-                      <FiClock className="w-4 h-4" />
-                      Time
-                    </div>
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {blocks.map((block, index) => (
+                return (
                   <tr
                     key={`${block.header.height}-${index}`}
-                    className="border-b hover:bg-opacity-50 transition-colors duration-200"
-                    style={{
-                      borderColor: colors.border.secondary,
-                      backgroundColor: 'transparent',
-                    }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.backgroundColor =
-                        colors.background + '50'
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.backgroundColor = 'transparent'
-                    }}
+                    className="reference-table-row border-b"
+                    style={{ borderColor: colors.border.primary }}
                   >
-                    <td className="py-3 px-4">
+                    <td className="px-5 py-4">
                       <Link
                         to={`/blocks/${getBlockHeight(block)}`}
-                        className="hover:opacity-70 transition-opacity font-mono"
+                        className="font-mono text-[1.05rem] font-semibold hover:opacity-70 transition-opacity"
                         style={{ color: colors.primary }}
                       >
-                        {getBlockHeight(block)}
+                        {getBlockHeight(block).toLocaleString()}
                       </Link>
                     </td>
-                    <td className="py-3 px-4">
+                    <td className="px-5 py-4">
                       <CopyText
-                        text={
-                          typeof block.header.appHash === 'string'
-                            ? block.header.appHash
-                            : toHex(block.header.appHash)
-                        }
-                        displayText={trimHash(
-                          typeof block.header.appHash === 'string'
-                            ? block.header.appHash
-                            : toHex(block.header.appHash)
-                        )}
+                        text={appHash}
+                        displayText={trimHash(appHash, 16)}
                         className="text-sm"
                         style={{ color: colors.text.secondary }}
                       />
                     </td>
-                    <td className="py-3 px-4">
+                    <td className="px-5 py-4">
+                      <div className="flex items-center gap-3">
+                        <div
+                          className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-[0.65rem] font-semibold text-white"
+                          style={{
+                            background: `linear-gradient(135deg, ${colors.primary}, ${colors.accent})`,
+                          }}
+                        >
+                          {proposerDisplay.charAt(0) || '?'}
+                        </div>
+                        <span
+                          className="text-sm"
+                          style={{ color: colors.text.secondary }}
+                        >
+                          {proposerDisplay}
+                        </span>
+                      </div>
+                    </td>
+                    <td className="px-5 py-4">
                       <span style={{ color: colors.text.primary }}>
                         {block.txs.length}
                       </span>
                     </td>
-                    <td className="py-3 px-4">
+                    <td
+                      className="px-5 py-4 text-sm"
+                      style={{ color: colors.text.tertiary }}
+                    >
+                      --
+                    </td>
+                    <td className="px-5 py-4 text-right">
                       <span
                         className="text-sm"
                         style={{ color: colors.text.secondary }}
@@ -201,29 +181,29 @@ const Blocks: React.FC = () => {
                       </span>
                     </td>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                )
+              })}
+            </tbody>
+          </table>
 
-            {blocks.length === 0 && (
-              <div className="text-center py-12">
-                <FiHash
-                  className="w-12 h-12 mx-auto mb-4 opacity-50"
-                  style={{ color: colors.text.tertiary }}
-                />
-                <p style={{ color: colors.text.secondary }}>
-                  No blocks available
-                </p>
-                <p
-                  className="text-sm mt-1"
-                  style={{ color: colors.text.tertiary }}
-                >
-                  Blocks will appear here when the connection is established
-                </p>
-              </div>
-            )}
-          </div>
-        }
+          {blocks.length === 0 && (
+            <div className="py-12 text-center">
+              <FiHash
+                className="mx-auto mb-4 h-12 w-12 opacity-50"
+                style={{ color: colors.text.tertiary }}
+              />
+              <p style={{ color: colors.text.secondary }}>
+                No blocks available
+              </p>
+              <p
+                className="mt-1 text-sm"
+                style={{ color: colors.text.tertiary }}
+              >
+                Blocks will appear here when the connection is established
+              </p>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   )

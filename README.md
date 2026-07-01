@@ -69,12 +69,12 @@ This makes it perfect for:
 
 #### 🏠 Home Dashboard
 
-![Dexplorer Home Dashboard](./public/dexplorer2.png)
+![Dexplorer Home Dashboard](./public/dexplorer2.jpeg)
 _Real-time blockchain explorer dashboard showing chain statistics, latest blocks, and transactions_
 
 #### 🔗 Connect to Blockchain
 
-![Connect to Blockchain](./public/dexplorer1.png)
+![Connect to Blockchain](./public/dexplorer1.jpeg)
 _Simple connection interface to connect to any Cosmos SDK RPC endpoint_
 
 ### Live Demo
@@ -89,12 +89,14 @@ _Connect to any Cosmos RPC endpoint and start exploring!_
 - 📊 **Real-time Dashboard**: Monitor chain activity with live updates via WebSocket
 - 🔔 **Live Subscriptions**: Subscribe to latest blocks and transactions
 - 🔍 **Powerful Search**: Find blocks, transactions, and accounts instantly
-- 👥 **Validator Insights**: Browse active validators and their details
+- 👥 **Validator Insights**: Browse active validators with real uptime, commission, and voting power
 - 🗳️ **Governance**: Explore proposals and voting results
 - ⚙️ **Chain Parameters**: View blockchain configuration and parameters
+- 🌉 **IBC Transfers**: Track cross-chain transfers with converted amounts and channel data
 - 📱 **Responsive Design**: Works seamlessly on desktop and mobile
 - 🎨 **Modern UI**: Clean, intuitive interface with dark/light themes and smooth animations
-- 🌍 **Internationalization**: Multi-language support (i18n)
+- ♿ **Accessible**: WCAG 2.1 AA compliant — keyboard navigable, screen-reader friendly, respects reduced motion
+- 🌍 **i18n Ready**: Built on i18next, currently shipping English
 - ⚡ **Zero Backend**: No database or server infrastructure needed
 
 ## 🛠️ Tech Stack
@@ -122,9 +124,8 @@ _Connect to any Cosmos RPC endpoint and start exploring!_
 ### UI Components & UX
 
 - **Framer Motion** - Smooth animations and transitions
-- **Lucide React & React Icons** - Modern icon sets
+- **React Icons** - Modern icon set
 - **Sonner** - Toast notifications
-- **TanStack Table** - Headless UI for building powerful tables
 
 ### Development & Quality Assurance
 
@@ -252,13 +253,11 @@ dexplorer/
 │   ├── assets/             # Images and global styles
 │   ├── components/         # UI Components
 │   │   ├── AccountDetail/  # Account-related components
-│   │   ├── BlockDetail/    # Block-related components
 │   │   ├── Connect/        # Connection screen components
-│   │   ├── Datatable/      # Reusable table components
 │   │   ├── Home/           # Dashboard components
-│   │   ├── Layout/         # App layout (Sidebar, Header)
+│   │   ├── Layout/         # App layout (Sidebar, TopNavigation)
 │   │   ├── ProposalDetail/ # Governance proposal components
-│   │   └── ui/             # Generic UI primitives (Button, Input, etc.)
+│   │   └── ui/             # Generic UI primitives (Button, CopyText, etc.)
 │   ├── encoding/           # Protobuf/Amino encoding utilities
 │   ├── hooks/              # Custom React hooks (useBlock, useTx, etc.)
 │   ├── lib/                # Shared libraries and utilities

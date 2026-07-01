@@ -1,4 +1,5 @@
-import { useParams } from 'react-router-dom'
+import { Link, useParams } from 'react-router-dom'
+import { FiChevronLeft } from 'react-icons/fi'
 import { useTheme } from '@/theme/ThemeProvider'
 import { useAccountData } from '@/hooks/useAccountData'
 import AccountHeader from '@/components/AccountDetail/AccountHeader'
@@ -17,17 +18,21 @@ export default function AccountDetail() {
     loading,
   } = useAccountData(address)
 
+  const backLink = (
+    <Link
+      to="/accounts"
+      className="inline-flex items-center gap-1.5 text-sm font-medium"
+      style={{ color: colors.text.secondary }}
+    >
+      <FiChevronLeft className="h-4 w-4" />
+      Back to accounts
+    </Link>
+  )
+
   if (loading) {
     return (
-      <div className="space-y-6">
-        <div className="flex items-center gap-2 text-sm">
-          <h1
-            className="text-2xl font-bold"
-            style={{ color: colors.text.primary }}
-          >
-            Account
-          </h1>
-        </div>
+      <div className="flex flex-col gap-[18px]">
+        {backLink}
         <div className="flex items-center justify-center min-h-[400px]">
           <div className="text-center">
             <div
@@ -46,10 +51,14 @@ export default function AccountDetail() {
   if (!address) return null
 
   return (
-    <div className="space-y-6">
+    <div className="flex flex-col gap-[18px]">
+      {backLink}
       <AccountHeader address={address} account={account} />
       <Balances balances={balances} stakedBalance={stakedBalance} />
-      <TransactionList decodedTxs={decodedTxs} totalCount={transactions.length} />
+      <TransactionList
+        decodedTxs={decodedTxs}
+        totalCount={transactions.length}
+      />
     </div>
   )
 }

@@ -1,8 +1,11 @@
-import React from 'react'
+import React, { useMemo } from 'react'
 import { Link } from 'react-router-dom'
 import { useTheme } from '@/theme/ThemeProvider'
 import { toHex } from '@cosmjs/encoding'
+import { Coin } from '@cosmjs/stargate'
+import { Tx as TxData } from 'cosmjs-types/cosmos/tx/v1beta1/tx'
 import { trimHash, getTypeMsg } from '@/utils/helper'
+import { getResultPillStyle } from '@/utils/pillStyle'
 import { FiUser } from 'react-icons/fi'
 import { DecodedTx } from '@/hooks/useAccountData'
 import { DecodeMsg } from '@/encoding'
@@ -12,8 +15,40 @@ interface TransactionListProps {
   totalCount: number
 }
 
-export default function TransactionList({ decodedTxs, totalCount }: TransactionListProps) {
+const formatFee = (coins: readonly Coin[] | undefined) => {
+  const fee = coins?.[0]
+  if (!fee) return '—'
+
+  const amount = Number(fee.amount)
+  const denom = fee.denom.startsWith('u')
+    ? fee.denom.slice(1).toUpperCase()
+    : fee.denom.toUpperCase()
+
+  if (!Number.isFinite(amount)) return `— ${denom}`
+
+  const normalized = fee.denom.startsWith('u') ? amount / 1e6 : amount
+  return `${normalized.toFixed(normalized < 1 ? 4 : 2)} ${denom}`
+}
+
+export default function TransactionList({
+  decodedTxs,
+  totalCount,
+}: TransactionListProps) {
   const { colors } = useTheme()
+
+  const rows = useMemo(
+    () =>
+      decodedTxs.slice(0, 10).map(({ tx, msgs }) => {
+        let fee = '—'
+        try {
+          fee = formatFee(TxData.decode(tx.tx).authInfo?.fee?.amount)
+        } catch (error) {
+          console.warn('Error decoding tx fee:', error)
+        }
+        return { tx, msgs, fee }
+      }),
+    [decodedTxs]
+  )
 
   const renderTransactionMessages = (msgs: DecodeMsg[]) => {
     if (msgs.length === 0) return 'No messages'
@@ -21,151 +56,106 @@ export default function TransactionList({ decodedTxs, totalCount }: TransactionL
     if (msgs.length === 1) {
       return (
         <span
-          className="px-2 py-1 rounded text-xs font-medium"
+          className="reference-pill w-fit"
           style={{
-            backgroundColor: colors.primary + '20',
+            backgroundColor: `${colors.primary}20`,
             color: colors.primary,
           }}
         >
           {getTypeMsg(msgs[0].typeUrl)}
         </span>
       )
-    } else {
-      return (
-        <div className="flex items-center gap-2">
-          <span
-            className="px-2 py-1 rounded text-xs font-medium"
-            style={{
-              backgroundColor: colors.primary + '20',
-              color: colors.primary,
-            }}
-          >
-            {getTypeMsg(msgs[0].typeUrl)}
-          </span>
-          <span
-            className="text-xs font-medium"
-            style={{ color: colors.primary }}
-          >
-            +{msgs.length - 1}
-          </span>
-        </div>
-      )
     }
+
+    return (
+      <div className="flex items-center gap-2">
+        <span
+          className="reference-pill w-fit"
+          style={{
+            backgroundColor: `${colors.primary}20`,
+            color: colors.primary,
+          }}
+        >
+          {getTypeMsg(msgs[0].typeUrl)}
+        </span>
+        <span
+          className="text-xs font-semibold"
+          style={{ color: colors.primary }}
+        >
+          +{msgs.length - 1}
+        </span>
+      </div>
+    )
   }
 
   return (
-    <div
-      className="rounded-xl p-6"
-      style={{
-        backgroundColor: colors.surface,
-        border: `1px solid ${colors.border.primary}`,
-        boxShadow: colors.shadow.sm,
-      }}
-    >
-      <h2
-        className="text-lg font-semibold mb-4"
-        style={{ color: colors.text.primary }}
+    <div className="reference-table-shell">
+      <div
+        className="border-b px-5 py-[15px] text-[14px] font-semibold"
+        style={{
+          borderColor: colors.border.primary,
+          color: colors.text.primary,
+        }}
       >
         Recent Transactions ({totalCount})
-      </h2>
-      <div
-        className="border-b mb-4"
-        style={{ borderColor: colors.border.secondary }}
-      ></div>
+      </div>
 
-      {decodedTxs.length > 0 ? (
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead>
-              <tr
-                className="border-b"
-                style={{ borderColor: colors.border.secondary }}
+      {rows.length > 0 ? (
+        <>
+          <div
+            className="reference-table-header hidden gap-3 border-b px-5 py-3 md:grid md:grid-cols-[1.6fr_110px_130px_100px_110px]"
+            style={{ borderColor: colors.border.primary }}
+          >
+            <span>Tx Hash</span>
+            <span>Height</span>
+            <span>Messages</span>
+            <span>Result</span>
+            <span className="text-right">Fee</span>
+          </div>
+
+          {rows.map(({ tx, msgs, fee }, index) => (
+            <div
+              key={index}
+              className="reference-table-row grid gap-3 border-b px-5 py-4 md:grid-cols-[1.6fr_110px_130px_100px_110px] md:items-center"
+              style={{ borderColor: colors.border.primary }}
+            >
+              <Link
+                to={`/txs/${toHex(tx.hash)}`}
+                className="truncate font-mono text-[12.5px]"
+                style={{ color: colors.primary }}
               >
-                <th
-                  className="text-left py-3 px-0 font-medium"
-                  style={{ color: colors.text.secondary }}
-                >
-                  Hash
-                </th>
-                <th
-                  className="text-left py-3 px-0 font-medium"
-                  style={{ color: colors.text.secondary }}
-                >
-                  Height
-                </th>
-                <th
-                  className="text-left py-3 px-0 font-medium"
-                  style={{ color: colors.text.secondary }}
-                >
-                  Messages
-                </th>
-                <th
-                  className="text-left py-3 px-0 font-medium"
-                  style={{ color: colors.text.secondary }}
-                >
-                  Status
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {decodedTxs.slice(0, 10).map(({ tx, msgs }, index) => (
-                <tr
-                  key={index}
-                  className="border-b"
-                  style={{ borderColor: colors.border.secondary }}
-                >
-                  <td className="py-3 px-0">
-                    <Link
-                      to={`/txs/${toHex(tx.hash)}`}
-                      className="font-mono text-sm hover:opacity-70 transition-opacity"
-                      style={{ color: colors.primary }}
-                    >
-                      {trimHash(tx.hash)}
-                    </Link>
-                  </td>
-                  <td className="py-3 px-0">
-                    <Link
-                      to={`/blocks/${tx.height}`}
-                      className="hover:opacity-70 transition-opacity"
-                      style={{ color: colors.primary }}
-                    >
-                      {tx.height}
-                    </Link>
-                  </td>
-                  <td className="py-3 px-0">
-                    {renderTransactionMessages(msgs)}
-                  </td>
-                  <td className="py-3 px-0">
-                    <span
-                      className="px-2 py-1 rounded text-xs font-medium"
-                      style={{
-                        backgroundColor:
-                          tx.result.code === 0
-                            ? colors.status.success + '20'
-                            : colors.status.error + '20',
-                        color:
-                          tx.result.code === 0
-                            ? colors.status.success
-                            : colors.status.error,
-                      }}
-                    >
-                      {tx.result.code === 0 ? 'Success' : 'Failed'}
-                    </span>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+                {trimHash(tx.hash)}
+              </Link>
+              <Link
+                to={`/blocks/${tx.height}`}
+                className="font-mono text-[12.5px]"
+                style={{ color: colors.text.secondary }}
+              >
+                {tx.height}
+              </Link>
+              <div>{renderTransactionMessages(msgs)}</div>
+              <span
+                className="reference-pill w-fit"
+                style={getResultPillStyle(tx.result.code === 0, colors)}
+              >
+                {tx.result.code === 0 ? 'Success' : 'Failed'}
+              </span>
+              <span
+                className="font-mono text-[12.5px] md:text-right"
+                style={{ color: colors.text.primary }}
+              >
+                {fee}
+              </span>
+            </div>
+          ))}
+        </>
       ) : (
-        <div className="text-center py-8">
+        <div className="px-5 py-10 text-center">
           <FiUser
-            className="w-12 h-12 mx-auto mb-4"
+            className="mx-auto mb-4 h-12 w-12"
             style={{ color: colors.text.tertiary }}
           />
-          <p style={{ color: colors.text.secondary }}>
-            No transactions found
-          </p>
+          <p style={{ color: colors.text.secondary }}>No transactions found</p>
         </div>
       )}
     </div>

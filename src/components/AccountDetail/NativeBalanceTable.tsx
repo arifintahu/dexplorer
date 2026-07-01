@@ -2,7 +2,6 @@ import React from 'react'
 import { Coin } from '@cosmjs/stargate'
 import { useTheme } from '@/theme/ThemeProvider'
 import { formatAmount, formatDenom, getConvertedAmount } from '@/utils/cosmos'
-import { FiUser } from 'react-icons/fi'
 
 interface NativeBalanceTableProps {
   nativeTokens: readonly Coin[]
@@ -37,269 +36,101 @@ export default function NativeBalanceTable({
 
   if (nativeTokens.length === 0 && !nativeStakedToken) return null
 
-  return (
-    <div>
-      <div className="flex items-center gap-2 mb-4">
-        <FiUser className="w-5 h-5" style={{ color: colors.primary }} />
-        <h3
-          className="text-lg font-medium"
-          style={{ color: colors.text.primary }}
-        >
-          Native Token
-        </h3>
-      </div>
-      <div
-        className="rounded-lg overflow-hidden"
-        style={{
-          backgroundColor: colors.background,
-          border: `1px solid ${colors.border.secondary}`,
-        }}
+  const metricCard = (
+    key: string,
+    label: string,
+    value: string,
+    token: string,
+    raw?: string
+  ) => (
+    <div
+      key={key}
+      className="panel-surface flex flex-col gap-[7px] px-[19px] py-[17px]"
+    >
+      <span
+        className="text-[11px] font-semibold uppercase tracking-[0.06em]"
+        style={{ color: colors.text.tertiary }}
       >
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead
-              style={{
-                backgroundColor: colors.surface,
-                borderBottom: `1px solid ${colors.border.secondary}`,
-              }}
-            >
-              <tr>
-                <th
-                  className="text-left py-3 px-4 font-medium text-sm"
-                  style={{ color: colors.text.secondary }}
-                >
-                  Token
-                </th>
-                <th
-                  className="text-right py-3 px-4 font-medium text-sm"
-                  style={{ color: colors.text.secondary }}
-                >
-                  Available
-                </th>
-                <th
-                  className="text-right py-3 px-4 font-medium text-sm"
-                  style={{ color: colors.text.secondary }}
-                >
-                  Delegated
-                </th>
-                <th
-                  className="text-right py-3 px-4 font-medium text-sm"
-                  style={{ color: colors.text.secondary }}
-                >
-                  Total
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {nativeTokens.length > 0 ? (
-                nativeTokens.map((balance, index) => {
-                  const formatted = formatBalance(balance)
-                  const stakedForThisToken =
-                    nativeStakedToken &&
-                    nativeStakedToken.denom === balance.denom
-                      ? nativeStakedToken
-                      : null
-                  const stakedFormatted = stakedForThisToken
-                    ? formatBalance(stakedForThisToken)
-                    : null
-                  const totalAmount = stakedForThisToken
-                    ? (
-                        parseFloat(balance.amount) +
-                        parseFloat(stakedForThisToken.amount)
-                      ).toString()
-                    : balance.amount
-                  const totalFormatted = formatBalance({
-                    amount: totalAmount,
-                    denom: balance.denom,
-                  })
+        {label}
+      </span>
+      <span
+        className="font-mono text-[20px] font-semibold"
+        style={{ color: colors.text.primary }}
+      >
+        {value}
+      </span>
+      <span className="text-[11.5px]" style={{ color: colors.text.secondary }}>
+        {token}
+      </span>
+      {raw && (
+        <span
+          className="font-mono text-[11px]"
+          style={{ color: colors.text.tertiary }}
+        >
+          Raw: {raw}
+        </span>
+      )}
+    </div>
+  )
 
-                  return (
-                    <tr
-                      key={index}
-                      className="border-b hover:bg-opacity-50 transition-colors"
-                      style={{
-                        borderColor: colors.border.secondary,
-                        backgroundColor: 'transparent',
-                      }}
-                      onMouseEnter={(e) => {
-                        e.currentTarget.style.backgroundColor =
-                          colors.surface + '50'
-                      }}
-                      onMouseLeave={(e) => {
-                        e.currentTarget.style.backgroundColor = 'transparent'
-                      }}
-                    >
-                      <td className="py-3 px-4">
-                        <div className="flex flex-col">
-                          <span
-                            className="font-mono text-sm font-semibold"
-                            style={{ color: colors.text.primary }}
-                          >
-                            {formatted.baseDenom.toUpperCase()}
-                          </span>
-                          {formatted.isConverted && (
-                            <span
-                              className="text-xs font-mono"
-                              style={{ color: colors.text.tertiary }}
-                              title={`Raw denomination: ${formatted.denom}`}
-                            >
-                              ({formatted.denom})
-                            </span>
-                          )}
-                        </div>
-                      </td>
-                      <td className="py-3 px-4 text-right">
-                        <div className="flex flex-col items-end">
-                          <span
-                            className="font-semibold text-lg"
-                            style={{ color: colors.status.success }}
-                          >
-                            {formatted.formattedAmount}
-                          </span>
-                          {formatted.isConverted && (
-                            <span
-                              className="text-xs font-mono"
-                              style={{ color: colors.text.tertiary }}
-                              title={`Raw amount: ${formatted.amount}`}
-                            >
-                              Raw: {formatted.rawFormattedAmount}
-                            </span>
-                          )}
-                        </div>
-                      </td>
-                      <td className="py-3 px-4 text-right">
-                        <div className="flex flex-col items-end">
-                          <span
-                            className="font-semibold text-lg"
-                            style={{ color: colors.status.warning }}
-                          >
-                            {stakedFormatted
-                              ? stakedFormatted.formattedAmount
-                              : '0'}
-                          </span>
-                          {stakedFormatted && stakedFormatted.isConverted && (
-                            <span
-                              className="text-xs font-mono"
-                              style={{ color: colors.text.tertiary }}
-                              title={`Raw amount: ${stakedFormatted.amount}`}
-                            >
-                              Raw: {stakedFormatted.rawFormattedAmount}
-                            </span>
-                          )}
-                        </div>
-                      </td>
-                      <td className="py-3 px-4 text-right">
-                        <div className="flex flex-col items-end">
-                          <span
-                            className="font-bold text-lg"
-                            style={{ color: colors.text.primary }}
-                          >
-                            {totalFormatted.formattedAmount}
-                          </span>
-                          {totalFormatted.isConverted && (
-                            <span
-                              className="text-xs font-mono"
-                              style={{ color: colors.text.tertiary }}
-                              title={`Raw total: ${totalAmount}`}
-                            >
-                              Raw: {totalFormatted.rawFormattedAmount}
-                            </span>
-                          )}
-                        </div>
-                      </td>
-                    </tr>
-                  )
-                })
-              ) : nativeStakedToken ? (
-                <tr
-                  className="border-b hover:bg-opacity-50 transition-colors"
-                  style={{
-                    borderColor: colors.border.secondary,
-                    backgroundColor: 'transparent',
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.backgroundColor =
-                      colors.surface + '50'
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.backgroundColor = 'transparent'
-                  }}
-                >
-                  <td className="py-3 px-4">
-                    <div className="flex flex-col">
-                      <span
-                        className="font-mono text-sm font-semibold"
-                        style={{ color: colors.text.primary }}
-                      >
-                        {formatBalance(
-                          nativeStakedToken
-                        ).baseDenom.toUpperCase()}
-                      </span>
-                      {formatBalance(nativeStakedToken).isConverted && (
-                        <span
-                          className="text-xs font-mono"
-                          style={{ color: colors.text.tertiary }}
-                          title={`Raw denomination: ${nativeStakedToken.denom}`}
-                        >
-                          ({nativeStakedToken.denom})
-                        </span>
-                      )}
-                    </div>
-                  </td>
-                  <td className="py-3 px-4 text-right">
-                    <span
-                      className="font-semibold text-lg"
-                      style={{ color: colors.status.success }}
-                    >
-                      0
-                    </span>
-                  </td>
-                  <td className="py-3 px-4 text-right">
-                    <div className="flex flex-col items-end">
-                      <span
-                        className="font-semibold text-lg"
-                        style={{ color: colors.status.warning }}
-                      >
-                        {formatBalance(nativeStakedToken).formattedAmount}
-                      </span>
-                      {formatBalance(nativeStakedToken).isConverted && (
-                        <span
-                          className="text-xs font-mono"
-                          style={{ color: colors.text.tertiary }}
-                          title={`Raw amount: ${nativeStakedToken.amount}`}
-                        >
-                          Raw:{' '}
-                          {formatBalance(nativeStakedToken).rawFormattedAmount}
-                        </span>
-                      )}
-                    </div>
-                  </td>
-                  <td className="py-3 px-4 text-right">
-                    <div className="flex flex-col items-end">
-                      <span
-                        className="font-bold text-lg"
-                        style={{ color: colors.text.primary }}
-                      >
-                        {formatBalance(nativeStakedToken).formattedAmount}
-                      </span>
-                      {formatBalance(nativeStakedToken).isConverted && (
-                        <span
-                          className="text-xs font-mono"
-                          style={{ color: colors.text.tertiary }}
-                          title={`Raw amount: ${nativeStakedToken.amount}`}
-                        >
-                          Raw:{' '}
-                          {formatBalance(nativeStakedToken).rawFormattedAmount}
-                        </span>
-                      )}
-                    </div>
-                  </td>
-                </tr>
-              ) : null}
-            </tbody>
-          </table>
-        </div>
-      </div>
+  return (
+    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      {nativeTokens.map((balance, index) => {
+        const formatted = formatBalance(balance)
+        const stakedForThisToken =
+          nativeStakedToken && nativeStakedToken.denom === balance.denom
+            ? nativeStakedToken
+            : null
+        const stakedFormatted = stakedForThisToken
+          ? formatBalance(stakedForThisToken)
+          : null
+
+        return (
+          <React.Fragment key={index}>
+            {metricCard(
+              `${index}-available`,
+              'Available',
+              formatted.formattedAmount,
+              formatted.baseDenom.toUpperCase(),
+              formatted.isConverted ? formatted.rawFormattedAmount : undefined
+            )}
+            {metricCard(
+              `${index}-delegated`,
+              'Delegated',
+              stakedFormatted ? stakedFormatted.formattedAmount : '0',
+              formatted.baseDenom.toUpperCase(),
+              stakedFormatted?.isConverted
+                ? stakedFormatted.rawFormattedAmount
+                : undefined
+            )}
+          </React.Fragment>
+        )
+      })}
+
+      {nativeTokens.length === 0 &&
+        nativeStakedToken &&
+        (() => {
+          const stakedFormatted = formatBalance(nativeStakedToken)
+          return (
+            <React.Fragment>
+              {metricCard(
+                'staked-available',
+                'Available',
+                '0',
+                stakedFormatted.baseDenom.toUpperCase()
+              )}
+              {metricCard(
+                'staked-delegated',
+                'Delegated',
+                stakedFormatted.formattedAmount,
+                stakedFormatted.baseDenom.toUpperCase(),
+                stakedFormatted.isConverted
+                  ? stakedFormatted.rawFormattedAmount
+                  : undefined
+              )}
+            </React.Fragment>
+          )
+        })()}
     </div>
   )
 }

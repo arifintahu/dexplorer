@@ -53,21 +53,54 @@ export const useIBCTransfers = () => {
           let denom = ''
           let memo = ''
 
-          // Extract IBC-related attributes from events
+          // Channel/port routing data lives on the packet lifecycle events
+          // (send_packet on the source chain, acknowledge_packet once the
+          // ack lands back, recv_packet/timeout_packet on other legs), all
+          // keyed with a "packet_" prefix. Confirmed against live chain data.
           for (const event of events) {
-            for (const attr of event.attributes) {
-              const key = attr.key
-              const value = attr.value
+            if (
+              event.type === 'send_packet' ||
+              event.type === 'recv_packet' ||
+              event.type === 'acknowledge_packet' ||
+              event.type === 'timeout_packet' ||
+              event.type === 'write_acknowledgement'
+            ) {
+              for (const attr of event.attributes) {
+                if (attr.key === 'packet_src_channel')
+                  sourceChannel = attr.value
+                if (attr.key === 'packet_src_port') sourcePort = attr.value
+                if (attr.key === 'packet_dst_channel')
+                  destinationChannel = attr.value
+                if (attr.key === 'packet_dst_port') destinationPort = attr.value
+              }
+            }
 
-              if (key === 'sender') sender = value
-              if (key === 'receiver') receiver = value
-              if (key === 'source_channel') sourceChannel = value
-              if (key === 'source_port') sourcePort = value
-              if (key === 'destination_channel') destinationChannel = value
-              if (key === 'destination_port') destinationPort = value
-              if (key === 'amount') amount = value
-              if (key === 'denom') denom = value
-              if (key === 'memo') memo = value
+            // Sender/receiver/denom/amount/memo live as separate attributes
+            // on fungible_token_packet (relayed transfers) or ibc_transfer
+            // (locally-initiated transfers). Confirmed against live chain
+            // data — these are NOT concatenated Coin strings here.
+            if (
+              event.type === 'fungible_token_packet' ||
+              event.type === 'ibc_transfer'
+            ) {
+              for (const attr of event.attributes) {
+                if (attr.key === 'sender') sender = attr.value
+                if (attr.key === 'receiver') receiver = attr.value
+                if (attr.key === 'denom') denom = attr.value
+                if (attr.key === 'amount') amount = attr.value
+                if (attr.key === 'memo') memo = attr.value
+              }
+            }
+          }
+
+          // Fallback: if we picked up an amount but never found a separate
+          // denom attribute, the amount may be a combined Coin string like
+          // "73325uosmo" — split the leading digit run from the denom.
+          if (amount && !denom) {
+            const match = amount.match(/^(\d+)(.+)$/)
+            if (match) {
+              amount = match[1]
+              denom = match[2]
             }
           }
 
@@ -109,25 +142,4 @@ export const useIBCTransfers = () => {
     isLoading,
     hasTransfers: ibcTransfers.length > 0,
   }
-}
-
-// Helper to format IBC channel ID for display
-export const formatIBCChannel = (channelId: string): string => {
-  if (!channelId) return 'N/A'
-  return channelId.length > 10 ? channelId.slice(0, 10) + '...' : channelId
-}
-
-// Helper to format IBC token amount
-export const formatIBCAmount = (amount: string, denom: string): string => {
-  if (!amount) return '0'
-
-  // Try to convert based on denom prefix
-  let formattedAmount = amount
-  if (denom.startsWith('u') && amount.length > 6) {
-    formattedAmount = (parseFloat(amount) / 1e6).toFixed(6)
-  } else if (denom.startsWith('a') && amount.length > 18) {
-    formattedAmount = (parseFloat(amount) / 1e18).toFixed(18)
-  }
-
-  return `${formattedAmount} ${denom.split('/').pop() || denom}`
 }

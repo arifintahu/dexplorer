@@ -1,5 +1,4 @@
 import React from 'react'
-import { useTheme } from '@/theme/ThemeProvider'
 import { FiBox, FiUsers, FiClock, FiActivity } from 'react-icons/fi'
 import { useHomeData } from '@/hooks/useHomeData'
 import StatCard from '@/components/Home/StatCard'
@@ -8,7 +7,6 @@ import QuickActionsCard from '@/components/Home/QuickActionsCard'
 import NetworkStatusCard from '@/components/Home/NetworkStatusCard'
 
 const Home: React.FC = () => {
-  const { colors } = useTheme()
   const {
     isConnected,
     isLoading,
@@ -20,22 +18,8 @@ const Home: React.FC = () => {
   } = useHomeData()
 
   return (
-    <div className="space-y-8">
-      {/* Welcome Section */}
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold tracking-tight mb-2 font-heading text-gradient-crypto">
-          Dexplorer
-        </h1>
-        <p
-          className="text-base font-ui"
-          style={{ color: colors.text.secondary }}
-        >
-          Real-time insights into the blockchain network
-        </p>
-      </div>
-
-      {/* Stats Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+    <div className="space-y-5">
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
         <StatCard
           title="Latest Block"
           value={
@@ -46,8 +30,7 @@ const Home: React.FC = () => {
               : 'Not Connected'
           }
           icon={FiBox}
-          subtitle="Current height"
-          iconColor={colors.primary}
+          subtitle="Live block height"
           isLoading={isConnected && latestBlock === null}
           index={0}
         />
@@ -55,35 +38,34 @@ const Home: React.FC = () => {
           title="Active Validators"
           value={!isLoading ? totalActiveValidator : 'Loading'}
           icon={FiUsers}
-          subtitle="Currently active"
-          iconColor={colors.status.success}
+          subtitle="of current validator set"
+          isLoading={isLoading}
           index={1}
         />
         <StatCard
           title="Total Transactions"
           value={isConnected ? totalTransactions : 'Not Connected'}
           icon={FiActivity}
-          subtitle="Transaction count"
-          iconColor={colors.accent}
+          subtitle="transaction count"
+          isLoading={isConnected && isLoading}
           index={2}
         />
         <StatCard
           title="Block Time"
           value={isConnected ? blockTime : 'Not Connected'}
           icon={FiClock}
-          subtitle="Latest interval"
-          iconColor={colors.status.error}
+          subtitle="avg of recent blocks"
+          isLoading={isConnected && isLoading}
           index={3}
         />
       </div>
 
-      {/* Recent Activity */}
-      <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
-        <div className="xl:col-span-2 space-y-6">
+      <div className="grid grid-cols-1 gap-5 lg:grid-cols-[1.7fr_1fr]">
+        <div className="space-y-5">
           <RecentBlocksCard />
         </div>
 
-        <div className="space-y-6">
+        <div className="space-y-5">
           <NetworkStatusCard
             isConnected={isConnected}
             catchingUp={networkStatus.catchingUp}

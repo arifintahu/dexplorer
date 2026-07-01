@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { useSelector } from 'react-redux'
-import { FiChevronRight, FiUser, FiMail, FiFolder } from 'react-icons/fi'
+import { FiUser } from 'react-icons/fi'
 import { useTheme } from '@/theme/ThemeProvider'
 import {
   timeFromNow,
@@ -22,6 +22,7 @@ interface Account {
 
 const Accounts: React.FC = () => {
   const { colors } = useTheme()
+  const navigate = useNavigate()
 
   // Get recent transactions from Redux store
   const transactions = useSelector(selectTransactions)
@@ -102,141 +103,101 @@ const Accounts: React.FC = () => {
       .slice(0, 10)
   }, [transactions])
 
-  // Use recentAccounts for display, but keep mock data for stats
   const accounts = recentAccounts
 
   return (
-    <div className="space-y-6">
-      {/* Breadcrumb */}
-      <div className="flex items-center gap-2 text-sm mb-4">
-        <Link
-          to="/"
-          className="hover:opacity-70 transition-opacity font-medium"
-          style={{ color: colors.text.secondary }}
+    <div className="reference-table-shell">
+      <div
+        className="flex items-center justify-between border-b px-5 py-[15px]"
+        style={{ borderColor: colors.border.primary }}
+      >
+        <span
+          className="text-sm font-semibold"
+          style={{ color: colors.text.primary }}
         >
-          Home
-        </Link>
-        <FiChevronRight
-          className="w-4 h-4"
-          style={{ color: colors.text.tertiary }}
-        />
-        <span className="font-bold" style={{ color: colors.text.primary }}>
-          Accounts
+          Recent Account Activity
+        </span>
+        <span className="text-xs" style={{ color: colors.text.tertiary }}>
+          Select an account for details
         </span>
       </div>
 
-      {/* Recent Accounts */}
-      <div
-        className="rounded-xl p-6"
-        style={{
-          backgroundColor: colors.surface,
-          border: `1px solid ${colors.border.primary}`,
-          boxShadow: colors.shadow.sm,
-        }}
-      >
-        <div className="mb-6">
-          <h2
-            className="text-lg font-semibold"
-            style={{ color: colors.text.primary }}
+      {accounts.length > 0 && (
+        <div
+          className="reference-table-header hidden gap-3 border-b px-5 py-3 md:grid md:grid-cols-[2fr_130px_160px_110px]"
+          style={{ borderColor: colors.border.primary }}
+        >
+          <span>Account</span>
+          <span>Module</span>
+          <span>Last Message</span>
+          <span className="text-right">Last Active</span>
+        </div>
+      )}
+
+      {accounts.map((account) => (
+        <div
+          key={account.address}
+          role="button"
+          tabIndex={0}
+          className="reference-table-row grid cursor-pointer gap-3 border-b px-5 py-4 md:grid-cols-[2fr_130px_160px_110px] md:items-center"
+          style={{ borderColor: colors.border.primary }}
+          onClick={() => navigate(`/accounts/${account.address}`)}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault()
+              navigate(`/accounts/${account.address}`)
+            }
+          }}
+        >
+          <div className="flex min-w-0 items-center gap-3">
+            <Avatar address={account.address} size={32} />
+            <Link
+              to={`/accounts/${account.address}`}
+              className="truncate font-mono text-[12.5px]"
+              style={{ color: colors.text.primary }}
+              title={account.address}
+              tabIndex={-1}
+              onClick={(e) => e.stopPropagation()}
+            >
+              {account.address}
+            </Link>
+          </div>
+          <span
+            className="reference-pill w-fit"
+            style={{
+              backgroundColor: `${colors.primary}20`,
+              color: colors.primary,
+            }}
           >
-            Recent Active Accounts
-          </h2>
-          <p className="text-sm mt-1" style={{ color: colors.text.secondary }}>
-            Message senders from recent transactions on the network
+            {account.module}
+          </span>
+          <span
+            className="truncate text-[13px]"
+            style={{ color: colors.text.secondary }}
+          >
+            {account.lastMessage}
+          </span>
+          <span
+            className="text-right text-xs"
+            style={{ color: colors.text.tertiary }}
+          >
+            {account.lastActivity}
+          </span>
+        </div>
+      ))}
+
+      {accounts.length === 0 && (
+        <div className="px-5 py-12 text-center">
+          <FiUser
+            className="mx-auto mb-4 h-12 w-12 opacity-50"
+            style={{ color: colors.text.tertiary }}
+          />
+          <p style={{ color: colors.text.secondary }}>No accounts available</p>
+          <p className="mt-1 text-sm" style={{ color: colors.text.tertiary }}>
+            Account information will appear here
           </p>
         </div>
-
-        <div className="space-y-3">
-          {accounts.map((account) => (
-            <div
-              key={account.address}
-              className="p-4 rounded-lg border transition-all duration-200 hover:shadow-md"
-              style={{
-                backgroundColor: colors.background,
-                borderColor: colors.border.secondary,
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.borderColor = colors.primary
-                e.currentTarget.style.transform = 'translateY(-1px)'
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.borderColor = colors.border.secondary
-                e.currentTarget.style.transform = 'translateY(0)'
-              }}
-            >
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-4">
-                  <Avatar address={account.address} size={48} />
-                  <div>
-                    <div className="flex items-center gap-2 mb-1">
-                      <Link
-                        to={`/accounts/${account.address}`}
-                        className="font-bold text-base hover:opacity-70 transition-opacity truncate max-w-[200px] sm:max-w-xs md:max-w-md"
-                        style={{ color: colors.text.primary }}
-                        title={account.address}
-                      >
-                        {account.address}
-                      </Link>
-                    </div>
-                    <div className="flex items-center gap-4 text-sm">
-                      <div className="flex items-center gap-1">
-                        <FiFolder
-                          className="w-3 h-3"
-                          style={{ color: colors.text.tertiary }}
-                        />
-                        <span style={{ color: colors.text.secondary }}>
-                          Module: {account.module}
-                        </span>
-                      </div>
-                      <div className="flex items-center gap-1">
-                        <FiMail
-                          className="w-3 h-3"
-                          style={{ color: colors.text.tertiary }}
-                        />
-                        <span style={{ color: colors.text.secondary }}>
-                          Message: {account.lastMessage}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <div className="text-right">
-                  <p
-                    className="text-sm"
-                    style={{ color: colors.text.secondary }}
-                  >
-                    Last Activity
-                  </p>
-                  <p
-                    className="text-xs"
-                    style={{ color: colors.text.tertiary }}
-                  >
-                    {account.lastActivity}
-                  </p>
-                </div>
-              </div>
-            </div>
-          ))}
-
-          {accounts.length === 0 && (
-            <div className="text-center py-12">
-              <FiUser
-                className="w-12 h-12 mx-auto mb-4 opacity-50"
-                style={{ color: colors.text.tertiary }}
-              />
-              <p style={{ color: colors.text.secondary }}>
-                No accounts available
-              </p>
-              <p
-                className="text-sm mt-1"
-                style={{ color: colors.text.tertiary }}
-              >
-                Account information will appear here
-              </p>
-            </div>
-          )}
-        </div>
-      </div>
+      )}
     </div>
   )
 }
