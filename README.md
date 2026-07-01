@@ -69,12 +69,12 @@ This makes it perfect for:
 
 #### 🏠 Home Dashboard
 
-![Dexplorer Home Dashboard](./public/dexplorer2.png)
+![Dexplorer Home Dashboard](./public/dexplorer2.jpeg)
 _Real-time blockchain explorer dashboard showing chain statistics, latest blocks, and transactions_
 
 #### 🔗 Connect to Blockchain
 
-![Connect to Blockchain](./public/dexplorer1.png)
+![Connect to Blockchain](./public/dexplorer1.jpeg)
 _Simple connection interface to connect to any Cosmos SDK RPC endpoint_
 
 ### Live Demo
