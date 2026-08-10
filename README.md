@@ -1,3 +1,5 @@
+
+
 <div align="center">
   <h1 align="center">🚀 Dexplorer</h1>
 
@@ -141,7 +143,7 @@ _Connect to any Cosmos RPC endpoint and start exploring!_
 Before running Dexplorer, ensure you have:
 
 - **Node.js** (v22.0.0 or higher)
-- **pnpm** (v8.0.0 or higher) - _Recommended package manager_
+- **pnpm** (v9.0.0 or higher) - _Required package manager_
 - **Git** - For cloning the repository
 
 ## 🚀 Installation
